@@ -153,13 +153,15 @@
     .err{color:#ef4444;font-size:13px;min-height:18px;margin-top:8px;font-weight:500}
 
     @media (max-width: 1100px){
-      .main{grid-template-columns:1fr}
-      .side{position:relative;top:0}
+      .filters-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
       #indiaMapContainer{height:500px}
     }
     @media (max-width: 640px){
       .bar{padding:12px 16px}
       .main{padding:16px;gap:16px}
+      .filters-grid{grid-template-columns:1fr}
+      .filters-actions{flex-direction:column}
+      .filters-actions .btn{max-width:100%}
       .kpi-grid{grid-template-columns:1fr}
       .header-actions{width:100%;justify-content:flex-start}
       #indiaMapContainer{height:400px}
@@ -179,9 +181,10 @@
   </header>
 
   <main class="main">
-    <aside class="side">
-      <div class="panel filters">
-        <h3 style="margin-bottom:20px;font-size:16px;color:var(--text)">🔍 Filters</h3>
+    <!-- Horizontal Filters at Top -->
+    <section class="filters-container filters">
+      <h3 class="filters-title">🔍 Filters</h3>
+      <div class="filters-grid">
         <div class="group">
           <label for="dateFrom">Date From</label>
           <input id="dateFrom" type="date" />
@@ -214,13 +217,11 @@
           <label for="status">Approved Status</label>
           <select id="status"></select>
         </div>
-        <button class="btn" id="resetBtn" style="width:100%;margin-top:8px">🔄 Reset Filters</button>
       </div>
-      <div class="panel" style="padding:16px">
-        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:600">CSV SOURCE:</div>
-        <div style="word-break:break-all;font-size:12px;font-family:monospace;color:var(--acc1);font-weight:500" id="csvPath">./data.csv</div>
+      <div class="filters-actions">
+        <button class="btn" id="resetBtn">🔄 Reset Filters</button>
       </div>
-    </aside>
+    </section>
 
     <section class="content">
       <!-- Total Scans with sub-metrics -->
