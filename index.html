@@ -61,7 +61,7 @@
     .btn-logout:hover{box-shadow:0 8px 24px rgba(239,68,68,.4)}
 
     /* Layout */
-    .main{display:flex;flex-direction:column;gap:24px;padding:24px;max-width:2000px;margin:0 auto}
+    .main{display:flex;flex-direction:column;gap:24px;padding:24px 24px 24px 48px;max-width:100%;margin:0}
     .panel{background:var(--panel);border:2px solid var(--ring);border-radius:16px;padding:20px;
       box-shadow:0 4px 16px var(--shadow);transition:all .3s ease}
     .panel:hover{border-color:var(--acc1);box-shadow:0 8px 24px var(--shadow-lg)}
@@ -134,30 +134,47 @@
     .kpi-percent{font-size:14px;color:var(--muted);font-weight:600}
 
     /* India Map */
-    #indiaMapContainer{width:100%;height:600px;position:relative;
+    #indiaMapContainer{width:100%;height:700px;position:relative;
       border-radius:16px;overflow:hidden;border:2px solid var(--ring)}
     #indiaMap{width:100%;height:100%;z-index:1}
-    .leaflet-container{background:var(--bg);font-family:Inter,sans-serif}
-    .leaflet-popup-content-wrapper{background:white;border-radius:12px;box-shadow:0 8px 24px rgba(15,23,42,.2);border:2px solid var(--acc1)}
-    .leaflet-popup-content{margin:16px;font-size:13px;color:var(--text)}
-    .leaflet-popup-tip{background:white;border:2px solid var(--acc1)}
-    .map-popup-state{font-size:16px;font-weight:700;color:var(--acc1);margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid var(--ring)}
-    .map-popup-row{display:flex;justify-content:space-between;align-items:center;margin:8px 0;padding:6px 0}
+    .leaflet-container{background:linear-gradient(135deg, #f0f9ff 0%, #fef3c7 50%, #fce7f3 100%);font-family:Inter,sans-serif}
+    .leaflet-popup-content-wrapper{background:white;border-radius:16px;box-shadow:0 12px 40px rgba(15,23,42,.3);border:3px solid var(--acc1)}
+    .leaflet-popup-content{margin:20px;font-size:13px;color:var(--text)}
+    .leaflet-popup-tip{background:white;border:3px solid var(--acc1)}
+    .map-popup-state{font-size:18px;font-weight:800;color:var(--acc1);margin-bottom:12px;padding-bottom:10px;border-bottom:3px solid var(--ring)}
+    .map-popup-row{display:flex;justify-content:space-between;align-items:center;margin:10px 0;padding:8px 0}
     .map-popup-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
-    .map-popup-value{font-size:18px;font-weight:700;color:var(--text)}
+    .map-popup-value{font-size:20px;font-weight:800;color:var(--text)}
     .map-popup-success{color:var(--acc3)!important}
     .map-popup-pending{color:var(--acc4)!important}
     .map-popup-rejected{color:var(--acc2)!important}
-    .state-label-marker{background:rgba(255,255,255,.98);border:2px solid var(--acc1);
-      border-radius:8px;padding:6px 10px;font-weight:700;font-size:13px;
-      color:var(--text);box-shadow:0 4px 12px rgba(15,23,42,.2);
-      white-space:nowrap;text-align:center}
-    .state-label-count{font-size:16px;color:var(--acc3);display:block;margin-top:2px}
-    .legend{position:absolute;bottom:20px;right:20px;background:rgba(255,255,255,.95);
-      padding:16px;border-radius:12px;box-shadow:0 4px 16px var(--shadow);border:2px solid var(--ring);z-index:1000}
-    .legend-title{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;text-transform:uppercase}
-    .legend-item{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:11px}
-    .legend-color{width:24px;height:16px;border-radius:4px;border:1px solid var(--border)}
+    .state-marker-pin{position:relative;width:60px;height:60px;display:flex;align-items:center;justify-content:center}
+    .state-marker-inner{position:relative;z-index:2;background:white;border-radius:12px;
+      padding:8px 12px;box-shadow:0 8px 24px rgba(15,23,42,.25);border:3px solid;
+      font-weight:800;font-size:14px;text-align:center;min-width:80px;
+      transition:all .3s ease;cursor:pointer}
+    .state-marker-inner:hover{transform:translateY(-4px) scale(1.05);box-shadow:0 12px 32px rgba(15,23,42,.4)}
+    .state-marker-name{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+    .state-marker-count{font-size:18px;font-weight:900;display:flex;align-items:center;justify-content:center;gap:4px}
+    .marker-ripple{position:absolute;width:100%;height:100%;border-radius:50%;
+      background:radial-gradient(circle, rgba(14,165,233,.3) 0%, rgba(14,165,233,0) 70%);
+      animation:ripple 2s ease-in-out infinite;z-index:1}
+    @keyframes ripple{0%{transform:scale(.8);opacity:.7}50%{transform:scale(1.2);opacity:.3}100%{transform:scale(.8);opacity:.7}}
+    .state-marker-level-1{border-color:var(--acc3)}
+    .state-marker-level-1 .state-marker-count{color:var(--acc3)}
+    .state-marker-level-2{border-color:#22c55e}
+    .state-marker-level-2 .state-marker-count{color:#22c55e}
+    .state-marker-level-3{border-color:#84cc16}
+    .state-marker-level-3 .state-marker-count{color:#84cc16}
+    .state-marker-level-4{border-color:#eab308}
+    .state-marker-level-4 .state-marker-count{color:#eab308}
+    .state-marker-level-5{border-color:var(--acc2)}
+    .state-marker-level-5 .state-marker-count{color:var(--acc2)}
+    .legend{position:absolute;bottom:20px;right:20px;background:rgba(255,255,255,.98);
+      padding:20px;border-radius:16px;box-shadow:0 8px 24px var(--shadow-lg);border:3px solid var(--acc1);z-index:1000}
+    .legend-title{font-size:13px;font-weight:800;color:var(--text);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px}
+    .legend-item{display:flex;align-items:center;gap:10px;margin:8px 0;font-size:12px;font-weight:600}
+    .legend-color{width:28px;height:20px;border-radius:6px;border:2px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,.1)}
 
     .footer{padding:16px 24px;color:var(--muted);border-top:2px solid var(--ring);
       text-align:center;font-size:13px;background:var(--panel);font-weight:500}
@@ -319,11 +336,12 @@
         <div id="indiaMapContainer">
           <div id="indiaMap"></div>
           <div class="legend">
-            <div class="legend-title">Scan Intensity</div>
-            <div class="legend-item"><div class="legend-color" style="background:#dcfce7"></div><span>Low (0-25%)</span></div>
-            <div class="legend-item"><div class="legend-color" style="background:#86efac"></div><span>Medium (25-50%)</span></div>
-            <div class="legend-item"><div class="legend-color" style="background:#22c55e"></div><span>High (50-75%)</span></div>
-            <div class="legend-item"><div class="legend-color" style="background:#15803d"></div><span>Very High (75-100%)</span></div>
+            <div class="legend-title">🎯 Approval Levels</div>
+            <div class="legend-item"><div class="legend-color" style="background:#10b981;border-color:#10b981"></div><span>Elite (1000+)</span></div>
+            <div class="legend-item"><div class="legend-color" style="background:#22c55e;border-color:#22c55e"></div><span>High (500-999)</span></div>
+            <div class="legend-item"><div class="legend-color" style="background:#84cc16;border-color:#84cc16"></div><span>Medium (250-499)</span></div>
+            <div class="legend-item"><div class="legend-color" style="background:#eab308;border-color:#eab308"></div><span>Growing (100-249)</span></div>
+            <div class="legend-item"><div class="legend-color" style="background:#f97316;border-color:#f97316"></div><span>Emerging (1-99)</span></div>
           </div>
         </div>
       </div>
@@ -676,6 +694,35 @@
     'Ladakh': [34.1526, 77.5771]
   };
 
+  function getMarkerLevel(approved) {
+    if (approved >= 1000) return 1;
+    if (approved >= 500) return 2;
+    if (approved >= 250) return 3;
+    if (approved >= 100) return 4;
+    return 5;
+  }
+
+  function getMarkerIcon(state, approved) {
+    const level = getMarkerLevel(approved);
+    const shortName = state.length > 12 ? state.substring(0, 10) + '.' : state;
+    
+    return L.divIcon({
+      className: 'state-marker-pin',
+      html: `
+        <div class="marker-ripple"></div>
+        <div class="state-marker-inner state-marker-level-${level}">
+          <div class="state-marker-name">${shortName}</div>
+          <div class="state-marker-count">
+            <span>✓</span>
+            <span>${approved >= 1000 ? (approved/1000).toFixed(1) + 'K' : approved}</span>
+          </div>
+        </div>
+      `,
+      iconSize: [null, null],
+      iconAnchor: [30, 30]
+    });
+  }
+
   function getColorByIntensity(intensity) {
     if (intensity > 0.75) return '#15803d';
     if (intensity > 0.5) return '#22c55e';
@@ -733,37 +780,24 @@
       else if (status === 'no') data.rejected++;
       else if (status === 'pending') data.pending++;
     }
-
-    const maxApproved = Math.max(...Array.from(stateData.values()).map(d => d.approved), 1);
     
     mapLayer = L.layerGroup();
 
-    // Add markers for each state with data
+    // Add creative markers for each state with data
     for (const [state, coords] of Object.entries(stateCoordinates)) {
       const data = stateData.get(state);
       if (!data || data.approved === 0) continue;
 
-      const intensity = data.approved / maxApproved;
-      const color = getColorByIntensity(intensity);
       const approvalRate = getApprovalRate(data.approved, data.total);
       
-      // Create bubble size based on approved count
-      const radius = Math.max(15, Math.min(50, Math.sqrt(data.approved) * 4));
-
-      // Create circle marker with professional styling
-      const circle = L.circleMarker(coords, {
-        radius: radius,
-        fillColor: color,
-        color: '#ffffff',
-        weight: 3,
-        opacity: 1,
-        fillOpacity: 0.8,
-        className: 'professional-bubble'
+      // Create marker with custom icon
+      const marker = L.marker(coords, {
+        icon: getMarkerIcon(state, data.approved)
       });
 
       // Enhanced popup with detailed statistics
       const popupContent = `
-        <div class="map-popup-state">${state}</div>
+        <div class="map-popup-state">📍 ${state}</div>
         <div class="map-popup-row">
           <span class="map-popup-label">✅ Approved</span>
           <span class="map-popup-value map-popup-success">${data.approved.toLocaleString()}</span>
@@ -776,62 +810,29 @@
           <span class="map-popup-label">❌ Rejected</span>
           <span class="map-popup-value map-popup-rejected">${data.rejected.toLocaleString()}</span>
         </div>
-        <div class="map-popup-row" style="border-top:2px solid var(--ring);margin-top:8px;padding-top:8px">
-          <span class="map-popup-label">Total Scans</span>
+        <div class="map-popup-row" style="border-top:3px solid var(--ring);margin-top:10px;padding-top:10px">
+          <span class="map-popup-label">📊 Total Scans</span>
           <span class="map-popup-value">${data.total.toLocaleString()}</span>
         </div>
         <div class="map-popup-row">
-          <span class="map-popup-label">Approval Rate</span>
+          <span class="map-popup-label">🎯 Approval Rate</span>
           <span class="map-popup-value map-popup-success">${approvalRate}%</span>
         </div>
       `;
 
-      circle.bindPopup(popupContent, {
+      marker.bindPopup(popupContent, {
         closeButton: true,
-        maxWidth: 300,
+        maxWidth: 320,
         className: 'custom-popup'
       });
 
-      // Create permanent label showing approved count
-      const labelIcon = L.divIcon({
-        className: 'state-label-marker',
-        html: `<div style="text-align:center">
-          <div style="font-size:11px;color:var(--muted)">${state.length > 15 ? state.substring(0, 12) + '...' : state}</div>
-          <div class="state-label-count">✓ ${data.approved.toLocaleString()}</div>
-        </div>`,
-        iconSize: [null, null]
-      });
-
-      const label = L.marker(coords, { 
-        icon: labelIcon,
-        interactive: false
-      });
-
-      // Hover effects
-      circle.on('mouseover', function() {
-        this.setStyle({
-          weight: 5,
-          fillOpacity: 1,
-          color: '#0ea5e9'
-        });
-      });
-
-      circle.on('mouseout', function() {
-        this.setStyle({
-          weight: 3,
-          fillOpacity: 0.8,
-          color: '#ffffff'
-        });
-      });
-
-      circle.on('click', () => {
+      marker.on('click', () => {
         FILTERS.state = state;
         selState.value = state;
         render();
       });
 
-      circle.addTo(mapLayer);
-      label.addTo(mapLayer);
+      marker.addTo(mapLayer);
     }
 
     mapLayer.addTo(indiaMap);
