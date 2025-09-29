@@ -1,334 +1,449 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Digicides • Campaign Analytics (Fast)</title>
-  <!-- TailwindCSS (CDN) -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- PapaParse for CSV -->
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-  <!-- Chart.js -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Coromandel CPC — Campaign Dashboard</title>
+  <!-- Lightweight fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Chart.js & PapaParse (CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <!-- Day.js for dates -->
-  <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.11/dayjs.min.js"></script>
-  <!-- XLSX for Excel downloads -->
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <style>
     :root{
-      /* Calm, performance-friendly theme */
-      --bg: #0d1117;        /* dark slate */
-      --card: #111827;      /* deep gray */
-      --muted: #9aa4b2;     /* cool gray */
-      --text: #e5eefb;      /* near-white */
-      --accent: #22d3ee;    /* cyan */
-      --accent2: #34d399;   /* emerald */
-      --border: #1f2937;    /* soft border */
+      --bg:#0f172a;          /* slate-900 */
+      --panel:#0b1223;       /* deeper */
+      --card:#111c32;        /* card */
+      --muted:#94a3b8;       /* slate-400 */
+      --text:#e2e8f0;        /* slate-200 */
+      --acc1:#22d3ee;        /* cyan-400 */
+      --acc2:#fb923c;        /* orange-400 */
+      --acc3:#10b981;        /* emerald-500 */
+      --ring:#1e293b;        /* slate-800 */
     }
-    html, body { background: var(--bg); color: var(--text); font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; }
-    .btn-primary { background: linear-gradient(90deg, var(--accent), var(--accent2)); color:#00131a; font-weight:700; border-radius:10px; }
-    .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text); border-radius:10px; }
-    .chip { background: #0f1624; border: 1px solid var(--border); color: var(--muted); border-radius: 999px; padding: 6px 12px; }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,var(--bg),#0a0f1e) fixed;color:var(--text)}
+    .app{display:grid;grid-template-rows:auto 1fr;min-height:100vh}
+    header{position:sticky;top:0;z-index:30;backdrop-filter:saturate(140%) blur(10px);background:linear-gradient(180deg,rgba(15,23,42,.9),rgba(15,23,42,.6));border-bottom:1px solid var(--ring)}
+    .bar{display:flex;align-items:center;gap:16px;padding:14px 18px}
+    .logo{display:flex;align-items:center;gap:10px;font-weight:700}
+    .dot{width:10px;height:10px;border-radius:999px;background:linear-gradient(135deg,var(--acc1),var(--acc2))}
+    .title{letter-spacing:.3px}
+    .pill{margin-left:auto;display:flex;gap:8px}
+    .pill > div{background:var(--card);border:1px solid var(--ring);padding:6px 10px;border-radius:999px;font-size:12px;color:var(--muted)}
 
-    .grid-kpi { display:grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 12px; }
-    .grid-charts { display:grid; grid-template-columns: repeat(auto-fit, minmax(360px,1fr)); gap: 16px; }
+    /* Layout */
+    .main{display:grid;grid-template-columns:280px 1fr;gap:18px;padding:18px}
+    .side{display:flex;flex-direction:column;gap:12px}
+    .panel{background:var(--panel);border:1px solid var(--ring);border-radius:16px;padding:14px}
 
-    .chart-wrap { height: 260px; padding: 10px; }
-    .chart-wrap.tall { height: 320px; }
-    .chart-wrap canvas { width:100% !important; height:100% !important; background:#0b1322; border-radius:10px; }
+    .filters .group{display:flex;flex-direction:column;gap:6px}
+    .filters label{font-size:12px;color:var(--muted)}
+    .filters select,.filters input{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--ring);background:#0d1933;color:var(--text);outline:none}
 
-    .login-bg { position: fixed; inset:0; display:flex; align-items:center; justify-content:center; background:#0b1220; z-index:50; }
-    .sticky { position: sticky; top: 12px; align-self: start; }
+    .content{display:grid;grid-template-columns:repeat(12,1fr);gap:18px}
+    .card{background:var(--card);border:1px solid var(--ring);border-radius:18px;padding:14px;min-height:140px;display:flex;flex-direction:column}
+    .card h3{margin:0 0 8px;font-size:14px;color:#cbd5e1;font-weight:600}
+    .kpi{font-size:34px;font-weight:700;line-height:1.1}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:12px}
 
-    .input, select { background:#0b1322; border:1px solid var(--border); border-radius:10px; color:var(--text); padding:8px 10px; width:100%; }
-    .label { font-size:12px; color: var(--muted); }
+    .footer{padding:10px 18px;color:var(--muted);border-top:1px solid var(--ring)}
 
-    .table-wrapper { max-height: 360px; overflow:auto; border:1px solid var(--border); border-radius:10px; }
-    table { width:100%; border-collapse: collapse; font-size: 13px; }
-    th, td { border-bottom: 1px solid var(--border); padding: 8px 10px; text-align:left; }
-    th { position: sticky; top:0; background:#0e1627; z-index:1; }
+    /* Login overlay */
+    .overlay{position:fixed;inset:0;background:radial-gradient(1200px 800px at 10% 10%,rgba(34,211,238,.15),transparent 60%),radial-gradient(1000px 700px at 100% 0,rgba(16,185,129,.1),transparent 60%),#051024;display:grid;place-items:center;z-index:50}
+    .login{width:min(92vw,380px);background:var(--panel);border:1px solid var(--ring);border-radius:20px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.45)}
+    .login h2{margin:0 0 4px;font-size:20px}
+    .login p{margin:0 0 14px;color:var(--muted);font-size:13px}
+    .field{display:flex;flex-direction:column;gap:6px;margin:10px 0}
+    .field label{font-size:12px;color:var(--muted)}
+    .field input{padding:12px;border-radius:12px;border:1px solid var(--ring);background:#0d1933;color:var(--text)}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 14px;border-radius:12px;border:1px solid #174162;background:linear-gradient(180deg,#14324f,#0c2744);color:#e6f4ff;font-weight:600;cursor:pointer}
+    .btn:hover{filter:brightness(1.05)}
+    .err{color:#fca5a5;font-size:12px;min-height:16px}
 
-    .tab { padding: 8px 12px; border-radius: 10px; cursor: pointer; border:1px solid var(--border); color:var(--muted); }
-    .tab.active { color: var(--text); border-color: var(--accent); }
-
-    .toast { position: fixed; right:16px; bottom:16px; background:#0e1627; border:1px solid var(--border); border-radius:10px; padding:10px 14px; display:none; z-index:60 }
+    /* Responsive */
+    @media (max-width: 1000px){
+      .main{grid-template-columns:1fr}
+    }
   </style>
 </head>
 <body>
-  <!-- LOGIN OVERLAY -->
-  <div id="loginOverlay" class="login-bg">
-    <div class="card p-6 w-full max-w-md">
-      <h1 class="text-xl font-bold mb-4" style="color:var(--accent)">Digicides • Campaign Dashboard</h1>
-      <form id="loginForm" class="space-y-3" autocomplete="off">
-        <input id="username" class="input" placeholder="Username" />
-        <input id="password" type="password" class="input" placeholder="Password" />
-        <button class="btn-primary w-full py-2" type="submit">Login</button>
-        <p id="loginErr" class="hidden text-red-400 text-sm">Invalid credentials.</p>
-        <p class="text-xs" style="color:var(--muted)">Hint: digicides / coromandel@cpc</p>
-      </form>
+<div class="app">
+  <header>
+    <div class="bar">
+      <div class="logo"><span class="dot"></span><span class="title">CPC Campaign Dashboard</span></div>
+      <div class="pill">
+        <div id="kpi-total">Scans: 0</div>
+        <div id="kpi-yes">Approved: 0</div>
+        <div id="kpi-pending">Pending: 0</div>
+      </div>
     </div>
-  </div>
-
-  <!-- HEADER -->
-  <header class="px-5 py-4 flex items-center justify-between">
-    <div class="flex items-center gap-3">
-      <div class="w-2.5 h-6 rounded" style="background:linear-gradient(180deg,var(--accent),var(--accent2))"></div>
-      <h1 class="text-lg font-bold">Coromandel Campaign Insights</h1>
-    </div>
-    <nav class="flex gap-2">
-      <button id="tabDashboard" class="tab active">Dashboard</button>
-      <button id="tabDownloads" class="tab">Downloads</button>
-      <button id="refreshBtn" class="chip"><span>Refresh</span></button>
-    </nav>
   </header>
 
-  <!-- MAIN -->
-  <main class="px-5 grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-5 pb-16">
-    <!-- LEFT: Dashboard / Downloads -->
-    <section id="viewDashboard">
-      <!-- KPIs -->
-      <div class="grid-kpi">
-        <div class="card p-4"><p class="text-xs" style="color:var(--muted)">Total Scans</p><p id="kpiTotal" class="text-2xl font-bold">0</p></div>
-        <div class="card p-4"><p class="text-xs" style="color:var(--muted)">Approved (Yes)</p><p id="kpiYes" class="text-2xl font-bold">0</p></div>
-        <div class="card p-4"><p class="text-xs" style="color:var(--muted)">Pending</p><p id="kpiPending" class="text-2xl font-bold">0</p></div>
-        <div class="card p-4"><p class="text-xs" style="color:var(--muted)">Completion Rate</p><p id="kpiRate" class="text-2xl font-bold">0%</p></div>
-      </div>
-
-      <!-- CHARTS -->
-      <section class="grid-charts mt-5">
-        <div class="card p-4"><h3 class="font-semibold mb-2">Approved Status (Yes / No / Pending)</h3><div class="chart-wrap"><canvas id="statusChart"></canvas></div></div>
-        <div class="card p-4"><h3 class="font-semibold mb-2">Retailer Performance (Top 10)</h3><div class="chart-wrap"><canvas id="retailerChart"></canvas></div></div>
-        <div class="card p-4"><h3 class="font-semibold mb-2">District-wise Scans (Top 10)</h3><div class="chart-wrap"><canvas id="districtChart"></canvas></div></div>
-        <div class="card p-4"><h3 class="font-semibold mb-2">State-wise Scans</h3><div class="chart-wrap"><canvas id="stateChart"></canvas></div></div>
-        <div class="card p-4"><h3 class="font-semibold mb-2">Top Products (by Quantity)</h3><div class="chart-wrap"><canvas id="productChart"></canvas></div></div>
-        <div class="card p-4 xl:col-span-2"><h3 class="font-semibold mb-2">Time Trend (Scans per Hour)</h3><div class="chart-wrap tall"><canvas id="timeChart"></canvas></div></div>
-      </section>
-
-      <!-- TABLE -->
-      <section class="mt-5">
-        <div class="card p-4">
-          <div class="flex items-center justify-between mb-2">
-            <h3 class="font-semibold">Records (first 500 rows)</h3>
-            <div class="flex gap-2 items-center">
-              <input id="searchBox" placeholder="Search…" class="input w-56"/>
-              <button id="exportBtn" class="chip">Export Filtered CSV</button>
-            </div>
-          </div>
-          <div class="table-wrapper"><table id="dataTable"><thead></thead><tbody></tbody></table></div>
+  <main class="main">
+    <!-- Sidebar Filters -->
+    <aside class="side">
+      <div class="panel filters">
+        <div class="group">
+          <label for="state">State</label>
+          <select id="state"></select>
         </div>
-      </section>
-    </section>
-
-    <!-- DOWNLOADS PAGE -->
-    <section id="viewDownloads" class="hidden">
-      <div class="card p-6">
-        <h2 class="font-semibold text-lg mb-1">Downloads</h2>
-        <p class="text-sm mb-4" style="color:var(--muted)">Export your data and KPIs. Filters apply to the filtered exports.</p>
-        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          <button id="dlFullXLSX" class="btn-primary py-2">Full data (.xlsx)</button>
-          <button id="dlFilteredXLSX" class="btn-ghost py-2">Filtered data (.xlsx)</button>
-          <button id="dlFilteredCSV" class="btn-ghost py-2">Filtered data (.csv)</button>
-          <button id="dlKPIsXLSX" class="btn-ghost py-2">KPI summary (.xlsx)</button>
-          <button id="dlCharts" class="btn-ghost py-2">Download all charts (PNG)</button>
-          <label class="btn-ghost py-2 text-center cursor-pointer" for="csvInput">Upload CSV (fallback)</label>
+        <div class="group">
+          <label for="district">District</label>
+          <select id="district"></select>
+        </div>
+        <div class="group">
+          <label for="retailer">Retailer</label>
+          <select id="retailer"></select>
+        </div>
+        <div class="group">
+          <label for="product">Product</label>
+          <select id="product"></select>
+        </div>
+        <div class="group">
+          <label for="qtyMin">Quantity (≥)</label>
+          <input id="qtyMin" type="number" min="0" step="1" placeholder="0" />
+        </div>
+        <div class="group">
+          <label for="status">Approved Status</label>
+          <select id="status"></select>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" id="resetBtn">Reset Filters</button>
         </div>
       </div>
-    </section>
-
-    <!-- RIGHT: FILTERS (Manual apply for speed) -->
-    <aside class="card p-4 sticky">
-      <h3 class="font-semibold mb-3">Filters</h3>
-      <div class="space-y-3">
-        <div><div class="label">State</div><select id="stateFilter" class="input"></select></div>
-        <div><div class="label">District</div><select id="districtFilter" class="input"></select></div>
-        <div><div class="label">Retailer</div><select id="retailerFilter" class="input"></select></div>
-        <div><div class="label">Crop</div><select id="cropFilter" class="input"></select></div>
-        <div><div class="label">Language</div><select id="languageFilter" class="input"></select></div>
-        <div><div class="label">Status</div>
-          <select id="statusFilter" class="input">
-            <option value="">All</option>
-            <option value="Yes">Yes</option>
-            <option value="No">No</option>
-            <option value="Pending">Pending</option>
-          </select>
-        </div>
-        <div><div class="label">Product</div><select id="productFilter" class="input"></select></div>
-        <div>
-          <div class="label">Qty (sum per row)</div>
-          <div class="grid grid-cols-2 gap-2">
-            <input id="qtyMin" type="number" class="input" placeholder="Min" />
-            <input id="qtyMax" type="number" class="input" placeholder="Max" />
-          </div>
-        </div>
-        <div class="flex gap-2 pt-1">
-          <button id="applyFilters" class="btn-primary px-3 py-2">Apply</button>
-          <button id="clearFilters" class="chip">Clear</button>
-        </div>
+      <div class="panel">
+        <div class="row">CSV Source:</div>
+        <div class="row" style="word-break:break-all"><code id="csvPath">./data.csv</code></div>
       </div>
     </aside>
-  </main>
 
-  <div id="toast" class="toast"></div>
+    <!-- Content -->
+    <section class="content">
+      <div class="card" style="grid-column: span 3">
+        <h3>Total Scans</h3>
+        <div class="kpi" id="kpiTotalBig">0</div>
+        <div class="row" id="kpiMeta"></div>
+      </div>
+      <div class="card" style="grid-column: span 3">
+        <h3>Submission Status (Approved)</h3>
+        <canvas id="statusChart" height="140"></canvas>
+      </div>
+      <div class="card" style="grid-column: span 6">
+        <h3>Time Trend (Scans per Day)</h3>
+        <canvas id="trendChart" height="140"></canvas>
+      </div>
+
+      <div class="card" style="grid-column: span 6">
+        <h3>Retailer Performance (Scans)</h3>
+        <canvas id="retailerChart" height="160"></canvas>
+      </div>
+      <div class="card" style="grid-column: span 6">
+        <h3>District-wise Scans</h3>
+        <canvas id="districtChart" height="160"></canvas>
+      </div>
+
+      <div class="card" style="grid-column: span 12">
+        <h3>Product Basket (Parsed from Cart Items)</h3>
+        <canvas id="productChart" height="140"></canvas>
+      </div>
+    </section>
+  </main>
+  <div class="footer">© 2025 Coromandel CPC — Lightweight dashboard (no frameworks). Built for GitHub Pages.</div>
+</div>
+
+<!-- Login Overlay -->
+<div class="overlay" id="loginOverlay" aria-hidden="false">
+  <form class="login" id="loginForm">
+    <h2>Secure Access</h2>
+    <p>Please login to view the dashboard.</p>
+    <div class="field">
+      <label>Username</label>
+      <input id="u" autocomplete="username" placeholder="Username" />
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input id="p" type="password" autocomplete="current-password" placeholder="Password" />
+    </div>
+    <div class="row" style="justify-content:space-between">
+      <button class="btn" type="submit">Login</button>
+      <span class="err" id="err"></span>
+    </div>
+  </form>
+</div>
 
 <script>
-/******************** CONFIG ********************/
-const CSV_URL_DEFAULT = 'https://github.com/dsankush/cpc/blob/main/data.csv'; // we will auto-convert to RAW
-const REQUIRE_LOGIN = true;
-const AUTO_REFRESH_MS = 0; // set to 300000 for 5 min refresh if needed
+  // =====================
+  //  CONFIG
+  // =====================
+  const CSV_URL = './data.csv'; // Put your data.csv at repo root (or adjust path)
+  document.getElementById('csvPath').textContent = CSV_URL;
 
-/******************** LOGIN ********************/
-(function auth(){
-  const ok = sessionStorage.getItem('digicides_auth_ok');
-  if(REQUIRE_LOGIN && ok!=='1'){
-    document.getElementById('loginOverlay').style.display = 'flex';
-    document.getElementById('loginForm').addEventListener('submit', (e)=>{
-      e.preventDefault(); const u=username.value.trim(); const p=password.value.trim();
-      if(u==='digicides' && p==='coromandel@cpc'){ sessionStorage.setItem('digicides_auth_ok','1'); loginOverlay.style.display='none'; initApp(); }
-      else loginErr.classList.remove('hidden');
-    });
-  } else { document.getElementById('loginOverlay').style.display='none'; initApp(); }
-})();
+  // =====================
+  //  SIMPLE LOGIN (client-side; suitable for lightweight gating only)
+  // =====================
+  const VALID_USER = 'digicides';
+  const VALID_PASS = 'coro@cpc';
+  const overlay = document.getElementById('loginOverlay');
+  const form = document.getElementById('loginForm');
+  const errEl = document.getElementById('err');
+  const LS_KEY = 'cpc_login_ok';
 
-/******************** STATE ********************/
-let rows=[], rawRows=[]; let productsMaster=new Set(); let charts={};
-const columnsOrder=['User ID','Phone Number','First Name','Last Name','District','State','Language','Pin Code','QR Code','Land Acreage','Crop Name','Scan Date','RIN','Retailer Name','Cart Items','Coupon Code','Submission Status'];
-
-/******************** UTILS ********************/
-function toast(msg, err=false){ const t=toastEl; t.textContent=msg; t.style.display='block'; t.style.borderColor=err?'#f87171':'#1f2937'; clearTimeout(t.__hide); t.__hide=setTimeout(()=>t.style.display='none', 3200); }
-const toastEl = document.getElementById('toast');
-function toNumber(x){ if(x==null||x==='') return null; const n=Number(String(x).replace(/,/g,'').trim()); return Number.isFinite(n)?n:null; }
-function norm(x){ return (x==null?'':String(x)).trim(); }
-function parseDateSmart(s){ if(!s) return null; const str=String(s).trim(); let d=dayjs(str); if(!d.isValid()){ const m=str.match(/(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/); if(m){ const [_,dd,MM,yyyy,hh,mm,ss]=m; const iso=`${yyyy}-${MM}-${dd}${hh?` ${hh}:${mm||'00'}:${ss||'00'}`:''}`; d=dayjs(iso);} } return d.isValid()?d:null; }
-function parseCartItems(cart){ const out=[]; if(!cart) return out; String(cart).split(/\s*,\s*/).forEach(p=>{ const m=p.match(/^(.+?)\s*-\s*qty\s*(\d+)\s*-\s*([\w.]+)$/i); if(m){ out.push({name:m[1].trim(), qty:Number(m[2]), size:m[3].trim()}); } else if(p){ out.push({name:p.trim(), qty:1, size:''}); } }); return out; }
-function uniqueSorted(arr){ return Array.from(new Set(arr)).filter(Boolean).sort((a,b)=> String(a).localeCompare(String(b)); }
-function normalizeGithubUrl(u){ try{ const url=new URL(u); if(url.hostname==='github.com'){ const parts=url.pathname.split('/').filter(Boolean); const i=parts.indexOf('blob'); if(i>-1){ return `https://raw.githubusercontent.com/${parts[0]}/${parts[1]}/${parts[i+1]}/${parts.slice(i+2).join('/')}`; } return u+(url.search? '&':'?')+'raw=1'; } return u; } catch{ return u; } }
-
-/******************** FILTERS ********************/
-function buildFilters(){
-  const states=uniqueSorted(rows.map(r=>r.State));
-  const dists=uniqueSorted(rows.map(r=>r.District));
-  const rets=uniqueSorted(rows.map(r=>r['Retailer Name']));
-  const crops=uniqueSorted(rows.flatMap(r=> String(r['Crop Name']||'').split(/\s*,\s*/)));
-  const langs=uniqueSorted(rows.map(r=> r.Language));
-  const prods=uniqueSorted(Array.from(productsMaster));
-  function fill(el, arr){ el.innerHTML = `<option value="">All</option>` + arr.map(v=>`<option>${v}</option>`).join(''); }
-  fill(stateFilter, states); fill(districtFilter, dists); fill(retailerFilter, rets); fill(cropFilter, crops); fill(languageFilter, langs); fill(productFilter, prods);
-}
-
-function filteredRows(){
-  const fs={ state:norm(stateFilter.value), district:norm(districtFilter.value), retailer:norm(retailerFilter.value), crop:norm(cropFilter.value), language:norm(languageFilter.value), status:norm(statusFilter.value), product:norm(productFilter.value), qtyMin:toNumber(qtyMin.value), qtyMax:toNumber(qtyMax.value), search:norm(searchBox.value).toLowerCase() };
-  return rows.filter(r=>{
-    if(fs.state && r.State!==fs.state) return false;
-    if(fs.district && r.District!==fs.district) return false;
-    if(fs.retailer && r['Retailer Name']!==fs.retailer) return false;
-    if(fs.language && r.Language!==fs.language) return false;
-    if(fs.status){ const st=norm(r['Submission Status'])||''; const m = (st==='Yes'||st==='Pending')?st:'No'; if(m!==fs.status) return false; }
-    if(fs.crop){ const list=String(r['Crop Name']||'').split(/\s*,\s*/); if(!list.includes(fs.crop)) return false; }
-    if(fs.product){ const ok=(r._cartParsed||[]).some(ci=>ci.name===fs.product); if(!ok) return false; }
-    if(fs.qtyMin!=null || fs.qtyMax!=null){ let q=0; if(fs.product){ q=(r._cartParsed||[]).filter(ci=>ci.name===fs.product).reduce((a,b)=>a+(b.qty||0),0);} else { q=(r._cartParsed||[]).reduce((a,b)=>a+(b.qty||0),0);} if(fs.qtyMin!=null && q<fs.qtyMin) return false; if(fs.qtyMax!=null && q>fs.qtyMax) return false; }
-    if(fs.search){ const hay=columnsOrder.map(c=>String(r[c]||'')).join('|').toLowerCase(); if(!hay.includes(fs.search)) return false; }
-    return true;
+  function unlock(){ overlay.style.display='none'; }
+  if(localStorage.getItem(LS_KEY)==='1'){ unlock(); }
+  form.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const u = document.getElementById('u').value.trim();
+    const p = document.getElementById('p').value;
+    if(u===VALID_USER && p===VALID_PASS){
+      localStorage.setItem(LS_KEY,'1');
+      unlock();
+    } else {
+      errEl.textContent = 'Invalid credentials';
+    }
   });
-}
 
-/******************** CHARTS (fast) ********************/
-Chart.defaults.color = '#d7e2f0';
-Chart.defaults.font.family = 'Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif';
-Chart.defaults.animation = false; // speed
-Chart.defaults.responsive = true;
+  // =====================
+  //  UTILITIES
+  // =====================
+  const by = (k)=> (a,b)=> a[k]>b[k]?1:(a[k]<b[k]?-1:0);
+  const trim = (s)=> (s==null?'' : String(s).trim());
+  const toDateKey = (dt)=>{
+    if(!dt) return '';
+    const d = new Date(dt.replace(/-/g,'/')); // tolerate 'YYYY-MM-DD HH:mm:ss'
+    if(isNaN(d)) return '';
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  };
 
-function destroyChart(id){ if(charts[id]){ charts[id].destroy(); delete charts[id]; } }
-function makeDoughnut(id, labels, data){ destroyChart(id); charts[id]=new Chart(document.getElementById(id),{ type:'doughnut', data:{ labels, datasets:[{ data, borderWidth:1.2 }]}, options:{ maintainAspectRatio:false, plugins:{ legend:{ labels:{ color:'#bcd' } } } } }); }
-function makeBar(id, labels, data, horizontal=false){ destroyChart(id); charts[id]=new Chart(document.getElementById(id),{ type:'bar', data:{ labels, datasets:[{ data, borderWidth:1.2 }]}, options:{ indexAxis: horizontal?'y':'x', maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ x:{ ticks:{ color:'#bcd', autoSkip:true, maxRotation:0 } }, y:{ ticks:{ color:'#bcd' } } } } }); }
-function makeLine(id, labels, data){ destroyChart(id); charts[id]=new Chart(document.getElementById(id),{ type:'line', data:{ labels, datasets:[{ data, tension:0.35, borderWidth:2, fill:false }]}, options:{ maintainAspectRatio:false, parsing:false, normalized:true, plugins:{ legend:{ labels:{ color:'#bcd' } } }, scales:{ x:{ ticks:{ color:'#bcd', autoSkip:true, maxRotation:0 } }, y:{ ticks:{ color:'#bcd' } } } } }); }
+  function uniqSorted(arr){ return [...new Set(arr.filter(Boolean))].sort((a,b)=>a.localeCompare(b)); }
 
-function computeAggregations(list){
-  const agg = { status:{}, retailer:{}, district:{}, state:{}, product:{}, time:{} };
-  for(const r of list){
-    // Approved status: Yes/No/Pending (map other to No)
-    const stRaw = norm(r['Submission Status'])||''; const st = (stRaw==='Yes'||stRaw==='Pending')?stRaw:'No';
-    agg.status[st]=(agg.status[st]||0)+1;
-    const ret = norm(r['Retailer Name'])||'(blank)'; agg.retailer[ret]=(agg.retailer[ret]||0)+1;
-    const dist = norm(r.District)||'(blank)'; agg.district[dist]=(agg.district[dist]||0)+1;
-    const stt = norm(r.State)||'(blank)'; agg.state[stt]=(agg.state[stt]||0)+1;
-    (r._cartParsed||[]).forEach(ci=>{ agg.product[ci.name]=(agg.product[ci.name]||0)+(ci.qty||0); });
-    const d=parseDateSmart(r['Scan Date']); if(d){ const k=d.format('YYYY-MM-DD HH:00'); agg.time[k]=(agg.time[k]||0)+1; }
+  // Parse "Cart Items" like: "Fantac Plus - qty 2 - 1000ml, Benofit - qty 1 - 400gms"
+  function parseProducts(cartStr){
+    const map = new Map();
+    const s = trim(cartStr);
+    if(!s) return map;
+    const parts = s.split(',');
+    for(const raw of parts){
+      const item = raw.trim();
+      // capture: name, qty (optional)
+      const m = item.match(/^(.+?)\s*-\s*qty\s*(\d+)/i) || item.match(/^(.+?)\s*$/);
+      if(m){
+        const name = trim(m[1]).replace(/\s{2,}/g,' ');
+        const q = m[2] ? Number(m[2]) : 1;
+        map.set(name, (map.get(name)||0)+ (isFinite(q)? q : 1));
+      }
+    }
+    return map;
   }
-  return agg;
-}
 
-function updateCharts(list){
-  const a = computeAggregations(list);
-  // 1 Approved Status
-  const statusOrder=['Yes','No','Pending']; makeDoughnut('statusChart', statusOrder, statusOrder.map(k=>a.status[k]||0));
-  // 2 Retailer top 10
-  const rTop = Object.entries(a.retailer).sort((x,y)=>y[1]-x[1]).slice(0,10); makeBar('retailerChart', rTop.map(x=>x[0]), rTop.map(x=>x[1]));
-  // 3 District top 10 (horizontal)
-  const dTop = Object.entries(a.district).sort((x,y)=>y[1]-x[1]).slice(0,10); makeBar('districtChart', dTop.map(x=>x[0]), dTop.map(x=>x[1]), true);
-  // 4 State scans (sorted desc)
-  const sTop = Object.entries(a.state).sort((x,y)=>y[1]-x[1]); makeBar('stateChart', sTop.map(x=>x[0]), sTop.map(x=>x[1]), true);
-  // 5 Top products (top 5 quantities)
-  const pTop = Object.entries(a.product).sort((x,y)=>y[1]-x[1]).slice(0,5); makeBar('productChart', pTop.map(x=>x[0]), pTop.map(x=>x[1]), true);
-  // 6 Time trend
-  const ts = Object.entries(a.time).sort((a,b)=> a[0].localeCompare(b[0])); makeLine('timeChart', ts.map(x=>x[0]), ts.map(x=>x[1]));
-}
+  // =====================
+  //  STATE
+  // =====================
+  let RAW = [];
+  let FILTERS = { state:'', district:'', retailer:'', product:'', qtyMin:0, status:'' };
 
-/******************** KPIs & TABLE ********************/
-function updateKPIs(list){ const total=list.length; const yes=list.filter(r=> (norm(r['Submission Status'])==='Yes')).length; const pending=list.filter(r=> norm(r['Submission Status'])==='Pending').length; const rate= total? Math.round(yes/total*100):0; kpiTotal.textContent=total; kpiYes.textContent=yes; kpiPending.textContent=pending; kpiRate.textContent=rate+'%'; }
+  // =====================
+  //  DOM REFS
+  // =====================
+  const selState = document.getElementById('state');
+  const selDistrict = document.getElementById('district');
+  const selRetailer = document.getElementById('retailer');
+  const selProduct = document.getElementById('product');
+  const inpQtyMin = document.getElementById('qtyMin');
+  const selStatus = document.getElementById('status');
+  document.getElementById('resetBtn').addEventListener('click', ()=>{
+    FILTERS = { state:'', district:'', retailer:'', product:'', qtyMin:0, status:'' };
+    selState.value = selDistrict.value = selRetailer.value = selProduct.value = selStatus.value = '';
+    inpQtyMin.value = '';
+    render();
+  });
 
-function renderTable(list){ const thead=document.querySelector('#dataTable thead'); const tbody=document.querySelector('#dataTable tbody'); thead.innerHTML='<tr>'+columnsOrder.map(c=>`<th>${c}</th>`).join('')+'<th>Parsed Products</th></tr>'; const max=500; const slice=list.slice(0,max); tbody.innerHTML = slice.map(r=>{ const tds=columnsOrder.map(c=>`<td>${r[c]??''}</td>`).join(''); const parsed=(r._cartParsed||[]).map(ci=>`${ci.name} (qty ${ci.qty}${ci.size?', '+ci.size:''})`).join(', '); return `<tr>${tds}<td>${parsed}</td></tr>`; }).join(''); }
+  // =====================
+  //  CHARTS (reuse instances)
+  // =====================
+  const charts = {};
+  function makeChart(id, type, data, opts){
+    const ctx = document.getElementById(id).getContext('2d');
+    if(charts[id]){ charts[id].data = data; charts[id].options = opts; charts[id].update(); return charts[id]; }
+    charts[id] = new Chart(ctx, { type, data, options: opts });
+    return charts[id];
+  }
 
-/******************** EXPORTS ********************/
-function exportCSV(list){ const out=list.map(r=>{ const o=Object.fromEntries(columnsOrder.map(c=>[c, r[c]??''])); o['Parsed Product Names']=(r._cartParsed||[]).map(ci=>ci.name).join('|'); o['Parsed Total Qty']=(r._cartParsed||[]).reduce((a,b)=>a+(b.qty||0),0); return o; }); const csv=Papa.unparse(out); const blob=new Blob([csv], {type:'text/csv;charset=utf-8;'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='filtered_export.csv'; a.click(); URL.revokeObjectURL(url); }
-function exportXLSX(list, filename){ const out=list.map(r=>{ const o=Object.fromEntries(columnsOrder.map(c=>[c, r[c]??''])); o['Parsed Product Names']=(r._cartParsed||[]).map(ci=>ci.name).join('|'); o['Parsed Total Qty']=(r._cartParsed||[]).reduce((a,b)=>a+(b.qty||0),0); return o; }); const ws=XLSX.utils.json_to_sheet(out); const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Data'); XLSX.writeFile(wb, filename); }
-function exportKPIsXLSX(){ const list=filteredRows(); const total=list.length; const yes=list.filter(r=>norm(r['Submission Status'])==='Yes').length; const pending=list.filter(r=>norm(r['Submission Status'])==='Pending').length; const no=list.filter(r=>{ const st=norm(r['Submission Status']); return !(st==='Yes'||st==='Pending');}).length; const rate=total?Math.round(yes/total*100):0; const rows=[{Metric:'Total Scans', Value:total},{Metric:'Yes', Value:yes},{Metric:'No', Value:no},{Metric:'Pending', Value:pending},{Metric:'Completion Rate %', Value:rate}]; const ws=XLSX.utils.json_to_sheet(rows); const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'KPIs'); XLSX.writeFile(wb, 'kpis_summary.xlsx'); }
-function downloadAllCharts(){ for(const [id,chart] of Object.entries(charts)){ const link=document.createElement('a'); link.href=chart.toBase64Image(); link.download=`${id}.png`; document.body.appendChild(link); link.click(); document.body.removeChild(link); } }
+  function palette(n){
+    const base = [ '#22d3ee','#fb923c','#10b981','#a78bfa','#f472b6','#fbbf24','#60a5fa','#34d399','#f87171' ];
+    const arr = []; for(let i=0;i<n;i++) arr.push(base[i%base.length]);
+    return arr;
+  }
 
-/******************** WIRING ********************/
-function rebuild(){ const list=filteredRows(); updateKPIs(list); updateCharts(list); renderTable(list); }
+  // =====================
+  //  RENDER PIPELINE
+  // =====================
+  function applyFilters(rows){
+    const f = FILTERS;
+    return rows.filter(r=>{
+      if(f.state && trim(r.State)!==f.state) return false;
+      if(f.district && trim(r.District)!==f.district) return false;
+      if(f.retailer && trim(r['Retailer Name'])!==f.retailer) return false;
+      if(f.status && trim((r['Submission Status']||'').toLowerCase())!==f.status.toLowerCase()) return false;
+      if(f.product || (f.qtyMin||0)>0){
+        const map = parseProducts(r['Cart Items']);
+        if(f.product){
+          const has = map.has(f.product);
+          if(!has) return false;
+          if((f.qtyMin||0)>0 && (map.get(f.product)||0) < f.qtyMin) return false;
+        } else if((f.qtyMin||0)>0){
+          // any product >= qtyMin qualifies
+          let ok=false; for(const v of map.values()){ if(v>=f.qtyMin){ ok=true; break; } }
+          if(!ok) return false;
+        }
+      }
+      return true;
+    });
+  }
 
-// Manual apply (for performance)
-applyFilters.addEventListener('click', rebuild);
-clearFilters.addEventListener('click', ()=>{ ['stateFilter','districtFilter','retailerFilter','cropFilter','languageFilter','statusFilter','productFilter','qtyMin','qtyMax','searchBox'].forEach(id=>{ const el=document.getElementById(id); if(!el) return; if(el.tagName==='SELECT') el.selectedIndex=0; else el.value=''; }); rebuild(); });
+  function updateKpis(rows){
+    const total = rows.length;
+    const yes = rows.filter(r=>/^yes$/i.test(trim(r['Submission Status']))).length;
+    const pending = rows.filter(r=>/^pending$/i.test(trim(r['Submission Status']))).length;
+    const no = rows.filter(r=>/^no$/i.test(trim(r['Submission Status']))).length;
+    document.getElementById('kpi-total').textContent = `Scans: ${total}`;
+    document.getElementById('kpi-yes').textContent = `Approved: ${yes}`;
+    document.getElementById('kpi-pending').textContent = `Pending: ${pending}`;
+    document.getElementById('kpiTotalBig').textContent = total.toLocaleString();
+    document.getElementById('kpiMeta').textContent = `${yes} Yes • ${no} No • ${pending} Pending`;
+  }
 
-refreshBtn.addEventListener('click', ()=> fetchData(true));
-exportBtn.addEventListener('click', ()=> exportCSV(filteredRows()));
+  function buildCounts(rows, key){
+    const m = new Map();
+    for(const r of rows){
+      const k = trim(r[key]); if(!k) continue;
+      m.set(k, (m.get(k)||0)+1);
+    }
+    return [...m.entries()].sort((a,b)=>b[1]-a[1]);
+  }
 
-// Tabs
-const viewDashboard = document.getElementById('viewDashboard');
-const viewDownloads = document.getElementById('viewDownloads');
-function showTab(tab){ if(tab==='downloads'){ viewDashboard.classList.add('hidden'); viewDownloads.classList.remove('hidden'); tabDownloads.classList.add('active'); tabDashboard.classList.remove('active'); } else { viewDashboard.classList.remove('hidden'); viewDownloads.classList.add('hidden'); tabDashboard.classList.add('active'); tabDownloads.classList.remove('active'); } }
+  function renderCharts(rows){
+    // Status donut
+    const sYes = rows.filter(r=>/^yes$/i.test(trim(r['Submission Status']))).length;
+    const sNo = rows.filter(r=>/^no$/i.test(trim(r['Submission Status']))).length;
+    const sPending = rows.filter(r=>/^pending$/i.test(trim(r['Submission Status']))).length;
+    makeChart('statusChart','doughnut',{
+      labels:['Yes','No','Pending'],
+      datasets:[{ data:[sYes,sNo,sPending], backgroundColor:palette(3) }]
+    },{
+      plugins:{ legend:{ labels:{ color: '#cbd5e1' } } },
+      cutout:'62%'
+    });
 
-tabDashboard.addEventListener('click', ()=> showTab('dashboard'));
-tabDownloads.addEventListener('click', ()=> showTab('downloads'));
+    // Trend by day
+    const trendMap = new Map();
+    for(const r of rows){ const k = toDateKey(trim(r['Scan Date'])); if(k) trendMap.set(k,(trendMap.get(k)||0)+1); }
+    const trend = [...trendMap.entries()].sort((a,b)=>a[0].localeCompare(b[0]));
+    makeChart('trendChart','line',{
+      labels: trend.map(x=>x[0]),
+      datasets:[{ data: trend.map(x=>x[1]), borderWidth:2, tension:.3 }]
+    },{ scales:{ x:{ ticks:{ color:'#8aa1c6' } }, y:{ ticks:{ color:'#8aa1c6' }, grid:{ color:'#1e2a44' } } }, plugins:{ legend:{ display:false } } });
 
-// Downloads buttons (Excel/CSV/Charts)
-dlFullXLSX.addEventListener('click', ()=> exportXLSX(rows, 'full_data.xlsx'));
-dlFilteredXLSX.addEventListener('click', ()=> exportXLSX(filteredRows(), 'filtered_data.xlsx'));
-dlFilteredCSV.addEventListener('click', ()=> exportCSV(filteredRows()));
-dlKPIsXLSX.addEventListener('click', exportKPIsXLSX);
-dlCharts.addEventListener('click', downloadAllCharts);
+    // Retailer performance
+    const retailers = buildCounts(rows,'Retailer Name').slice(0,12);
+    makeChart('retailerChart','bar',{
+      labels: retailers.map(x=>x[0]),
+      datasets:[{ data: retailers.map(x=>x[1]), backgroundColor: palette(retailers.length) }]
+    },{ indexAxis:'y', plugins:{ legend:{ display:false } }, scales:{ x:{ ticks:{ color:'#8aa1c6' } }, y:{ ticks:{ color:'#cbd5e1' } } } });
 
-// CSV file fallback
-csvInput.addEventListener('change', (e)=>{ const file=e.target.files?.[0]; if(!file) return; Papa.parse(file,{header:true,skipEmptyLines:true,complete:(res)=>{ normalizeAndParse(res.data); toast('Loaded from file'); }, error:(err)=> toast('CSV parse error: '+err, true)}); });
+    // District scans
+    const districts = buildCounts(rows,'District').slice(0,12);
+    makeChart('districtChart','bar',{
+      labels: districts.map(x=>x[0]),
+      datasets:[{ data: districts.map(x=>x[1]), backgroundColor: palette(districts.length) }]
+    },{ indexAxis:'y', plugins:{ legend:{ display:false } }, scales:{ x:{ ticks:{ color:'#8aa1c6' } }, y:{ ticks:{ color:'#cbd5e1' } } } });
 
-// Search debounce
-searchBox.addEventListener('input', ()=>{ clearTimeout(window.__sb); window.__sb=setTimeout(rebuild, 180); });
+    // Product basket
+    const pMap = new Map();
+    for(const r of rows){
+      const m = parseProducts(r['Cart Items']);
+      for(const [name,qty] of m){ pMap.set(name,(pMap.get(name)||0)+qty); }
+    }
+    const pArr = [...pMap.entries()].sort((a,b)=>b[1]-a[1]).slice(0,16);
+    makeChart('productChart','bar',{
+      labels: pArr.map(x=>x[0]),
+      datasets:[{ data: pArr.map(x=>x[1]), backgroundColor: palette(pArr.length) }]
+    },{ plugins:{ legend:{ display:false } }, scales:{ x:{ ticks:{ color:'#cbd5e1', maxRotation:30, minRotation:0 } }, y:{ ticks:{ color:'#8aa1c6' } } } });
+  }
 
-/******************** DATA LOAD ********************/
-function normalizeAndParse(data){ productsMaster=new Set(); rows=data.map(r=>{ const o={}; columnsOrder.forEach(c=> o[c]= r[c]!==undefined? r[c]:'' ); o['Land Acreage']=toNumber(o['Land Acreage']); o._scanDate=parseDateSmart(o['Scan Date']); o._cartParsed=parseCartItems(o['Cart Items']); (o._cartParsed||[]).forEach(ci=> productsMaster.add(ci.name)); return o; }); buildFilters(); rebuild(); }
+  function populateFilters(rows){
+    const states = uniqSorted(rows.map(r=>trim(r.State)));
+    const dists  = uniqSorted(rows.map(r=>trim(r.District)));
+    const rets   = uniqSorted(rows.map(r=>trim(r['Retailer Name'])));
+    const products = uniqSorted(rows.flatMap(r=>[...parseProducts(r['Cart Items']).keys()]));
+    const statuses = ['','Yes','No','Pending'];
 
-function csvUrlFromQuery(){ const u=new URL(location.href); const q=u.searchParams.get('csv'); return q?normalizeGithubUrl(decodeURIComponent(q)):normalizeGithubUrl(CSV_URL_DEFAULT); }
+    function fill(sel, items){ sel.innerHTML = ''; const opt0 = document.createElement('option'); opt0.value=''; opt0.textContent='All'; sel.appendChild(opt0); for(const v of items){ const o=document.createElement('option'); o.value=v; o.textContent=v; sel.appendChild(o);} }
+    fill(selState, states); fill(selDistrict, dists); fill(selRetailer, rets); fill(selProduct, products);
+    fill(selStatus, statuses);
+  }
 
-async function fetchData(isManual=false){ try{ const url=csvUrlFromQuery(); const res=await fetch(url, { cache:'no-store' }); if(!res.ok) throw new Error('HTTP '+res.status+' for '+url); const text=await res.text(); const parsed=Papa.parse(text, { header:true, skipEmptyLines:true }); if(parsed.errors && parsed.errors.length){ console.warn('CSV parse errors', parsed.errors.slice(0,3)); }
-  rawRows=parsed.data; if(!rawRows || !rawRows.length){ throw new Error('No rows in CSV'); }
-  normalizeAndParse(rawRows); toast((isManual?'Refreshed':'Loaded')+' from CSV');
- } catch(err){ console.error(err); toast('Failed to load CSV. Use Upload CSV (fallback).', true); }
-}
+  function attachFilterHandlers(){
+    selState.onchange = ()=>{ FILTERS.state = selState.value; render(); };
+    selDistrict.onchange = ()=>{ FILTERS.district = selDistrict.value; render(); };
+    selRetailer.onchange = ()=>{ FILTERS.retailer = selRetailer.value; render(); };
+    selProduct.onchange = ()=>{ FILTERS.product = selProduct.value; render(); };
+    selStatus.onchange = ()=>{ FILTERS.status = selStatus.value; render(); };
+    let to=null; inpQtyMin.oninput = ()=>{ clearTimeout(to); to=setTimeout(()=>{ FILTERS.qtyMin = Number(inpQtyMin.value||0); render(); }, 180); };
+  }
 
-function initApp(){ fetchData(false); if(AUTO_REFRESH_MS>0){ setInterval(()=>fetchData(), AUTO_REFRESH_MS); } }
+  function render(){
+    const rows = applyFilters(RAW);
+    updateKpis(rows);
+    // Defer charts to next frame for smoother feel
+    requestAnimationFrame(()=> renderCharts(rows));
+  }
+
+  // =====================
+  //  LOAD CSV
+  // =====================
+  function normalizeRow(r){
+    // ensure all expected columns exist
+    const obj = {
+      'User ID': r['User ID']||r['UserID']||r['id']||'',
+      'Phone Number': r['Phone Number']||r['Phone']||r['phone']||'',
+      'First Name': r['First Name']||r['FirstName']||'',
+      'Last Name': r['Last Name']||r['LastName']||'',
+      'District': r['District']||'',
+      'State': r['State']||'',
+      'Language': r['Language']||'',
+      'Pin Code': r['Pin Code']||r['Pincode']||'',
+      'QR Code': r['QR Code']||'',
+      'Land Acreage': r['Land Acreage']||r['Land']||'',
+      'Crop Name': r['Crop Name']||'',
+      'Scan Date': r['Scan Date']||r['Date']||'',
+      'RIN': r['RIN']||'',
+      'Retailer Name': r['Retailer Name']||r['Retailer']||'',
+      'Cart Items': r['Cart Items']||'',
+      'Coupon Code': r['Coupon Code']||'',
+      'Submission Status': r['Submission Status']||r['Approved Status']||''
+    };
+    return obj;
+  }
+
+  Papa.parse(CSV_URL, {
+    download: true,
+    header: true,
+    skipEmptyLines: true,
+    complete: (res)=>{
+      RAW = res.data.map(normalizeRow);
+      populateFilters(RAW);
+      attachFilterHandlers();
+      render();
+    },
+    error: (err)=>{
+      console.error('CSV load error', err);
+      alert('Failed to load data.csv. Ensure the file exists at '+CSV_URL);
+    }
+  });
 </script>
 </body>
 </html>
