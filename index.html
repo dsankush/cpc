@@ -4,55 +4,14 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Coromandel CPC — Campaign Dashboard</title>
+  <link rel="icon" type="image/png" href="favicon.png" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-  <style>
-    body {
-      margin: 0;
-      font-family: Inter, system-ui, sans-serif;
-      background: #f8fafc;
-      color: #0f172a;
-    }
-    header {
-      background: linear-gradient(90deg, #3b82f6, #10b981);
-      color: #fff;
-      padding: 14px 18px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 30;
-    }
-    .logo { font-weight: 700; font-size: 18px; }
-    .pill { display: flex; gap: 12px; }
-    .pill div { background: rgba(255,255,255,.2); padding: 6px 12px; border-radius: 999px; font-size: 12px; }
-    .logoutBtn { background:#ef4444;border:none;color:#fff;padding:6px 12px;border-radius:8px;cursor:pointer }
-
-    .main { display: grid; grid-template-columns: 260px 1fr; gap: 18px; padding: 18px; }
-    .panel { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; }
-    .filters .group { display:flex; flex-direction:column; gap:6px; margin-bottom:8px }
-    .filters label { font-size:12px; color:#64748b }
-    .filters select, .filters input { padding:8px; border-radius:8px; border:1px solid #e2e8f0 }
-
-    .content { display:grid; grid-template-columns:repeat(12,1fr); gap:18px }
-    .card { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:14px; display:flex; flex-direction:column }
-    .card h3 { margin:0 0 8px; font-size:14px; color:#64748b; font-weight:600 }
-    .kpi { font-size:30px; font-weight:700 }
-
-    .footer { padding:10px 18px; color:#64748b; border-top:1px solid #e2e8f0 }
-
-    .overlay { position:fixed; inset:0; background:#f1f5f9; display:grid; place-items:center; z-index:50 }
-    .login { width:340px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:22px; box-shadow:0 10px 30px rgba(0,0,0,.1) }
-    .field { display:flex; flex-direction:column; gap:6px; margin:10px 0 }
-    .btn { padding:10px 14px; border-radius:8px; background:#3b82f6; color:#fff; font-weight:600; cursor:pointer; border:none }
-    .err { color:#dc2626; font-size:12px; min-height:16px }
-
-    @media (max-width:1000px){ .main { grid-template-columns:1fr } }
-  </style>
 </head>
 <body>
+  <!-- Header -->
   <header>
     <div class="logo">🌱 CPC Campaign Dashboard</div>
     <div class="pill">
@@ -63,6 +22,7 @@
     <button class="logoutBtn" id="logoutBtn">Logout</button>
   </header>
 
+  <!-- Main -->
   <main class="main">
     <!-- Sidebar Filters -->
     <aside class="panel filters">
@@ -72,26 +32,29 @@
       <div class="group"><label>Product</label><select id="product"></select></div>
       <div class="group"><label>Quantity ≥</label><input id="qtyMin" type="number" /></div>
       <div class="group"><label>Status</label><select id="status"></select></div>
+      <div class="group"><label>From Date</label><input id="dateFrom" type="date" /></div>
+      <div class="group"><label>To Date</label><input id="dateTo" type="date" /></div>
       <button class="btn" id="resetBtn">Reset Filters</button>
       <a class="btn" href="data.csv" download>⬇️ Download Data</a>
     </aside>
 
     <!-- Content -->
     <section class="content">
-      <div class="card" style="grid-column: span 3"><h3>Total Scans</h3><div class="kpi" id="kpiTotalBig">0</div><div id="kpiMeta"></div></div>
-      <div class="card" style="grid-column: span 3"><h3>Submission Status</h3><canvas id="statusChart"></canvas></div>
-      <div class="card" style="grid-column: span 6"><h3>Time Trend</h3><canvas id="trendChart"></canvas></div>
-      <div class="card" style="grid-column: span 6"><h3>Retailer Performance</h3><canvas id="retailerChart"></canvas></div>
-      <div class="card" style="grid-column: span 6"><h3>District-wise Scans</h3><canvas id="districtChart"></canvas></div>
-      <div class="card" style="grid-column: span 12"><h3>Product Basket</h3><canvas id="productChart" style="height:300px"></canvas></div>
+      <div class="card span-3"><h3>Total Scans</h3><div class="kpi" id="kpiTotalBig">0</div><div id="kpiMeta"></div></div>
+      <div class="card span-3"><h3>Submission Status</h3><canvas id="statusChart"></canvas></div>
+      <div class="card span-6"><h3>Time Trend</h3><canvas id="trendChart"></canvas></div>
+      <div class="card span-6"><h3>Retailer Performance</h3><canvas id="retailerChart"></canvas></div>
+      <div class="card span-6"><h3>District-wise Scans</h3><canvas id="districtChart"></canvas></div>
+      <div class="card span-12"><h3>Product Basket</h3><canvas id="productChart"></canvas></div>
     </section>
   </main>
+
   <div class="footer">© 2025 Coromandel CPC Dashboard</div>
 
   <!-- Login Overlay -->
   <div class="overlay" id="loginOverlay">
     <form class="login" id="loginForm">
-      <h2>Login</h2>
+      <h2>🔒 Secure Login</h2>
       <div class="field"><label>Username</label><input id="u" /></div>
       <div class="field"><label>Password</label><input id="p" type="password" /></div>
       <button class="btn" type="submit">Login</button>
@@ -99,20 +62,6 @@
     </form>
   </div>
 
-  <script>
-    const CSV_URL='./data.csv';
-    const VALID_USER='digicides', VALID_PASS='coro@cpc';
-    const overlay=document.getElementById('loginOverlay');
-    if(localStorage.getItem('cpc_login_ok')==='1') overlay.style.display='none';
-    document.getElementById('loginForm').addEventListener('submit',e=>{
-      e.preventDefault();
-      if(u.value===VALID_USER && p.value===VALID_PASS){
-        localStorage.setItem('cpc_login_ok','1');
-        overlay.style.display='none';
-      } else err.textContent='Invalid credentials';
-    });
-    document.getElementById('logoutBtn').addEventListener('click',()=>{localStorage.removeItem('cpc_login_ok');location.reload()});
-    // TODO: Add PapaParse + Chart.js logic (same as before)
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>
