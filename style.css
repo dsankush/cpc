@@ -1,0 +1,35 @@
+body { margin:0; font-family:Inter,sans-serif; background:#f8fafc; color:#0f172a; }
+header {
+  background: linear-gradient(90deg, #3b82f6, #f59e0b);
+  color:#fff; padding:14px 18px; display:flex; align-items:center; justify-content:space-between;
+  position:sticky; top:0; z-index:30; box-shadow:0 3px 6px rgba(0,0,0,.1);
+}
+.logo { font-weight:700; font-size:18px; }
+.pill { display:flex; gap:12px; }
+.pill div { background:rgba(255,255,255,.2); padding:6px 12px; border-radius:999px; font-size:12px; }
+.logoutBtn { background:#ef4444; border:none; color:#fff; padding:6px 12px; border-radius:8px; cursor:pointer; }
+
+.main { display:grid; grid-template-columns:260px 1fr; gap:18px; padding:18px; }
+.panel { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:14px; }
+.filters .group { display:flex; flex-direction:column; gap:6px; margin-bottom:8px; }
+.filters label { font-size:12px; color:#64748b; }
+.filters select,.filters input { padding:8px; border-radius:8px; border:1px solid #e2e8f0; }
+
+.content { display:grid; grid-template-columns:repeat(12,1fr); gap:18px; }
+.card { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:14px; display:flex; flex-direction:column; }
+.card h3 { margin:0 0 8px; font-size:14px; color:#64748b; font-weight:600; }
+.kpi { font-size:30px; font-weight:700; }
+.span-3 { grid-column: span 3; }
+.span-6 { grid-column: span 6; }
+.span-12 { grid-column: span 12; }
+
+.footer { padding:10px 18px; color:#64748b; border-top:1px solid #e2e8f0; text-align:center; }
+
+.overlay { position:fixed; inset:0; background:#f1f5f9; display:grid; place-items:center; z-index:50; }
+.login { width:340px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:22px; box-shadow:0 10px 30px rgba(0,0,0,.1); }
+.field { display:flex; flex-direction:column; gap:6px; margin:10px 0; }
+.btn { padding:10px 14px; border-radius:8px; background:#3b82f6; color:#fff; font-weight:600; cursor:pointer; border:none; }
+.btn:hover { filter:brightness(1.05); }
+.err { color:#dc2626; font-size:12px; min-height:16px; }
+
+@media(max-width:1000px){ .main{ grid-template-columns:1fr } }
