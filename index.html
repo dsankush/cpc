@@ -172,8 +172,8 @@
     <div class="bar">
       <div class="logo"><span class="dot"></span><span class="title">CPC Campaign Dashboard</span></div>
       <div class="header-actions">
-        <button class="btn" id="downloadBtn">📥 Download Data</button>
-        <button class="btn btn-logout" id="logoutBtn">🚪 Logout</button>
+        <button class="btn" id="downloadBtn">Download Data</button>
+        <button class="btn btn-logout" id="logoutBtn">Logout</button>
       </div>
     </div>
   </header>
@@ -181,7 +181,7 @@
   <main class="main">
     <aside class="side">
       <div class="panel filters">
-        <h3 style="margin-bottom:20px;font-size:16px;color:var(--text)">🔍 Filters</h3>
+        <h3 style="margin-bottom:20px;font-size:16px;color:var(--text)">Filters</h3>
         <div class="group">
           <label for="dateFrom">Date From</label>
           <input id="dateFrom" type="date" />
@@ -214,7 +214,7 @@
           <label for="status">Approved Status</label>
           <select id="status"></select>
         </div>
-        <button class="btn" id="resetBtn" style="width:100%;margin-top:8px">🔄 Reset Filters</button>
+        <button class="btn" id="resetBtn" style="width:100%;margin-top:8px">Reset Filters</button>
       </div>
       <div class="panel" style="padding:16px">
         <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:600">CSV SOURCE:</div>
@@ -225,7 +225,7 @@
     <section class="content">
       <!-- Total Scans with sub-metrics -->
       <div class="card" style="grid-column: span 6">
-        <h3>📊 Total Scans</h3>
+        <h3>Total Scans</h3>
         <div class="kpi-main" id="kpiTotalBig">0</div>
         <div class="kpi-grid">
           <div class="kpi-item">
@@ -245,31 +245,31 @@
 
       <!-- Status Chart -->
       <div class="card" style="grid-column: span 6">
-        <h3>✅ Submission Status</h3>
+        <h3>Submission Status</h3>
         <canvas id="statusChart" height="200"></canvas>
       </div>
 
       <!-- Trend Chart -->
       <div class="card" style="grid-column: span 12">
-        <h3>📈 Time Trend (Scans per Day)</h3>
+        <h3>Time Trend (Scans per Day)</h3>
         <canvas id="trendChart" height="140"></canvas>
       </div>
 
       <!-- Top States Table -->
       <div class="card" style="grid-column: span 6">
-        <h3>🏆 Top States by Scans</h3>
+        <h3>Top States by Scans</h3>
         <div id="statesTable" style="overflow-y:auto;max-height:380px;margin-top:12px"></div>
       </div>
 
       <!-- Retailer Performance -->
       <div class="card" style="grid-column: span 6">
-        <h3>🏪 Retailer Performance</h3>
+        <h3>Retailer Performance</h3>
         <canvas id="retailerChart" height="180"></canvas>
       </div>
 
       <!-- District Scans -->
       <div class="card" style="grid-column: span 6">
-        <h3>🏘️ District-wise Scans</h3>
+        <h3>District-wise Scans</h3>
         <canvas id="districtChart" height="180"></canvas>
       </div>
 
@@ -281,7 +281,7 @@
 
       <!-- India Map - Now at bottom and full width -->
       <div class="card" style="grid-column: span 12">
-        <h3>🗺️ India - State-wise Distribution</h3>
+        <h3>India - State-wise Distribution</h3>
         <div id="indiaMapContainer">
           <div id="indiaMap"></div>
           <div class="legend">
@@ -297,7 +297,7 @@
   </main>
 
   <div class="footer">
-    © 2025 Coromandel CPC — Empowering Agriculture
+    © 2025 Coromandel CPC — Farmer First
   </div>
 </div>
 
@@ -895,4 +895,5 @@
 </script>
 </body>
 </html>
+
 
