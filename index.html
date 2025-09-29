@@ -95,8 +95,8 @@
       text-transform:uppercase;letter-spacing:1px}
     
     /* KPI Cards */
-    .kpi-hero{display:grid;grid-template-columns:1fr 3fr;gap:24px;align-items:center}
-    .kpi-main-circle{width:180px;height:180px;border-radius:50%;
+    .kpi-hero{display:grid;grid-template-columns:200px 1fr;gap:32px;align-items:center}
+    .kpi-main-circle{width:200px;height:200px;border-radius:50%;
       display:flex;flex-direction:column;align-items:center;justify-content:center;
       background:linear-gradient(135deg,rgba(14,165,233,.15),rgba(16,185,129,.15));
       border:4px solid var(--acc1);box-shadow:0 8px 32px rgba(14,165,233,.25);
@@ -110,7 +110,7 @@
       background:linear-gradient(135deg,var(--acc1),var(--acc3));
       -webkit-background-clip:text;-webkit-text-fill-color:transparent;
       background-clip:text}
-    .kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
     .kpi-item{background:linear-gradient(135deg,rgba(14,165,233,.05),rgba(16,185,129,.05));
       border:2px solid rgba(14,165,233,.15);border-radius:16px;padding:20px;
       text-align:center;transition:all .3s ease;position:relative;overflow:hidden}
@@ -119,9 +119,9 @@
     .kpi-item:hover{transform:translateY(-4px);border-color:var(--acc1);
       box-shadow:0 8px 24px rgba(14,165,233,.2)}
     .kpi-item:hover::before{opacity:1}
-    .kpi-label{font-size:13px;color:var(--muted);text-transform:uppercase;
+    .kpi-label{font-size:11px;color:var(--muted);text-transform:uppercase;
       letter-spacing:.8px;font-weight:700;margin-bottom:12px}
-    .kpi-value{font-size:40px;font-weight:800;margin-bottom:8px}
+    .kpi-value{font-size:36px;font-weight:800;margin-bottom:8px}
     .kpi-item:nth-child(1){border-color:rgba(16,185,129,.2)}
     .kpi-item:nth-child(1)::before{background:var(--acc3)}
     .kpi-item:nth-child(1) .kpi-value{color:var(--acc3)}
@@ -131,7 +131,13 @@
     .kpi-item:nth-child(3){border-color:rgba(139,92,246,.2)}
     .kpi-item:nth-child(3)::before{background:var(--acc4)}
     .kpi-item:nth-child(3) .kpi-value{color:var(--acc4)}
-    .kpi-percent{font-size:14px;color:var(--muted);font-weight:600}
+    .kpi-item:nth-child(4){border-color:rgba(59,130,246,.2)}
+    .kpi-item:nth-child(4)::before{background:#3b82f6}
+    .kpi-item:nth-child(4) .kpi-value{color:#3b82f6}
+    .kpi-item:nth-child(5){border-color:rgba(236,72,153,.2)}
+    .kpi-item:nth-child(5)::before{background:#ec4899}
+    .kpi-item:nth-child(5) .kpi-value{color:#ec4899}
+    .kpi-percent{font-size:13px;color:var(--muted);font-weight:600}
 
     /* India Map */
     #indiaMapContainer{width:100%;height:700px;position:relative;
@@ -200,6 +206,7 @@
     @media (max-width: 1100px){
       .kpi-hero{grid-template-columns:1fr}
       .kpi-main-circle{margin:0 auto}
+      .kpi-grid{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
       .filters-horizontal{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
       #indiaMapContainer{height:500px}
     }
@@ -290,20 +297,30 @@
               <div class="kpi-value" id="kpiPending">0</div>
               <div class="kpi-percent" id="kpiPendingPct">0%</div>
             </div>
+            <div class="kpi-item">
+              <div class="kpi-label">👨‍🌾 Total Farmers</div>
+              <div class="kpi-value" id="kpiTotalFarmers">0</div>
+              <div class="kpi-percent" id="kpiUniqueFarmers">Unique: 0</div>
+            </div>
+            <div class="kpi-item">
+              <div class="kpi-label">🏪 Retailers</div>
+              <div class="kpi-value" id="kpiActiveRetailers">0</div>
+              <div class="kpi-percent">of 1,256 total</div>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Status Chart -->
-      <div class="card" style="grid-column: span 6">
+      <div class="card" style="grid-column: span 4">
         <h3>✅ Submission Status</h3>
-        <canvas id="statusChart" height="200"></canvas>
+        <canvas id="statusChart" height="280"></canvas>
       </div>
 
       <!-- Trend Chart -->
-      <div class="card" style="grid-column: span 6">
+      <div class="card" style="grid-column: span 8">
         <h3>📈 Time Trend (Scans per Day)</h3>
-        <canvas id="trendChart" height="200"></canvas>
+        <canvas id="trendChart" height="280"></canvas>
       </div>
 
       <!-- Top States Table -->
@@ -315,7 +332,7 @@
       <!-- Retailer Performance -->
       <div class="card" style="grid-column: span 6">
         <h3>🏪 Retailer Performance</h3>
-        <canvas id="retailerChart" height="180"></canvas>
+        <canvas id="retailerChart" height="240"></canvas>
       </div>
 
       <!-- District Scans -->
@@ -520,10 +537,24 @@
     const pending = rows.filter(r=>/^pending$/i.test(trim(r['Submission Status']))).length;
     const no = rows.filter(r=>/^no$/i.test(trim(r['Submission Status']))).length;
     
+    // Calculate farmer metrics
+    const allPhones = rows.map(r=>trim(r['Phone Number'])).filter(p=>p);
+    const uniquePhones = new Set(allPhones);
+    const totalFarmers = allPhones.length;
+    const uniqueFarmers = uniquePhones.size;
+    
+    // Calculate retailer metrics
+    const activeRINs = new Set(rows.map(r=>trim(r['RIN'])).filter(rin=>rin));
+    const activeRetailers = activeRINs.size;
+    const totalRetailers = 1256; // Static number
+    
     document.getElementById('kpiTotalBig').textContent = total.toLocaleString();
     document.getElementById('kpiYes').textContent = yes.toLocaleString();
     document.getElementById('kpiNo').textContent = no.toLocaleString();
     document.getElementById('kpiPending').textContent = pending.toLocaleString();
+    document.getElementById('kpiTotalFarmers').textContent = totalFarmers.toLocaleString();
+    document.getElementById('kpiUniqueFarmers').textContent = `Unique: ${uniqueFarmers.toLocaleString()}`;
+    document.getElementById('kpiActiveRetailers').textContent = activeRetailers.toLocaleString();
     
     // Calculate percentages
     const yesPct = total > 0 ? ((yes / total) * 100).toFixed(1) : '0.0';
@@ -570,10 +601,56 @@
     const sPending = rows.filter(r=>/^pending$/i.test(trim(r['Submission Status']))).length;
     makeChart('statusChart','doughnut',{
       labels:['Approved','Rejected','Pending'],
-      datasets:[{ data:[sYes,sNo,sPending], backgroundColor:['#10b981','#f97316','#8b5cf6'], borderWidth:0 }]
+      datasets:[{ 
+        data:[sYes,sNo,sPending], 
+        backgroundColor:['#10b981','#f97316','#8b5cf6'], 
+        borderWidth: 3,
+        borderColor: '#fff',
+        hoverOffset: 8
+      }]
     },{
-      plugins:{ legend:{ labels:{ color: '#475569', padding:15, font:{size:13,weight:'600'} } } },
-      cutout:'65%'
+      plugins:{ 
+        legend:{ 
+          display: true,
+          position: 'bottom',
+          labels:{ 
+            color: '#0f172a', 
+            padding: 18, 
+            font:{ size: 13, weight: '700' },
+            usePointStyle: true,
+            pointStyle: 'circle',
+            generateLabels: function(chart) {
+              const data = chart.data;
+              if (data.labels.length && data.datasets.length) {
+                return data.labels.map((label, i) => {
+                  const value = data.datasets[0].data[i];
+                  const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                  const percent = ((value / total) * 100).toFixed(1);
+                  return {
+                    text: `${label}: ${value.toLocaleString()} (${percent}%)`,
+                    fillStyle: data.datasets[0].backgroundColor[i],
+                    hidden: false,
+                    index: i
+                  };
+                });
+              }
+              return [];
+            }
+          } 
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const label = context.label || '';
+              const value = context.parsed || 0;
+              const total = context.dataset.data.reduce((a, b) => a + b, 0);
+              const percent = ((value / total) * 100).toFixed(1);
+              return `${label}: ${value.toLocaleString()} (${percent}%)`;
+            }
+          }
+        }
+      },
+      cutout:'60%'
     });
 
     // Trend
@@ -603,15 +680,78 @@
       plugins:{ legend:{ display:false } } 
     });
 
-    // Retailer
-    const retailers = buildCounts(rows,'Retailer Name').slice(0,10);
+    // Retailer - Changed to vertical grouped bar chart
+    const retailers = buildCounts(rows,'Retailer Name').slice(0,8);
+    const retailerApproved = retailers.map(r => {
+      return rows.filter(row => trim(row['Retailer Name']) === r[0] && /^yes$/i.test(trim(row['Submission Status']))).length;
+    });
+    const retailerPending = retailers.map(r => {
+      return rows.filter(row => trim(row['Retailer Name']) === r[0] && /^pending$/i.test(trim(row['Submission Status']))).length;
+    });
+    const retailerRejected = retailers.map(r => {
+      return rows.filter(row => trim(row['Retailer Name']) === r[0] && /^no$/i.test(trim(row['Submission Status']))).length;
+    });
+    
     makeChart('retailerChart','bar',{
       labels: retailers.map(x=>x[0]),
-      datasets:[{ data: retailers.map(x=>x[1]), backgroundColor: palette(retailers.length), borderWidth:0, borderRadius:6 }]
+      datasets:[
+        { 
+          label: 'Approved',
+          data: retailerApproved, 
+          backgroundColor: '#10b981',
+          borderWidth: 0,
+          borderRadius: 8,
+          barThickness: 20
+        },
+        { 
+          label: 'Pending',
+          data: retailerPending, 
+          backgroundColor: '#8b5cf6',
+          borderWidth: 0,
+          borderRadius: 8,
+          barThickness: 20
+        },
+        { 
+          label: 'Rejected',
+          data: retailerRejected, 
+          backgroundColor: '#f97316',
+          borderWidth: 0,
+          borderRadius: 8,
+          barThickness: 20
+        }
+      ]
     },{ 
-      indexAxis:'y', 
-      plugins:{ legend:{ display:false } }, 
-      scales:{ x:{ ticks:{ color:'#64748b', font:{weight:'500'} }, grid:{color:'#e2e8f0'} }, y:{ ticks:{ color:'#0f172a',font:{size:11,weight:'600'} }, grid:{display:false} } } 
+      plugins: { 
+        legend: { 
+          display: true,
+          position: 'top',
+          labels: { 
+            color: '#0f172a', 
+            padding: 15, 
+            font: { size: 12, weight: '600' },
+            usePointStyle: true,
+            pointStyle: 'circle'
+          } 
+        } 
+      }, 
+      scales: { 
+        x: { 
+          ticks: { 
+            color: '#0f172a', 
+            maxRotation: 45, 
+            minRotation: 25,
+            font: { size: 11, weight: '600' } 
+          }, 
+          grid: { display: false } 
+        }, 
+        y: { 
+          ticks: { 
+            color: '#64748b', 
+            font: { weight: '500' } 
+          }, 
+          grid: { color: '#e2e8f0' } 
+        } 
+      } 
     });
 
     // District
@@ -714,7 +854,7 @@
           <div class="state-marker-name">${shortName}</div>
           <div class="state-marker-count">
             <span>✓</span>
-            <span>${approved >= 1000 ? (approved/1000).toFixed(1) + 'K' : approved}</span>
+            <span>${approved.toLocaleString()}</span>
           </div>
         </div>
       `,
