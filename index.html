@@ -111,11 +111,20 @@
     #indiaMap{width:100%;height:100%;z-index:1}
     .leaflet-container{background:var(--bg);font-family:Inter,sans-serif}
     .leaflet-popup-content-wrapper{background:white;border-radius:12px;box-shadow:0 8px 24px rgba(15,23,42,.2);border:2px solid var(--acc1)}
-    .leaflet-popup-content{margin:14px;font-size:13px;font-weight:600;color:var(--text)}
+    .leaflet-popup-content{margin:16px;font-size:13px;color:var(--text)}
     .leaflet-popup-tip{background:white;border:2px solid var(--acc1)}
-    .map-popup-state{font-size:15px;font-weight:700;color:var(--acc1);margin-bottom:6px}
-    .map-popup-count{font-size:20px;font-weight:700;color:var(--text)}
-    .map-popup-label{font-size:11px;color:var(--muted);text-transform:uppercase}
+    .map-popup-state{font-size:16px;font-weight:700;color:var(--acc1);margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid var(--ring)}
+    .map-popup-row{display:flex;justify-content:space-between;align-items:center;margin:8px 0;padding:6px 0}
+    .map-popup-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+    .map-popup-value{font-size:18px;font-weight:700;color:var(--text)}
+    .map-popup-success{color:var(--acc3)!important}
+    .map-popup-pending{color:var(--acc4)!important}
+    .map-popup-rejected{color:var(--acc2)!important}
+    .state-label-marker{background:rgba(255,255,255,.98);border:2px solid var(--acc1);
+      border-radius:8px;padding:6px 10px;font-weight:700;font-size:13px;
+      color:var(--text);box-shadow:0 4px 12px rgba(15,23,42,.2);
+      white-space:nowrap;text-align:center}
+    .state-label-count{font-size:16px;color:var(--acc3);display:block;margin-top:2px}
     .legend{position:absolute;bottom:20px;right:20px;background:rgba(255,255,255,.95);
       padding:16px;border-radius:12px;box-shadow:0 4px 16px var(--shadow);border:2px solid var(--ring);z-index:1000}
     .legend-title{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;text-transform:uppercase}
@@ -633,6 +642,11 @@
     return '#f1f5f9';
   }
 
+  function getApprovalRate(approved, total) {
+    if (total === 0) return 0;
+    return (approved / total * 100).toFixed(1);
+  }
+
   function initMap() {
     if (indiaMap) return;
     
@@ -644,7 +658,6 @@
       zoomControl: true
     });
 
-    // Add OpenStreetMap tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors',
       maxZoom: 19
@@ -656,50 +669,117 @@
       initMap();
     }
 
-    // Clear existing markers
     if (mapLayer) {
       indiaMap.removeLayer(mapLayer);
     }
 
-    // Count scans by state
-    const stateCounts = new Map();
+    // Count scans and approvals by state
+    const stateData = new Map();
     for (const r of rows) {
       const st = trim(r.State);
-      if (st) stateCounts.set(st, (stateCounts.get(st) || 0) + 1);
+      if (!st) continue;
+      
+      if (!stateData.has(st)) {
+        stateData.set(st, { total: 0, approved: 0, rejected: 0, pending: 0 });
+      }
+      
+      const data = stateData.get(st);
+      data.total++;
+      
+      const status = trim(r['Submission Status']).toLowerCase();
+      if (status === 'yes') data.approved++;
+      else if (status === 'no') data.rejected++;
+      else if (status === 'pending') data.pending++;
     }
 
-    const maxCount = Math.max(...stateCounts.values(), 1);
+    const maxApproved = Math.max(...Array.from(stateData.values()).map(d => d.approved), 1);
     
-    // Create marker cluster group
     mapLayer = L.layerGroup();
 
-    // Add circle markers for each state
+    // Add markers for each state with data
     for (const [state, coords] of Object.entries(stateCoordinates)) {
-      const count = stateCounts.get(state) || 0;
-      if (count === 0) continue;
+      const data = stateData.get(state);
+      if (!data || data.approved === 0) continue;
 
-      const intensity = count / maxCount;
+      const intensity = data.approved / maxApproved;
       const color = getColorByIntensity(intensity);
-      const radius = Math.max(8, Math.min(40, Math.sqrt(count) * 3));
+      const approvalRate = getApprovalRate(data.approved, data.total);
+      
+      // Create bubble size based on approved count
+      const radius = Math.max(15, Math.min(50, Math.sqrt(data.approved) * 4));
 
+      // Create circle marker with professional styling
       const circle = L.circleMarker(coords, {
         radius: radius,
         fillColor: color,
-        color: '#0ea5e9',
-        weight: 2,
-        opacity: 0.8,
-        fillOpacity: 0.7
+        color: '#ffffff',
+        weight: 3,
+        opacity: 1,
+        fillOpacity: 0.8,
+        className: 'professional-bubble'
       });
 
+      // Enhanced popup with detailed statistics
       const popupContent = `
         <div class="map-popup-state">${state}</div>
-        <div class="map-popup-label">Total Scans</div>
-        <div class="map-popup-count">${count.toLocaleString()}</div>
+        <div class="map-popup-row">
+          <span class="map-popup-label">✅ Approved</span>
+          <span class="map-popup-value map-popup-success">${data.approved.toLocaleString()}</span>
+        </div>
+        <div class="map-popup-row">
+          <span class="map-popup-label">⏳ Pending</span>
+          <span class="map-popup-value map-popup-pending">${data.pending.toLocaleString()}</span>
+        </div>
+        <div class="map-popup-row">
+          <span class="map-popup-label">❌ Rejected</span>
+          <span class="map-popup-value map-popup-rejected">${data.rejected.toLocaleString()}</span>
+        </div>
+        <div class="map-popup-row" style="border-top:2px solid var(--ring);margin-top:8px;padding-top:8px">
+          <span class="map-popup-label">Total Scans</span>
+          <span class="map-popup-value">${data.total.toLocaleString()}</span>
+        </div>
+        <div class="map-popup-row">
+          <span class="map-popup-label">Approval Rate</span>
+          <span class="map-popup-value map-popup-success">${approvalRate}%</span>
+        </div>
       `;
 
       circle.bindPopup(popupContent, {
         closeButton: true,
+        maxWidth: 300,
         className: 'custom-popup'
+      });
+
+      // Create permanent label showing approved count
+      const labelIcon = L.divIcon({
+        className: 'state-label-marker',
+        html: `<div style="text-align:center">
+          <div style="font-size:11px;color:var(--muted)">${state.length > 15 ? state.substring(0, 12) + '...' : state}</div>
+          <div class="state-label-count">✓ ${data.approved.toLocaleString()}</div>
+        </div>`,
+        iconSize: [null, null]
+      });
+
+      const label = L.marker(coords, { 
+        icon: labelIcon,
+        interactive: false
+      });
+
+      // Hover effects
+      circle.on('mouseover', function() {
+        this.setStyle({
+          weight: 5,
+          fillOpacity: 1,
+          color: '#0ea5e9'
+        });
+      });
+
+      circle.on('mouseout', function() {
+        this.setStyle({
+          weight: 3,
+          fillOpacity: 0.8,
+          color: '#ffffff'
+        });
       });
 
       circle.on('click', () => {
@@ -709,11 +789,11 @@
       });
 
       circle.addTo(mapLayer);
+      label.addTo(mapLayer);
     }
 
     mapLayer.addTo(indiaMap);
 
-    // Fit bounds to India
     setTimeout(() => {
       indiaMap.fitBounds([
         [8, 68],
