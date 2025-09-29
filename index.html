@@ -224,13 +224,31 @@
 <div class="app">
   <header>
     <div class="bar">
-      <div class="logo" style="display:flex; align-items:center; gap:15px;">
-    <span class="dot" style="width:20px; height:20px; border-radius:50%; background:#00fff0; box-shadow:0 0 10px #00fff0,0 0 20px #00fff0,0 0 40px #00fff0,0 0 60px #00fff0; animation:pulse 1.5s infinite alternate;"></span>
-    <span class="title">
-      <h1 style="font-size:2.2rem; color:#fff; text-transform:uppercase; letter-spacing:2px; text-shadow:0 0 5px #00fff0,0 0 10px #00fff0,0 0 20px #00fff0,0 0 40px #00fff0,0 0 80px #00fff0; animation:flicker 2s infinite;">
-        Coromandel CPC Campaign Dashboard
-      </h1>
+      <div class="logo" style="display:flex; align-items:center; gap:20px;">
+
+    <!-- Neon dot with gradient glow -->
+    <span style="
+      width:24px; height:24px; border-radius:50%;
+      background:radial-gradient(circle at 30% 30%, #00fff7, #008cff);
+      box-shadow:0 0 10px #00fff7, 0 0 25px #00fff7, 0 0 45px #008cff, 0 0 70px #00fff7;
+      animation: pulse 1.8s infinite alternate;">
     </span>
+
+    <!-- Neon quirky title -->
+    <h1 style="
+      font-size:2.5rem; 
+      color:#fff; 
+      letter-spacing:3px; 
+      text-transform:uppercase;
+      background:linear-gradient(90deg, #00fff7, #00ff9d, #ff00ff, #00fff7);
+      -webkit-background-clip:text; 
+      -webkit-text-fill-color:transparent;
+      text-shadow:0 0 8px rgba(0,255,247,0.8),0 0 16px rgba(0,255,157,0.6),0 0 32px rgba(255,0,255,0.6);
+      font-weight:700;
+      animation:flicker 3s infinite;">
+      Coromandel CPC Campaign Dashboard
+    </h1>
+
   </div>
       <div class="header-actions">
         <button class="btn" id="downloadBtn">📥 Download Data</button>
@@ -1085,5 +1103,6 @@
 </script>
 </body>
 </html>
+
 
 
