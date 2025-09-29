@@ -153,7 +153,7 @@
     <div class="bar">
       <div class="logo"><span class="dot"></span><span class="title">CPC Campaign Dashboard</span></div>
       <div class="header-actions">
-        <button class="btn" id="downloadBtn">📥 Download Data</button>
+        <button class="btn" id="downloadBtn">Download Data</button>
         <button class="btn btn-logout" id="logoutBtn">🚪 Logout</button>
       </div>
     </div>
@@ -164,35 +164,35 @@
       <div class="panel filters">
         <h3 style="margin-bottom:20px;font-size:16px;color:var(--text)">🎯 Filters</h3>
         <div class="group">
-          <label for="dateFrom">📅 Date From</label>
+          <label for="dateFrom">Date From</label>
           <input id="dateFrom" type="date" />
         </div>
         <div class="group">
-          <label for="dateTo">📅 Date To</label>
+          <label for="dateTo">Date To</label>
           <input id="dateTo" type="date" />
         </div>
         <div class="group">
-          <label for="state">📍 State</label>
+          <label for="state">State</label>
           <select id="state"></select>
         </div>
         <div class="group">
-          <label for="district">🏘️ District</label>
+          <label for="district">District</label>
           <select id="district"></select>
         </div>
         <div class="group">
-          <label for="retailer">🏪 Retailer</label>
+          <label for="retailer">Retailer</label>
           <select id="retailer"></select>
         </div>
         <div class="group">
-          <label for="product">📦 Product</label>
+          <label for="product">Product</label>
           <select id="product"></select>
         </div>
         <div class="group">
-          <label for="qtyMin">🔢 Quantity (≥)</label>
+          <label for="qtyMin">Quantity (≥)</label>
           <input id="qtyMin" type="number" min="0" step="1" placeholder="0" />
         </div>
         <div class="group">
-          <label for="status">✅ Approved Status</label>
+          <label for="status">Approved Status</label>
           <select id="status"></select>
         </div>
         <button class="btn" id="resetBtn" style="width:100%;margin-top:8px">🔄 Reset Filters</button>
@@ -206,7 +206,7 @@
     <section class="content">
       <!-- Total Scans with sub-metrics -->
       <div class="card" style="grid-column: span 6">
-        <h3>📊 Total Scans</h3>
+        <h3>Total Scans</h3>
         <div class="kpi-main" id="kpiTotalBig">0</div>
         <div class="kpi-grid">
           <div class="kpi-item">
@@ -226,19 +226,19 @@
 
       <!-- Status Chart -->
       <div class="card" style="grid-column: span 6">
-        <h3>📈 Submission Status</h3>
+        <h3>Submission Status</h3>
         <canvas id="statusChart" height="200"></canvas>
       </div>
 
       <!-- Trend Chart -->
       <div class="card" style="grid-column: span 12">
-        <h3>📉 Time Trend (Scans per Day)</h3>
+        <h3>Time Trend (Scans per Day)</h3>
         <canvas id="trendChart" height="140"></canvas>
       </div>
 
       <!-- India Map -->
       <div class="card" style="grid-column: span 6">
-        <h3>🗺️ State-wise Distribution</h3>
+        <h3>State-wise Distribution</h3>
         <div id="indiaMap">
           <div class="map-placeholder">
             <div style="font-size:48px;margin-bottom:12px">🇮🇳</div>
@@ -250,39 +250,39 @@
 
       <!-- Top States Table -->
       <div class="card" style="grid-column: span 6">
-        <h3>🏆 Top States by Scans</h3>
+        <h3>Top States by Scans</h3>
         <div id="statesTable" style="overflow-y:auto;max-height:380px;margin-top:12px"></div>
       </div>
 
       <!-- Retailer Performance -->
       <div class="card" style="grid-column: span 6">
-        <h3>🏪 Retailer Performance</h3>
+        <h3>Retailer Performance</h3>
         <canvas id="retailerChart" height="180"></canvas>
       </div>
 
       <!-- District Scans -->
       <div class="card" style="grid-column: span 6">
-        <h3>🏘️ District-wise Scans</h3>
+        <h3>District-wise Scans</h3>
         <canvas id="districtChart" height="180"></canvas>
       </div>
 
       <!-- Product Basket -->
       <div class="card" style="grid-column: span 12">
-        <h3>📦 Product Basket (Parsed from Cart Items)</h3>
+        <h3>Product Basket (Parsed from Cart Items)</h3>
         <canvas id="productChart" height="160"></canvas>
       </div>
     </section>
   </main>
 
   <div class="footer">
-    © 2025 Coromandel CPC — Advanced Campaign Dashboard • Built with ❤️ for Data-Driven Decisions
+    © 2025 Coromandel CPC
   </div>
 </div>
 
 <!-- Login Overlay -->
 <div class="overlay" id="loginOverlay">
   <form class="login" id="loginForm">
-    <h2>🔐 Secure Access</h2>
+    <h2>Secure Access</h2>
     <p>Please authenticate to view the campaign dashboard.</p>
     <div class="field">
       <label>Username</label>
@@ -320,7 +320,7 @@
       localStorage.setItem(LS_KEY,'1');
       unlock();
     } else {
-      errEl.textContent = '❌ Invalid credentials. Please try again.';
+      errEl.textContent = 'Invalid credentials. Please try again.';
     }
   });
 
@@ -656,3 +656,4 @@
 </script>
 </body>
 </html>
+
