@@ -11,82 +11,80 @@
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <style>
     :root{
-      --bg:#050B1F;
-      --panel:#0A1128;
-      --card:#111C32;
-      --card-hover:#1A2742;
-      --muted:#94a3b8;
-      --text:#e2e8f0;
-      --acc1:#22d3ee;
-      --acc2:#fb923c;
+      --bg:#f8fafc;
+      --panel:#ffffff;
+      --card:#ffffff;
+      --card-hover:#f1f5f9;
+      --muted:#64748b;
+      --text:#0f172a;
+      --acc1:#0ea5e9;
+      --acc2:#f97316;
       --acc3:#10b981;
-      --acc4:#a78bfa;
-      --ring:#1e293b;
-      --glow1:rgba(34,211,238,.15);
-      --glow2:rgba(251,146,60,.12);
+      --acc4:#8b5cf6;
+      --ring:#e2e8f0;
+      --border:#cbd5e1;
+      --shadow:rgba(15,23,42,.08);
+      --shadow-lg:rgba(15,23,42,.12);
     }
     *{box-sizing:border-box;margin:0;padding:0}
     html,body{height:100%;overflow-x:hidden}
     body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      background:radial-gradient(ellipse 120% 80% at 50% -20%, var(--glow1), transparent 60%),
-                 radial-gradient(ellipse 100% 60% at 80% 100%, var(--glow2), transparent 50%),
-                 linear-gradient(180deg,var(--bg),#020815);
+      background:linear-gradient(135deg, #e0f2fe 0%, #fef3c7 50%, #fce7f3 100%);
       background-attachment:fixed;color:var(--text)}
     .app{display:grid;grid-template-rows:auto 1fr auto;min-height:100vh}
     
     /* Header */
     header{position:sticky;top:0;z-index:30;
       backdrop-filter:saturate(180%) blur(20px);
-      background:linear-gradient(180deg,rgba(10,17,40,.95),rgba(10,17,40,.85));
-      border-bottom:1px solid var(--ring);
-      box-shadow:0 4px 20px rgba(0,0,0,.3)}
+      background:rgba(255,255,255,.95);
+      border-bottom:2px solid var(--ring);
+      box-shadow:0 4px 20px var(--shadow)}
     .bar{display:flex;align-items:center;gap:20px;padding:16px 24px;flex-wrap:wrap}
-    .logo{display:flex;align-items:center;gap:12px;font-weight:700;font-size:18px}
+    .logo{display:flex;align-items:center;gap:12px;font-weight:700;font-size:18px;color:var(--text)}
     .dot{width:12px;height:12px;border-radius:999px;
-      background:linear-gradient(135deg,var(--acc1),var(--acc2));
-      box-shadow:0 0 20px var(--acc1),0 0 40px var(--acc1);
+      background:linear-gradient(135deg,var(--acc1),var(--acc3));
+      box-shadow:0 0 20px rgba(14,165,233,.4);
       animation:pulse 2s ease-in-out infinite}
-    @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.1);opacity:.8}}
+    @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.15);opacity:.7}}
     .title{letter-spacing:.5px}
     .header-actions{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
     .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      padding:10px 16px;border-radius:12px;border:1px solid rgba(255,255,255,.1);
-      background:linear-gradient(135deg,rgba(34,211,238,.15),rgba(16,185,129,.1));
-      color:var(--text);font-weight:600;cursor:pointer;font-size:13px;
-      transition:all .3s ease;white-space:nowrap}
-    .btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(34,211,238,.25);
-      border-color:var(--acc1)}
-    .btn-logout{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(220,38,38,.15));
-      border-color:rgba(239,68,68,.3)}
-    .btn-logout:hover{border-color:#ef4444;box-shadow:0 8px 24px rgba(239,68,68,.3)}
+      padding:10px 16px;border-radius:12px;border:2px solid var(--acc1);
+      background:linear-gradient(135deg,var(--acc1),#0284c7);
+      color:white;font-weight:600;cursor:pointer;font-size:13px;
+      transition:all .3s ease;white-space:nowrap;box-shadow:0 4px 12px rgba(14,165,233,.25)}
+    .btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(14,165,233,.4)}
+    .btn-logout{background:linear-gradient(135deg,#ef4444,#dc2626);
+      border-color:#ef4444;box-shadow:0 4px 12px rgba(239,68,68,.25)}
+    .btn-logout:hover{box-shadow:0 8px 24px rgba(239,68,68,.4)}
 
     /* Layout */
     .main{display:grid;grid-template-columns:300px 1fr;gap:24px;padding:24px;max-width:2000px;margin:0 auto}
     .side{display:flex;flex-direction:column;gap:16px;position:sticky;top:90px;height:fit-content}
-    .panel{background:var(--panel);border:1px solid var(--ring);border-radius:20px;padding:20px;
-      box-shadow:0 8px 32px rgba(0,0,0,.2);transition:all .3s ease}
-    .panel:hover{border-color:rgba(34,211,238,.3);box-shadow:0 12px 40px rgba(0,0,0,.3)}
+    .panel{background:var(--panel);border:2px solid var(--ring);border-radius:16px;padding:20px;
+      box-shadow:0 4px 16px var(--shadow);transition:all .3s ease}
+    .panel:hover{border-color:var(--acc1);box-shadow:0 8px 24px var(--shadow-lg)}
 
     /* Filters */
     .filters .group{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
     .filters label{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
-    .filters select,.filters input{width:100%;padding:12px 14px;border-radius:12px;
-      border:1px solid var(--ring);background:var(--card);color:var(--text);outline:none;
+    .filters select,.filters input{width:100%;padding:12px 14px;border-radius:10px;
+      border:2px solid var(--ring);background:var(--bg);color:var(--text);outline:none;
       font-size:14px;transition:all .2s ease}
     .filters select:hover,.filters input:hover{border-color:var(--acc1)}
-    .filters select:focus,.filters input:focus{border-color:var(--acc1);box-shadow:0 0 0 3px rgba(34,211,238,.1)}
+    .filters select:focus,.filters input:focus{border-color:var(--acc1);box-shadow:0 0 0 3px rgba(14,165,233,.1)}
 
     /* Content Grid */
     .content{display:grid;grid-template-columns:repeat(12,1fr);gap:24px}
-    .card{background:var(--card);border:1px solid var(--ring);border-radius:20px;
+    .card{background:var(--card);border:2px solid var(--ring);border-radius:16px;
       padding:24px;min-height:160px;display:flex;flex-direction:column;
-      box-shadow:0 8px 32px rgba(0,0,0,.2);transition:all .3s ease;position:relative;overflow:hidden}
-    .card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
-      background:linear-gradient(90deg,var(--acc1),var(--acc2),var(--acc3));opacity:0;transition:opacity .3s}
-    .card:hover{border-color:rgba(34,211,238,.4);transform:translateY(-4px);
-      box-shadow:0 16px 48px rgba(0,0,0,.3)}
+      box-shadow:0 4px 16px var(--shadow);transition:all .3s ease;position:relative;overflow:hidden}
+    .card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+      background:linear-gradient(90deg,var(--acc1),var(--acc3),var(--acc2));opacity:0;transition:opacity .3s}
+    .card:hover{border-color:var(--acc1);transform:translateY(-4px);
+      box-shadow:0 12px 32px var(--shadow-lg)}
     .card:hover::before{opacity:1}
-    .card h3{margin:0 0 12px;font-size:13px;color:var(--muted);font-weight:600;
+    .card h3{margin:0 0 12px;font-size:13px;color:var(--muted);font-weight:700;
       text-transform:uppercase;letter-spacing:1px}
     
     /* KPI Cards */
@@ -95,55 +93,64 @@
       -webkit-background-clip:text;-webkit-text-fill-color:transparent;
       background-clip:text;margin-bottom:12px}
     .kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
-    .kpi-item{background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.2);
-      border-radius:12px;padding:12px;text-align:center}
-    .kpi-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+    .kpi-item{background:linear-gradient(135deg,rgba(14,165,233,.1),rgba(16,185,129,.08));
+      border:2px solid rgba(14,165,233,.2);
+      border-radius:12px;padding:12px;text-align:center;transition:all .3s ease}
+    .kpi-item:hover{transform:translateY(-2px);border-color:var(--acc1)}
+    .kpi-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
     .kpi-value{font-size:24px;font-weight:700;margin-top:4px}
     .kpi-item:nth-child(1) .kpi-value{color:var(--acc3)}
     .kpi-item:nth-child(2) .kpi-value{color:var(--acc2)}
     .kpi-item:nth-child(3) .kpi-value{color:var(--acc4)}
 
     /* India Map */
-    #indiaMap{width:100%;height:400px;background:var(--panel);border-radius:16px;
-      display:flex;align-items:center;justify-content:center;color:var(--muted);
-      position:relative;overflow:hidden}
-    .map-placeholder{text-align:center;padding:40px}
-    .state-label{position:absolute;font-size:11px;color:var(--text);font-weight:600;
-      background:rgba(0,0,0,.7);padding:4px 8px;border-radius:6px;pointer-events:none}
+    #indiaMapContainer{width:100%;height:600px;position:relative;background:var(--bg);
+      border-radius:16px;overflow:hidden;border:2px solid var(--ring)}
+    #indiaMap{width:100%;height:100%}
+    .state-region{cursor:pointer;transition:all .2s ease;stroke:#94a3b8;stroke-width:1.5}
+    .state-region:hover{opacity:.8;stroke:#0ea5e9;stroke-width:2}
+    .map-tooltip{position:absolute;background:rgba(255,255,255,.98);
+      padding:12px 16px;border-radius:10px;pointer-events:none;
+      box-shadow:0 8px 24px rgba(15,23,42,.15);border:2px solid var(--acc1);
+      font-size:13px;font-weight:600;color:var(--text);display:none;z-index:100}
+    .legend{position:absolute;bottom:20px;right:20px;background:rgba(255,255,255,.95);
+      padding:16px;border-radius:12px;box-shadow:0 4px 16px var(--shadow);border:2px solid var(--ring)}
+    .legend-title{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;text-transform:uppercase}
+    .legend-item{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:11px}
+    .legend-color{width:24px;height:16px;border-radius:4px;border:1px solid var(--border)}
 
-    .footer{padding:16px 24px;color:var(--muted);border-top:1px solid var(--ring);
-      text-align:center;font-size:13px;background:var(--panel)}
+    .footer{padding:16px 24px;color:var(--muted);border-top:2px solid var(--ring);
+      text-align:center;font-size:13px;background:var(--panel);font-weight:500}
 
     /* Login */
     .overlay{position:fixed;inset:0;
-      background:radial-gradient(ellipse 80% 60% at 50% 40%, rgba(34,211,238,.2), transparent 70%),
-                 radial-gradient(ellipse 60% 50% at 20% 80%, rgba(16,185,129,.15), transparent 60%),
-                 #020510;
+      background:linear-gradient(135deg, rgba(224,242,254,.95) 0%, rgba(254,243,199,.95) 50%, rgba(252,231,243,.95) 100%);
       display:grid;place-items:center;z-index:100;backdrop-filter:blur(10px)}
-    .login{width:min(92vw,420px);background:var(--panel);border:1px solid rgba(34,211,238,.3);
-      border-radius:24px;padding:32px;
-      box-shadow:0 24px 80px rgba(0,0,0,.6),0 0 100px rgba(34,211,238,.15);
+    .login{width:min(92vw,420px);background:white;border:2px solid var(--acc1);
+      border-radius:20px;padding:32px;
+      box-shadow:0 24px 80px rgba(15,23,42,.2);
       animation:slideIn .5s ease}
     @keyframes slideIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-    .login h2{margin:0 0 8px;font-size:24px}
+    .login h2{margin:0 0 8px;font-size:24px;color:var(--text)}
     .login p{margin:0 0 24px;color:var(--muted);font-size:14px}
     .field{display:flex;flex-direction:column;gap:8px;margin:16px 0}
     .field label{font-size:12px;color:var(--muted);font-weight:600}
-    .field input{padding:14px;border-radius:12px;border:1px solid var(--ring);
-      background:var(--card);color:var(--text);font-size:14px}
-    .field input:focus{outline:none;border-color:var(--acc1);box-shadow:0 0 0 3px rgba(34,211,238,.1)}
-    .err{color:#fca5a5;font-size:13px;min-height:18px;margin-top:8px}
+    .field input{padding:14px;border-radius:12px;border:2px solid var(--ring);
+      background:var(--bg);color:var(--text);font-size:14px}
+    .field input:focus{outline:none;border-color:var(--acc1);box-shadow:0 0 0 3px rgba(14,165,233,.1)}
+    .err{color:#ef4444;font-size:13px;min-height:18px;margin-top:8px;font-weight:500}
 
     @media (max-width: 1100px){
       .main{grid-template-columns:1fr}
       .side{position:relative;top:0}
-      .kpi-grid{grid-template-columns:repeat(3,1fr)}
+      #indiaMapContainer{height:500px}
     }
     @media (max-width: 640px){
       .bar{padding:12px 16px}
       .main{padding:16px;gap:16px}
       .kpi-grid{grid-template-columns:1fr}
       .header-actions{width:100%;justify-content:flex-start}
+      #indiaMapContainer{height:400px}
     }
   </style>
 </head>
@@ -153,8 +160,8 @@
     <div class="bar">
       <div class="logo"><span class="dot"></span><span class="title">CPC Campaign Dashboard</span></div>
       <div class="header-actions">
-        <button class="btn" id="downloadBtn">Download Data</button>
-        <button class="btn btn-logout" id="logoutBtn">Logout</button>
+        <button class="btn" id="downloadBtn">📥 Download Data</button>
+        <button class="btn btn-logout" id="logoutBtn">🚪 Logout</button>
       </div>
     </div>
   </header>
@@ -162,7 +169,7 @@
   <main class="main">
     <aside class="side">
       <div class="panel filters">
-        <h3 style="margin-bottom:20px;font-size:16px;color:var(--text)">Filters</h3>
+        <h3 style="margin-bottom:20px;font-size:16px;color:var(--text)">🔍 Filters</h3>
         <div class="group">
           <label for="dateFrom">Date From</label>
           <input id="dateFrom" type="date" />
@@ -198,15 +205,15 @@
         <button class="btn" id="resetBtn" style="width:100%;margin-top:8px">🔄 Reset Filters</button>
       </div>
       <div class="panel" style="padding:16px">
-        <div style="font-size:11px;color:var(--muted);margin-bottom:6px">CSV Source:</div>
-        <div style="word-break:break-all;font-size:12px;font-family:monospace;color:var(--acc1)" id="csvPath">./data.csv</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:600">CSV SOURCE:</div>
+        <div style="word-break:break-all;font-size:12px;font-family:monospace;color:var(--acc1);font-weight:500" id="csvPath">./data.csv</div>
       </div>
     </aside>
 
     <section class="content">
       <!-- Total Scans with sub-metrics -->
       <div class="card" style="grid-column: span 6">
-        <h3>Total Scans</h3>
+        <h3>📊 Total Scans</h3>
         <div class="kpi-main" id="kpiTotalBig">0</div>
         <div class="kpi-grid">
           <div class="kpi-item">
@@ -226,63 +233,67 @@
 
       <!-- Status Chart -->
       <div class="card" style="grid-column: span 6">
-        <h3>Submission Status</h3>
+        <h3>✅ Submission Status</h3>
         <canvas id="statusChart" height="200"></canvas>
       </div>
 
       <!-- Trend Chart -->
       <div class="card" style="grid-column: span 12">
-        <h3>Time Trend (Scans per Day)</h3>
+        <h3>📈 Time Trend (Scans per Day)</h3>
         <canvas id="trendChart" height="140"></canvas>
-      </div>
-
-      <!-- India Map -->
-      <div class="card" style="grid-column: span 6">
-        <h3>State-wise Distribution</h3>
-        <div id="indiaMap">
-          <div class="map-placeholder">
-            <div style="font-size:48px;margin-bottom:12px">🇮🇳</div>
-            <div style="font-size:14px">India Map Visualization</div>
-            <div style="font-size:12px;margin-top:8px;opacity:.7">State-wise scan distribution</div>
-          </div>
-        </div>
       </div>
 
       <!-- Top States Table -->
       <div class="card" style="grid-column: span 6">
-        <h3>Top States by Scans</h3>
+        <h3>🏆 Top States by Scans</h3>
         <div id="statesTable" style="overflow-y:auto;max-height:380px;margin-top:12px"></div>
       </div>
 
       <!-- Retailer Performance -->
       <div class="card" style="grid-column: span 6">
-        <h3>Retailer Performance</h3>
+        <h3>🏪 Retailer Performance</h3>
         <canvas id="retailerChart" height="180"></canvas>
       </div>
 
       <!-- District Scans -->
       <div class="card" style="grid-column: span 6">
-        <h3>District-wise Scans</h3>
+        <h3>🏘️ District-wise Scans</h3>
         <canvas id="districtChart" height="180"></canvas>
       </div>
 
       <!-- Product Basket -->
+      <div class="card" style="grid-column: span 6">
+        <h3>🛒 Product Basket</h3>
+        <canvas id="productChart" height="180"></canvas>
+      </div>
+
+      <!-- India Map - Now at bottom and full width -->
       <div class="card" style="grid-column: span 12">
-        <h3>Product Basket (Parsed from Cart Items)</h3>
-        <canvas id="productChart" height="160"></canvas>
+        <h3>🗺️ India - State-wise Distribution</h3>
+        <div id="indiaMapContainer">
+          <svg id="indiaMap" viewBox="0 0 800 900"></svg>
+          <div class="map-tooltip" id="mapTooltip"></div>
+          <div class="legend">
+            <div class="legend-title">Scan Intensity</div>
+            <div class="legend-item"><div class="legend-color" style="background:#dcfce7"></div><span>Low (0-25%)</span></div>
+            <div class="legend-item"><div class="legend-color" style="background:#86efac"></div><span>Medium (25-50%)</span></div>
+            <div class="legend-item"><div class="legend-color" style="background:#22c55e"></div><span>High (50-75%)</span></div>
+            <div class="legend-item"><div class="legend-color" style="background:#15803d"></div><span>Very High (75-100%)</span></div>
+          </div>
+        </div>
       </div>
     </section>
   </main>
 
   <div class="footer">
-    © 2025 Coromandel CPC
+    © 2025 Coromandel CPC — Empowering Agriculture
   </div>
 </div>
 
 <!-- Login Overlay -->
 <div class="overlay" id="loginOverlay">
   <form class="login" id="loginForm">
-    <h2>Secure Access</h2>
+    <h2>🔐 Secure Access</h2>
     <p>Please authenticate to view the campaign dashboard.</p>
     <div class="field">
       <label>Username</label>
@@ -408,7 +419,7 @@
     return charts[id];
   }
   function palette(n){
-    const base = [ '#22d3ee','#fb923c','#10b981','#a78bfa','#f472b6','#fbbf24','#60a5fa','#34d399','#f87171' ];
+    const base = [ '#0ea5e9','#f97316','#10b981','#8b5cf6','#ec4899','#eab308','#3b82f6','#14b8a6','#f43f5e' ];
     const arr = []; for(let i=0;i<n;i++) arr.push(base[i%base.length]);
     return arr;
   }
@@ -472,8 +483,8 @@
           <span style="font-weight:600;color:var(--text)">${i+1}. ${s[0]}</span>
           <span style="color:var(--acc1);font-weight:700">${s[1]}</span>
         </div>
-        <div style="width:100%;height:6px;background:rgba(34,211,238,.15);border-radius:3px;overflow:hidden">
-          <div style="width:${bar}%;height:100%;background:linear-gradient(90deg,var(--acc1),var(--acc3));border-radius:3px"></div>
+        <div style="width:100%;height:8px;background:rgba(14,165,233,.12);border-radius:4px;overflow:hidden">
+          <div style="width:${bar}%;height:100%;background:linear-gradient(90deg,var(--acc1),var(--acc3));border-radius:4px"></div>
         </div>
       </div>`;
     });
@@ -488,9 +499,9 @@
     const sPending = rows.filter(r=>/^pending$/i.test(trim(r['Submission Status']))).length;
     makeChart('statusChart','doughnut',{
       labels:['Approved','Rejected','Pending'],
-      datasets:[{ data:[sYes,sNo,sPending], backgroundColor:['#10b981','#fb923c','#a78bfa'], borderWidth:0 }]
+      datasets:[{ data:[sYes,sNo,sPending], backgroundColor:['#10b981','#f97316','#8b5cf6'], borderWidth:0 }]
     },{
-      plugins:{ legend:{ labels:{ color: '#cbd5e1', padding:15, font:{size:13} } } },
+      plugins:{ legend:{ labels:{ color: '#475569', padding:15, font:{size:13,weight:'600'} } } },
       cutout:'65%'
     });
 
@@ -502,18 +513,21 @@
       labels: trend.map(x=>x[0]),
       datasets:[{ 
         data: trend.map(x=>x[1]), 
-        borderColor:'#22d3ee',
-        backgroundColor:'rgba(34,211,238,.1)',
+        borderColor:'#0ea5e9',
+        backgroundColor:'rgba(14,165,233,.15)',
         borderWidth:3, 
         tension:.4,
         fill:true,
         pointRadius:4,
-        pointHoverRadius:6
+        pointHoverRadius:6,
+        pointBackgroundColor:'#0ea5e9',
+        pointBorderColor:'#fff',
+        pointBorderWidth:2
       }]
     },{ 
       scales:{ 
-        x:{ ticks:{ color:'#8aa1c6', maxRotation:45 }, grid:{display:false} }, 
-        y:{ ticks:{ color:'#8aa1c6' }, grid:{ color:'#1e2a44' } } 
+        x:{ ticks:{ color:'#64748b', maxRotation:45, font:{weight:'500'} }, grid:{display:false} }, 
+        y:{ ticks:{ color:'#64748b', font:{weight:'500'} }, grid:{ color:'#e2e8f0' } } 
       }, 
       plugins:{ legend:{ display:false } } 
     });
@@ -522,22 +536,22 @@
     const retailers = buildCounts(rows,'Retailer Name').slice(0,10);
     makeChart('retailerChart','bar',{
       labels: retailers.map(x=>x[0]),
-      datasets:[{ data: retailers.map(x=>x[1]), backgroundColor: palette(retailers.length), borderWidth:0 }]
+      datasets:[{ data: retailers.map(x=>x[1]), backgroundColor: palette(retailers.length), borderWidth:0, borderRadius:6 }]
     },{ 
       indexAxis:'y', 
       plugins:{ legend:{ display:false } }, 
-      scales:{ x:{ ticks:{ color:'#8aa1c6' }, grid:{color:'#1e2a44'} }, y:{ ticks:{ color:'#cbd5e1',font:{size:11} }, grid:{display:false} } } 
+      scales:{ x:{ ticks:{ color:'#64748b', font:{weight:'500'} }, grid:{color:'#e2e8f0'} }, y:{ ticks:{ color:'#0f172a',font:{size:11,weight:'600'} }, grid:{display:false} } } 
     });
 
     // District
     const districts = buildCounts(rows,'District').slice(0,10);
     makeChart('districtChart','bar',{
       labels: districts.map(x=>x[0]),
-      datasets:[{ data: districts.map(x=>x[1]), backgroundColor: palette(districts.length), borderWidth:0 }]
+      datasets:[{ data: districts.map(x=>x[1]), backgroundColor: palette(districts.length), borderWidth:0, borderRadius:6 }]
     },{ 
       indexAxis:'y', 
       plugins:{ legend:{ display:false } }, 
-      scales:{ x:{ ticks:{ color:'#8aa1c6' }, grid:{color:'#1e2a44'} }, y:{ ticks:{ color:'#cbd5e1',font:{size:11} }, grid:{display:false} } } 
+      scales:{ x:{ ticks:{ color:'#64748b', font:{weight:'500'} }, grid:{color:'#e2e8f0'} }, y:{ ticks:{ color:'#0f172a',font:{size:11,weight:'600'} }, grid:{display:false} } } 
     });
 
     // Product
@@ -558,10 +572,105 @@
     },{ 
       plugins:{ legend:{ display:false } }, 
       scales:{ 
-        x:{ ticks:{ color:'#cbd5e1', maxRotation:45, minRotation:20, font:{size:11} }, grid:{display:false} }, 
-        y:{ ticks:{ color:'#8aa1c6' }, grid:{color:'#1e2a44'} } 
+        x:{ ticks:{ color:'#0f172a', maxRotation:45, minRotation:20, font:{size:11,weight:'600'} }, grid:{display:false} }, 
+        y:{ ticks:{ color:'#64748b', font:{weight:'500'} }, grid:{color:'#e2e8f0'} } 
       } 
     });
+  }
+
+  // India Map with state boundaries
+  const stateCoords = {
+    'Jammu and Kashmir': 'M250,80 L280,70 L310,85 L320,110 L300,130 L270,120 Z',
+    'Himachal Pradesh': 'M280,110 L310,100 L330,120 L320,140 L290,135 Z',
+    'Punjab': 'M270,130 L300,125 L320,145 L310,165 L280,160 Z',
+    'Chandigarh': 'M295,148 L300,145 L305,150 L300,155 Z',
+    'Uttarakhand': 'M330,140 L360,135 L380,155 L370,175 L340,170 Z',
+    'Haryana': 'M280,165 L310,160 L340,175 L335,195 L305,190 Z',
+    'Delhi': 'M310,180 L320,175 L325,185 L315,190 Z',
+    'Rajasthan': 'M240,190 L305,195 L335,200 L350,250 L340,310 L280,320 L230,280 L220,230 Z',
+    'Uttar Pradesh': 'M335,200 L370,195 L420,210 L460,240 L470,270 L450,290 L380,295 L340,280 Z',
+    'Bihar': 'M450,295 L490,300 L520,315 L510,340 L480,335 L460,320 Z',
+    'Sikkim': 'M510,240 L525,235 L535,250 L525,265 Z',
+    'Arunachal Pradesh': 'M540,210 L600,200 L640,230 L630,265 L580,270 L550,250 Z',
+    'Nagaland': 'M580,275 L610,270 L625,290 L615,310 L590,305 Z',
+    'Manipur': 'M590,310 L615,305 L625,325 L610,340 L595,330 Z',
+    'Mizoram': 'M585,340 L605,335 L615,355 L600,370 L585,360 Z',
+    'Tripura': 'M560,330 L580,325 L585,345 L575,360 L560,350 Z',
+    'Meghalaya': 'M540,300 L565,295 L575,315 L560,325 Z',
+    'Assam': 'M525,270 L580,265 L610,275 L600,300 L560,305 L530,290 Z',
+    'West Bengal': 'M480,340 L520,335 L540,360 L535,390 L500,395 L470,375 Z',
+    'Jharkhand': 'M460,325 L490,320 L510,340 L500,370 L470,365 Z',
+    'Odisha': 'M470,370 L510,365 L535,395 L530,440 L490,450 L460,420 Z',
+    'Chhattisgarh': 'M380,300 L430,305 L450,335 L445,380 L410,390 L380,370 Z',
+    'Madhya Pradesh': 'M280,260 L340,255 L380,270 L410,295 L420,340 L390,360 L340,350 L300,320 Z',
+    'Gujarat': 'M180,280 L240,270 L280,285 L295,330 L280,380 L240,400 L200,390 L170,340 Z',
+    'Daman and Diu': 'M205,360 L215,355 L220,365 L210,370 Z',
+    'Dadra and Nagar Haveli': 'M230,370 L240,365 L245,375 L235,380 Z',
+    'Maharashtra': 'M240,400 L300,390 L350,395 L380,420 L370,480 L330,510 L280,500 L240,470 Z',
+    'Andhra Pradesh': 'M380,480 L420,475 L450,500 L450,560 L410,580 L370,570 L350,530 Z',
+    'Karnataka': 'M280,510 L330,505 L370,520 L380,570 L360,620 L310,630 L270,600 Z',
+    'Goa': 'M260,490 L285,485 L290,505 L275,515 Z',
+    'Lakshadweep': 'M140,570 L155,565 L160,580 L145,585 Z',
+    'Kerala': 'M270,605 L310,595 L320,640 L310,690 L280,700 L260,670 Z',
+    'Tamil Nadu': 'M310,635 L360,625 L390,650 L400,700 L380,740 L340,750 L310,730 Z',
+    'Puducherry': 'M355,680 L365,675 L370,685 L360,690 Z',
+    'Andaman and Nicobar Islands': 'M620,650 L635,645 L640,680 L625,685 Z',
+    'Telangana': 'M350,430 L390,425 L420,450 L415,490 L380,495 L360,470 Z',
+    'Ladakh': 'M240,50 L280,40 L320,55 L330,90 L300,100 L260,85 Z'
+  };
+
+  function renderIndiaMap(rows){
+    const stateCounts = new Map();
+    for(const r of rows){
+      const st = trim(r.State);
+      if(st) stateCounts.set(st, (stateCounts.get(st)||0)+1);
+    }
+    
+    const maxCount = Math.max(...stateCounts.values(), 1);
+    const svg = document.getElementById('indiaMap');
+    const tooltip = document.getElementById('mapTooltip');
+    
+    svg.innerHTML = '';
+    
+    for(const [state, path] of Object.entries(stateCoords)){
+      const count = stateCounts.get(state) || 0;
+      const intensity = count / maxCount;
+      let fillColor = '#f1f5f9';
+      if(intensity > 0.75) fillColor = '#15803d';
+      else if(intensity > 0.5) fillColor = '#22c55e';
+      else if(intensity > 0.25) fillColor = '#86efac';
+      else if(intensity > 0) fillColor = '#dcfce7';
+      
+      const pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      pathEl.setAttribute('d', path);
+      pathEl.setAttribute('fill', fillColor);
+      pathEl.setAttribute('class', 'state-region');
+      pathEl.setAttribute('data-state', state);
+      pathEl.setAttribute('data-count', count);
+      
+      pathEl.addEventListener('mouseenter', (e)=>{
+        tooltip.textContent = `${state}: ${count.toLocaleString()} scans`;
+        tooltip.style.display = 'block';
+      });
+      
+      pathEl.addEventListener('mousemove', (e)=>{
+        const rect = document.getElementById('indiaMapContainer').getBoundingClientRect();
+        tooltip.style.left = (e.clientX - rect.left + 15) + 'px';
+        tooltip.style.top = (e.clientY - rect.top - 40) + 'px';
+      });
+      
+      pathEl.addEventListener('mouseleave', ()=>{
+        tooltip.style.display = 'none';
+      });
+      
+      pathEl.addEventListener('click', ()=>{
+        FILTERS.state = state;
+        selState.value = state;
+        render();
+      });
+      
+      svg.appendChild(pathEl);
+    }
   }
 
   function populateFilters(rows){
@@ -610,6 +719,7 @@
     const rows = applyFilters(RAW);
     updateKpis(rows);
     renderStatesTable(rows);
+    renderIndiaMap(rows);
     requestAnimationFrame(()=> renderCharts(rows));
   }
 
@@ -656,5 +766,3 @@
 </script>
 </body>
 </html>
-
-
