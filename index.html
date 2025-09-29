@@ -61,20 +61,25 @@
     .btn-logout:hover{box-shadow:0 8px 24px rgba(239,68,68,.4)}
 
     /* Layout */
-    .main{display:grid;grid-template-columns:300px 1fr;gap:24px;padding:24px;max-width:2000px;margin:0 auto}
-    .side{display:flex;flex-direction:column;gap:16px;position:sticky;top:90px;height:fit-content}
+    .main{display:flex;flex-direction:column;gap:24px;padding:24px;max-width:2000px;margin:0 auto}
     .panel{background:var(--panel);border:2px solid var(--ring);border-radius:16px;padding:20px;
       box-shadow:0 4px 16px var(--shadow);transition:all .3s ease}
     .panel:hover{border-color:var(--acc1);box-shadow:0 8px 24px var(--shadow-lg)}
 
     /* Filters */
-    .filters .group{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
-    .filters label{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
-    .filters select,.filters input{width:100%;padding:12px 14px;border-radius:10px;
-      border:2px solid var(--ring);background:var(--bg);color:var(--text);outline:none;
-      font-size:14px;transition:all .2s ease}
-    .filters select:hover,.filters input:hover{border-color:var(--acc1)}
-    .filters select:focus,.filters input:focus{border-color:var(--acc1);box-shadow:0 0 0 3px rgba(14,165,233,.1)}
+    .filters-horizontal{background:var(--panel);border:2px solid var(--ring);border-radius:16px;
+      padding:20px 24px;box-shadow:0 4px 16px var(--shadow);display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;align-items:end}
+    .filters-horizontal .group{display:flex;flex-direction:column;gap:6px}
+    .filters-horizontal label{font-size:11px;color:var(--muted);font-weight:600;
+      text-transform:uppercase;letter-spacing:.5px}
+    .filters-horizontal select,.filters-horizontal input{width:100%;padding:10px 12px;
+      border-radius:10px;border:2px solid var(--ring);background:var(--bg);
+      color:var(--text);outline:none;font-size:13px;transition:all .2s ease}
+    .filters-horizontal select:hover,.filters-horizontal input:hover{border-color:var(--acc1)}
+    .filters-horizontal select:focus,.filters-horizontal input:focus{border-color:var(--acc1);
+      box-shadow:0 0 0 3px rgba(14,165,233,.1)}
+    .filters-horizontal .btn{padding:10px 20px;font-size:13px;white-space:nowrap}
 
     /* Content Grid */
     .content{display:grid;grid-template-columns:repeat(12,1fr);gap:24px}
@@ -90,20 +95,43 @@
       text-transform:uppercase;letter-spacing:1px}
     
     /* KPI Cards */
-    .kpi-main{font-size:48px;font-weight:700;line-height:1;
+    .kpi-hero{display:grid;grid-template-columns:1fr 3fr;gap:24px;align-items:center}
+    .kpi-main-circle{width:180px;height:180px;border-radius:50%;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      background:linear-gradient(135deg,rgba(14,165,233,.15),rgba(16,185,129,.15));
+      border:4px solid var(--acc1);box-shadow:0 8px 32px rgba(14,165,233,.25);
+      position:relative}
+    .kpi-main-circle::after{content:'';position:absolute;inset:-8px;border-radius:50%;
+      background:linear-gradient(135deg,var(--acc1),var(--acc3));opacity:.2;z-index:-1;
+      animation:pulse 3s ease-in-out infinite}
+    .kpi-main-label{font-size:12px;color:var(--muted);font-weight:700;
+      text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+    .kpi-main-value{font-size:56px;font-weight:800;line-height:1;
       background:linear-gradient(135deg,var(--acc1),var(--acc3));
       -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-      background-clip:text;margin-bottom:12px}
-    .kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
-    .kpi-item{background:linear-gradient(135deg,rgba(14,165,233,.1),rgba(16,185,129,.08));
-      border:2px solid rgba(14,165,233,.2);
-      border-radius:12px;padding:12px;text-align:center;transition:all .3s ease}
-    .kpi-item:hover{transform:translateY(-2px);border-color:var(--acc1)}
-    .kpi-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
-    .kpi-value{font-size:24px;font-weight:700;margin-top:4px}
+      background-clip:text}
+    .kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .kpi-item{background:linear-gradient(135deg,rgba(14,165,233,.05),rgba(16,185,129,.05));
+      border:2px solid rgba(14,165,233,.15);border-radius:16px;padding:20px;
+      text-align:center;transition:all .3s ease;position:relative;overflow:hidden}
+    .kpi-item::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:linear-gradient(90deg,var(--acc3),var(--acc1));opacity:0;transition:opacity .3s}
+    .kpi-item:hover{transform:translateY(-4px);border-color:var(--acc1);
+      box-shadow:0 8px 24px rgba(14,165,233,.2)}
+    .kpi-item:hover::before{opacity:1}
+    .kpi-label{font-size:13px;color:var(--muted);text-transform:uppercase;
+      letter-spacing:.8px;font-weight:700;margin-bottom:12px}
+    .kpi-value{font-size:40px;font-weight:800;margin-bottom:8px}
+    .kpi-item:nth-child(1){border-color:rgba(16,185,129,.2)}
+    .kpi-item:nth-child(1)::before{background:var(--acc3)}
     .kpi-item:nth-child(1) .kpi-value{color:var(--acc3)}
+    .kpi-item:nth-child(2){border-color:rgba(249,115,22,.2)}
+    .kpi-item:nth-child(2)::before{background:var(--acc2)}
     .kpi-item:nth-child(2) .kpi-value{color:var(--acc2)}
+    .kpi-item:nth-child(3){border-color:rgba(139,92,246,.2)}
+    .kpi-item:nth-child(3)::before{background:var(--acc4)}
     .kpi-item:nth-child(3) .kpi-value{color:var(--acc4)}
+    .kpi-percent{font-size:14px;color:var(--muted);font-weight:600}
 
     /* India Map */
     #indiaMapContainer{width:100%;height:600px;position:relative;
@@ -153,8 +181,9 @@
     .err{color:#ef4444;font-size:13px;min-height:18px;margin-top:8px;font-weight:500}
 
     @media (max-width: 1100px){
-      .main{grid-template-columns:1fr}
-      .side{position:relative;top:0}
+      .kpi-hero{grid-template-columns:1fr}
+      .kpi-main-circle{margin:0 auto}
+      .filters-horizontal{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
       #indiaMapContainer{height:500px}
     }
     @media (max-width: 640px){
@@ -163,6 +192,7 @@
       .kpi-grid{grid-template-columns:1fr}
       .header-actions{width:100%;justify-content:flex-start}
       #indiaMapContainer{height:400px}
+      .filters-horizontal{grid-template-columns:1fr}
     }
   </style>
 </head>
@@ -172,104 +202,108 @@
     <div class="bar">
       <div class="logo"><span class="dot"></span><span class="title">CPC Campaign Dashboard</span></div>
       <div class="header-actions">
-        <button class="btn" id="downloadBtn">Download Data</button>
-        <button class="btn btn-logout" id="logoutBtn">Logout</button>
+        <button class="btn" id="downloadBtn">📥 Download Data</button>
+        <button class="btn btn-logout" id="logoutBtn">🚪 Logout</button>
       </div>
     </div>
   </header>
 
   <main class="main">
-    <aside class="side">
-      <div class="panel filters">
-        <h3 style="margin-bottom:20px;font-size:16px;color:var(--text)">Filters</h3>
-        <div class="group">
-          <label for="dateFrom">Date From</label>
-          <input id="dateFrom" type="date" />
-        </div>
-        <div class="group">
-          <label for="dateTo">Date To</label>
-          <input id="dateTo" type="date" />
-        </div>
-        <div class="group">
-          <label for="state">State</label>
-          <select id="state"></select>
-        </div>
-        <div class="group">
-          <label for="district">District</label>
-          <select id="district"></select>
-        </div>
-        <div class="group">
-          <label for="retailer">Retailer</label>
-          <select id="retailer"></select>
-        </div>
-        <div class="group">
-          <label for="product">Product</label>
-          <select id="product"></select>
-        </div>
-        <div class="group">
-          <label for="qtyMin">Quantity (≥)</label>
-          <input id="qtyMin" type="number" min="0" step="1" placeholder="0" />
-        </div>
-        <div class="group">
-          <label for="status">Approved Status</label>
-          <select id="status"></select>
-        </div>
-        <button class="btn" id="resetBtn" style="width:100%;margin-top:8px">Reset Filters</button>
+    <!-- Horizontal Filters -->
+    <div class="filters-horizontal">
+      <div class="group">
+        <label for="dateFrom">Date From</label>
+        <input id="dateFrom" type="date" />
       </div>
-      <div class="panel" style="padding:16px">
-        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:600">CSV SOURCE:</div>
-        <div style="word-break:break-all;font-size:12px;font-family:monospace;color:var(--acc1);font-weight:500" id="csvPath">./data.csv</div>
+      <div class="group">
+        <label for="dateTo">Date To</label>
+        <input id="dateTo" type="date" />
       </div>
-    </aside>
+      <div class="group">
+        <label for="state">State</label>
+        <select id="state"></select>
+      </div>
+      <div class="group">
+        <label for="district">District</label>
+        <select id="district"></select>
+      </div>
+      <div class="group">
+        <label for="retailer">Retailer</label>
+        <select id="retailer"></select>
+      </div>
+      <div class="group">
+        <label for="product">Product</label>
+        <select id="product"></select>
+      </div>
+      <div class="group">
+        <label for="qtyMin">Quantity (≥)</label>
+        <input id="qtyMin" type="number" min="0" step="1" placeholder="0" />
+      </div>
+      <div class="group">
+        <label for="status">Status</label>
+        <select id="status"></select>
+      </div>
+      <div class="group" style="display:flex;align-items:flex-end">
+        <button class="btn" id="resetBtn" style="width:100%">🔄 Reset</button>
+      </div>
+    </div>
 
     <section class="content">
-      <!-- Total Scans with sub-metrics -->
-      <div class="card" style="grid-column: span 6">
-        <h3>Total Scans</h3>
-        <div class="kpi-main" id="kpiTotalBig">0</div>
-        <div class="kpi-grid">
-          <div class="kpi-item">
-            <div class="kpi-label">Approved</div>
-            <div class="kpi-value" id="kpiYes">0</div>
+      <!-- Total Scans with Hero Design -->
+      <div class="card" style="grid-column: span 12">
+        <h3>📊 Campaign Performance Overview</h3>
+        <div class="kpi-hero">
+          <div class="kpi-main-circle">
+            <div class="kpi-main-label">Total Scans</div>
+            <div class="kpi-main-value" id="kpiTotalBig">0</div>
           </div>
-          <div class="kpi-item">
-            <div class="kpi-label">Rejected</div>
-            <div class="kpi-value" id="kpiNo">0</div>
-          </div>
-          <div class="kpi-item">
-            <div class="kpi-label">Pending</div>
-            <div class="kpi-value" id="kpiPending">0</div>
+          <div class="kpi-grid">
+            <div class="kpi-item">
+              <div class="kpi-label">✅ Approved</div>
+              <div class="kpi-value" id="kpiYes">0</div>
+              <div class="kpi-percent" id="kpiYesPct">0%</div>
+            </div>
+            <div class="kpi-item">
+              <div class="kpi-label">❌ Rejected</div>
+              <div class="kpi-value" id="kpiNo">0</div>
+              <div class="kpi-percent" id="kpiNoPct">0%</div>
+            </div>
+            <div class="kpi-item">
+              <div class="kpi-label">⏳ Pending</div>
+              <div class="kpi-value" id="kpiPending">0</div>
+              <div class="kpi-percent" id="kpiPendingPct">0%</div>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Status Chart -->
       <div class="card" style="grid-column: span 6">
-        <h3>Submission Status</h3>
+        <h3>✅ Submission Status</h3>
         <canvas id="statusChart" height="200"></canvas>
       </div>
 
       <!-- Trend Chart -->
-      <div class="card" style="grid-column: span 12">
-        <h3>Time Trend (Scans per Day)</h3>
-        <canvas id="trendChart" height="140"></canvas>
+      <div class="card" style="grid-column: span 6">
+        <h3>📈 Time Trend (Scans per Day)</h3>
+        <canvas id="trendChart" height="200"></canvas>
       </div>
 
       <!-- Top States Table -->
       <div class="card" style="grid-column: span 6">
-        <h3>Top States by Scans</h3>
+        <h3>🏆 Top States by Scans</h3>
         <div id="statesTable" style="overflow-y:auto;max-height:380px;margin-top:12px"></div>
       </div>
 
       <!-- Retailer Performance -->
       <div class="card" style="grid-column: span 6">
-        <h3>Retailer Performance</h3>
+        <h3>🏪 Retailer Performance</h3>
         <canvas id="retailerChart" height="180"></canvas>
       </div>
 
       <!-- District Scans -->
       <div class="card" style="grid-column: span 6">
-        <h3>District-wise Scans</h3>
+        <h3>🏘️ District-wise Scans</h3>
         <canvas id="districtChart" height="180"></canvas>
       </div>
 
@@ -281,7 +315,7 @@
 
       <!-- India Map - Now at bottom and full width -->
       <div class="card" style="grid-column: span 12">
-        <h3>India - State-wise Distribution</h3>
+        <h3>🗺️ India - State-wise Distribution</h3>
         <div id="indiaMapContainer">
           <div id="indiaMap"></div>
           <div class="legend">
@@ -297,7 +331,7 @@
   </main>
 
   <div class="footer">
-    © 2025 Coromandel CPC — Farmer First
+    © 2025 Coromandel CPC — Empowering Agriculture
   </div>
 </div>
 
@@ -321,7 +355,6 @@
 
 <script>
   const CSV_URL = './data.csv';
-  document.getElementById('csvPath').textContent = CSV_URL;
 
   // Login
   const VALID_USER = 'digicides';
@@ -473,6 +506,15 @@
     document.getElementById('kpiYes').textContent = yes.toLocaleString();
     document.getElementById('kpiNo').textContent = no.toLocaleString();
     document.getElementById('kpiPending').textContent = pending.toLocaleString();
+    
+    // Calculate percentages
+    const yesPct = total > 0 ? ((yes / total) * 100).toFixed(1) : '0.0';
+    const noPct = total > 0 ? ((no / total) * 100).toFixed(1) : '0.0';
+    const pendingPct = total > 0 ? ((pending / total) * 100).toFixed(1) : '0.0';
+    
+    document.getElementById('kpiYesPct').textContent = `${yesPct}% of total`;
+    document.getElementById('kpiNoPct').textContent = `${noPct}% of total`;
+    document.getElementById('kpiPendingPct').textContent = `${pendingPct}% of total`;
   }
 
   function buildCounts(rows, key){
@@ -895,5 +937,3 @@
 </script>
 </body>
 </html>
-
-
