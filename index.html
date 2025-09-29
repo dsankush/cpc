@@ -530,3 +530,129 @@
     });
 
     // District
+    const districts = buildCounts(rows,'District').slice(0,10);
+    makeChart('districtChart','bar',{
+      labels: districts.map(x=>x[0]),
+      datasets:[{ data: districts.map(x=>x[1]), backgroundColor: palette(districts.length), borderWidth:0 }]
+    },{ 
+      indexAxis:'y', 
+      plugins:{ legend:{ display:false } }, 
+      scales:{ x:{ ticks:{ color:'#8aa1c6' }, grid:{color:'#1e2a44'} }, y:{ ticks:{ color:'#cbd5e1',font:{size:11} }, grid:{display:false} } } 
+    });
+
+    // Product
+    const pMap = new Map();
+    for(const r of rows){
+      const m = parseProducts(r['Cart Items']);
+      for(const [name,qty] of m){ pMap.set(name,(pMap.get(name)||0)+qty); }
+    }
+    const pArr = [...pMap.entries()].sort((a,b)=>b[1]-a[1]).slice(0,16);
+    makeChart('productChart','bar',{
+      labels: pArr.map(x=>x[0]),
+      datasets:[{ 
+        data: pArr.map(x=>x[1]), 
+        backgroundColor: palette(pArr.length), 
+        borderWidth:0,
+        borderRadius:8
+      }]
+    },{ 
+      plugins:{ legend:{ display:false } }, 
+      scales:{ 
+        x:{ ticks:{ color:'#cbd5e1', maxRotation:45, minRotation:20, font:{size:11} }, grid:{display:false} }, 
+        y:{ ticks:{ color:'#8aa1c6' }, grid:{color:'#1e2a44'} } 
+      } 
+    });
+  }
+
+  function populateFilters(rows){
+    const states = uniqSorted(rows.map(r=>trim(r.State)));
+    const dists  = uniqSorted(rows.map(r=>trim(r.District)));
+    const rets   = uniqSorted(rows.map(r=>trim(r['Retailer Name'])));
+    const products = uniqSorted(rows.flatMap(r=>[...parseProducts(r['Cart Items']).keys()]));
+    const statuses = ['','Yes','No','Pending'];
+
+    function fill(sel, items){ 
+      sel.innerHTML = ''; 
+      const opt0 = document.createElement('option'); 
+      opt0.value=''; 
+      opt0.textContent='All'; 
+      sel.appendChild(opt0); 
+      for(const v of items){ 
+        const o=document.createElement('option'); 
+        o.value=v; 
+        o.textContent=v; 
+        sel.appendChild(o);
+      } 
+    }
+    fill(selState, states); 
+    fill(selDistrict, dists); 
+    fill(selRetailer, rets); 
+    fill(selProduct, products);
+    fill(selStatus, statuses);
+  }
+
+  function attachFilterHandlers(){
+    selDateFrom.onchange = ()=>{ FILTERS.dateFrom = selDateFrom.value; render(); };
+    selDateTo.onchange = ()=>{ FILTERS.dateTo = selDateTo.value; render(); };
+    selState.onchange = ()=>{ FILTERS.state = selState.value; render(); };
+    selDistrict.onchange = ()=>{ FILTERS.district = selDistrict.value; render(); };
+    selRetailer.onchange = ()=>{ FILTERS.retailer = selRetailer.value; render(); };
+    selProduct.onchange = ()=>{ FILTERS.product = selProduct.value; render(); };
+    selStatus.onchange = ()=>{ FILTERS.status = selStatus.value; render(); };
+    let to=null; 
+    inpQtyMin.oninput = ()=>{ 
+      clearTimeout(to); 
+      to=setTimeout(()=>{ FILTERS.qtyMin = Number(inpQtyMin.value||0); render(); }, 300); 
+    };
+  }
+
+  function render(){
+    const rows = applyFilters(RAW);
+    updateKpis(rows);
+    renderStatesTable(rows);
+    requestAnimationFrame(()=> renderCharts(rows));
+  }
+
+  // Load CSV
+  function normalizeRow(r){
+    const obj = {
+      'User ID': r['User ID']||r['UserID']||r['id']||'',
+      'Phone Number': r['Phone Number']||r['Phone']||r['phone']||'',
+      'First Name': r['First Name']||r['FirstName']||'',
+      'Last Name': r['Last Name']||r['LastName']||'',
+      'District': r['District']||'',
+      'State': r['State']||'',
+      'Language': r['Language']||'',
+      'Pin Code': r['Pin Code']||r['Pincode']||'',
+      'QR Code': r['QR Code']||'',
+      'Land Acreage': r['Land Acreage']||r['Land']||'',
+      'Crop Name': r['Crop Name']||'',
+      'Scan Date': r['Scan Date']||r['Date']||'',
+      'RIN': r['RIN']||'',
+      'Retailer Name': r['Retailer Name']||r['Retailer']||'',
+      'Cart Items': r['Cart Items']||'',
+      'Coupon Code': r['Coupon Code']||'',
+      'Submission Status': r['Submission Status']||r['Approved Status']||''
+    };
+    return obj;
+  }
+
+  Papa.parse(CSV_URL, {
+    download: true,
+    header: true,
+    skipEmptyLines: true,
+    dynamicTyping: false,
+    complete: (res)=>{
+      RAW = res.data.map(normalizeRow);
+      populateFilters(RAW);
+      attachFilterHandlers();
+      render();
+    },
+    error: (err)=>{
+      console.error('CSV load error', err);
+      alert('Failed to load data.csv. Ensure the file exists at '+CSV_URL);
+    }
+  });
+</script>
+</body>
+</html>
