@@ -4,69 +4,40 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Coromandel CPC — Campaign Dashboard</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <style>
-    :root{
-      --bg:#f8fafc;          /* light gray */
-      --panel:#ffffff;       /* white panels */
-      --card:#fdfdfd;        /* white cards */
-      --muted:#64748b;       /* slate-500 */
-      --text:#0f172a;        /* dark text */
-      --acc1:#3b82f6;        /* blue */
-      --acc2:#f59e0b;        /* amber */
-      --acc3:#10b981;        /* green */
-      --ring:#e2e8f0;        /* gray border */
-    }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text)}
-    .app{display:grid;grid-template-rows:auto 1fr;min-height:100vh}
-    header{background:linear-gradient(90deg,var(--acc1),var(--acc2));color:#fff;position:sticky;top:0;z-index:30}
+    body{margin:0;font-family:Inter,system-ui,sans-serif;background:#f8fafc;color:#0f172a}
+    header{background:linear-gradient(90deg,#3b82f6,#f59e0b);color:#fff;position:sticky;top:0;z-index:30}
     .bar{display:flex;align-items:center;gap:16px;padding:14px 18px}
     .logo{font-weight:700;display:flex;align-items:center;gap:10px}
-    .dot{width:10px;height:10px;border-radius:999px;background:#fff}
-    .title{letter-spacing:.3px}
     .pill{margin-left:auto;display:flex;gap:12px}
     .pill > div{background:rgba(255,255,255,.2);padding:6px 10px;border-radius:999px;font-size:12px;color:#fff}
     .logoutBtn{margin-left:20px;background:#ef4444;border:none;color:#fff;padding:6px 12px;border-radius:8px;cursor:pointer}
-
     .main{display:grid;grid-template-columns:260px 1fr;gap:18px;padding:18px}
-    .side{display:flex;flex-direction:column;gap:12px}
-    .panel{background:var(--panel);border:1px solid var(--ring);border-radius:12px;padding:14px}
-    .filters .group{display:flex;flex-direction:column;gap:6px}
-    .filters label{font-size:12px;color:var(--muted)}
-    .filters select,.filters input{padding:10px;border-radius:8px;border:1px solid var(--ring);background:#fff;color:var(--text)}
-
+    .panel{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px}
+    .filters .group{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+    .filters label{font-size:12px;color:#64748b}
+    .filters select,.filters input{padding:8px;border-radius:8px;border:1px solid #e2e8f0}
     .content{display:grid;grid-template-columns:repeat(12,1fr);gap:18px}
-    .card{background:var(--card);border:1px solid var(--ring);border-radius:12px;padding:14px;display:flex;flex-direction:column}
-    .card h3{margin:0 0 8px;font-size:14px;color:var(--muted);font-weight:600}
+    .card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px}
+    .card h3{margin:0 0 8px;font-size:14px;color:#64748b}
     .kpi{font-size:30px;font-weight:700}
-    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:12px}
-
-    .footer{padding:10px 18px;color:var(--muted);border-top:1px solid var(--ring)}
-
+    .footer{padding:10px 18px;color:#64748b;border-top:1px solid #e2e8f0}
     .overlay{position:fixed;inset:0;background:#f1f5f9;display:grid;place-items:center;z-index:50}
-    .login{width:min(92vw,360px);background:#fff;border:1px solid var(--ring);border-radius:12px;padding:22px;box-shadow:0 10px 30px rgba(0,0,0,.1)}
-    .login h2{margin:0 0 4px;font-size:20px}
-    .login p{margin:0 0 14px;color:var(--muted);font-size:13px}
+    .login{width:340px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:22px;box-shadow:0 10px 30px rgba(0,0,0,.1)}
     .field{display:flex;flex-direction:column;gap:6px;margin:10px 0}
-    .field label{font-size:12px;color:var(--muted)}
-    .field input{padding:12px;border-radius:8px;border:1px solid var(--ring)}
-    .btn{padding:10px 14px;border-radius:8px;background:var(--acc1);color:#fff;font-weight:600;cursor:pointer;border:none}
-    .btn:hover{filter:brightness(1.05)}
+    .btn{padding:10px 14px;border-radius:8px;background:#3b82f6;color:#fff;font-weight:600;cursor:pointer;border:none}
     .err{color:#dc2626;font-size:12px;min-height:16px}
-
-    @media (max-width: 1000px){.main{grid-template-columns:1fr}}
+    @media (max-width:1000px){.main{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
 <div class="app">
   <header>
     <div class="bar">
-      <div class="logo"><span class="dot"></span><span class="title">CPC Campaign Dashboard</span></div>
+      <div class="logo">CPC Campaign Dashboard</div>
       <div class="pill">
         <div id="kpi-total">Scans: 0</div>
         <div id="kpi-yes">Approved: 0</div>
@@ -75,25 +46,21 @@
       <button class="logoutBtn" id="logoutBtn">Logout</button>
     </div>
   </header>
-
   <main class="main">
-    <aside class="side">
-      <div class="panel filters">
-        <div class="group"><label>State</label><select id="state"></select></div>
-        <div class="group"><label>District</label><select id="district"></select></div>
-        <div class="group"><label>Retailer</label><select id="retailer"></select></div>
-        <div class="group"><label>Product</label><select id="product"></select></div>
-        <div class="group"><label>Quantity (≥)</label><input id="qtyMin" type="number" min="0" step="1" placeholder="0" /></div>
-        <div class="group"><label>Approved Status</label><select id="status"></select></div>
-        <div class="row" style="margin-top:6px"><button class="btn" id="resetBtn">Reset Filters</button></div>
-        <div class="row" style="margin-top:6px"><a class="btn" href="data.csv" download>Download Data</a></div>
-      </div>
+    <aside class="panel filters">
+      <div class="group"><label>State</label><select id="state"></select></div>
+      <div class="group"><label>District</label><select id="district"></select></div>
+      <div class="group"><label>Retailer</label><select id="retailer"></select></div>
+      <div class="group"><label>Product</label><select id="product"></select></div>
+      <div class="group"><label>Quantity ≥</label><input id="qtyMin" type="number" /></div>
+      <div class="group"><label>Status</label><select id="status"></select></div>
+      <div class="group"><label>From Date</label><input id="dateFrom" type="date" /></div>
+      <div class="group"><label>To Date</label><input id="dateTo" type="date" /></div>
+      <button class="btn" id="resetBtn">Reset Filters</button>
+      <a class="btn" href="data.csv" download>Download Data</a>
     </aside>
-
     <section class="content">
-      <div class="card" style="grid-column: span 3">
-        <h3>Total Scans</h3><div class="kpi" id="kpiTotalBig">0</div><div class="row" id="kpiMeta"></div>
-      </div>
+      <div class="card" style="grid-column: span 3"><h3>Total Scans</h3><div class="kpi" id="kpiTotalBig">0</div><div id="kpiMeta"></div></div>
       <div class="card" style="grid-column: span 3"><h3>Submission Status</h3><canvas id="statusChart"></canvas></div>
       <div class="card" style="grid-column: span 6"><h3>Time Trend</h3><canvas id="trendChart"></canvas></div>
       <div class="card" style="grid-column: span 6"><h3>Retailer Performance</h3><canvas id="retailerChart"></canvas></div>
@@ -103,32 +70,21 @@
   </main>
   <div class="footer">© 2025 Coromandel CPC Dashboard</div>
 </div>
-
-<div class="overlay" id="loginOverlay" aria-hidden="false">
-  <form class="login" id="loginForm">
-    <h2>Login</h2>
-    <p>Enter credentials to access.</p>
-    <div class="field"><label>Username</label><input id="u" /></div>
-    <div class="field"><label>Password</label><input id="p" type="password" /></div>
-    <div class="row" style="justify-content:space-between"><button class="btn" type="submit">Login</button><span class="err" id="err"></span></div>
-  </form>
-</div>
-
+<div class="overlay" id="loginOverlay"><form class="login" id="loginForm"><h2>Login</h2><div class="field"><label>Username</label><input id="u" /></div><div class="field"><label>Password</label><input id="p" type="password" /></div><button class="btn" type="submit">Login</button><div class="err" id="err"></div></form></div>
 <script>
-  const CSV_URL = './data.csv';
-  const VALID_USER='digicides', VALID_PASS='coro@cpc';
-  const overlay=document.getElementById('loginOverlay');
-  const LS_KEY='cpc_login_ok';
-  function unlock(){overlay.style.display='none'}
-  if(localStorage.getItem(LS_KEY)==='1'){unlock()}
-  document.getElementById('loginForm').addEventListener('submit',e=>{
-    e.preventDefault();
-    if(document.getElementById('u').value===VALID_USER && document.getElementById('p').value===VALID_PASS){localStorage.setItem(LS_KEY,'1');unlock()}else{document.getElementById('err').textContent='Invalid'}
-  });
-  document.getElementById('logoutBtn').addEventListener('click',()=>{localStorage.removeItem(LS_KEY);location.reload()});
-</script>
-<script>
-// Keep the same CSV parsing, chart rendering logic as before (shortened here for brevity)
+const CSV_URL='./data.csv';
+const VALID_USER='digicides', VALID_PASS='coro@cpc';
+const overlay=document.getElementById('loginOverlay');
+if(localStorage.getItem('cpc_login_ok')==='1'){overlay.style.display='none'}
+document.getElementById('loginForm').addEventListener('submit',e=>{e.preventDefault();if(u.value===VALID_USER&&p.value===VALID_PASS){localStorage.setItem('cpc_login_ok','1');overlay.style.display='none'}else err.textContent='Invalid'});
+document.getElementById('logoutBtn').addEventListener('click',()=>{localStorage.removeItem('cpc_login_ok');location.reload()});
+
+let RAW=[];let FILTERS={state:'',district:'',retailer:'',product:'',qtyMin:0,status:'',dateFrom:'',dateTo:''};
+function parseProducts(s){const map=new Map();if(!s) return map;s.split(',').forEach(raw=>{const m=raw.match(/^(.+?)\s*-\s*qty\s*(\d+)/i);if(m){map.set(m[1].trim(),(map.get(m[1].trim())||0)+Number(m[2]))}});return map;}
+function toDateKey(dt){if(!dt)return'';const d=new Date(dt);if(isNaN(d))return'';return d.toISOString().slice(0,10)}
+function applyFilters(rows){return rows.filter(r=>{if(FILTERS.state&&r.State!==FILTERS.state)return false;if(FILTERS.district&&r.District!==FILTERS.district)return false;if(FILTERS.retailer&&r['Retailer Name']!==FILTERS.retailer)return false;if(FILTERS.status&&r['Submission Status']!==FILTERS.status)return false;if(FILTERS.dateFrom&&new Date(r['Scan Date'])<new Date(FILTERS.dateFrom))return false;if(FILTERS.dateTo&&new Date(r['Scan Date'])>new Date(FILTERS.dateTo))return false;if(FILTERS.product||FILTERS.qtyMin>0){const m=parseProducts(r['Cart Items']);if(FILTERS.product){if(!m.has(FILTERS.product)||m.get(FILTERS.product)<FILTERS.qtyMin)return false}else{let ok=false;for(const q of m.values()){if(q>=FILTERS.qtyMin)ok=true}if(!ok)return false}}return true})}
+Papa.parse(CSV_URL,{download:true,header:true,skipEmptyLines:true,complete:res=>{RAW=res.data;render()}});
+function render(){const rows=applyFilters(RAW);document.getElementById('kpiTotalBig').textContent=rows.length}
 </script>
 </body>
 </html>
