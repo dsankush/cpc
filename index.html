@@ -224,10 +224,10 @@
 <div class="app">
   <header>
     <div class="bar">
-      <div class="logo"><span class="dot"></span><span class="title">CPC Campaign Dashboard</span></div>
+      <div class="logo"><span class="dot"></span><span class="title"><H1>Coromandel CPC Campaign Dashboard</H1></span></div>
       <div class="header-actions">
         <button class="btn" id="downloadBtn">📥 Download Data</button>
-        <button class="btn btn-logout" id="logoutBtn">🚪 Logout</button>
+        <button class="btn btn-logout" id="logoutBtn">Logout</button>
       </div>
     </div>
   </header>
@@ -268,14 +268,14 @@
         <select id="status"></select>
       </div>
       <div class="group" style="display:flex;align-items:flex-end">
-        <button class="btn" id="resetBtn" style="width:100%">🔄 Reset</button>
+        <button class="btn" id="resetBtn" style="width:100%">Reset</button>
       </div>
     </div>
 
     <section class="content">
       <!-- Total Scans with Hero Design -->
       <div class="card" style="grid-column: span 12">
-        <h3>📊 Campaign Performance Overview</h3>
+        <h3>Campaign Performance Overview</h3>
         <div class="kpi-hero">
           <div class="kpi-main-circle">
             <div class="kpi-main-label">Total Scans</div>
@@ -283,27 +283,27 @@
           </div>
           <div class="kpi-grid">
             <div class="kpi-item">
-              <div class="kpi-label">✅ Approved</div>
+              <div class="kpi-label">Approved</div>
               <div class="kpi-value" id="kpiYes">0</div>
               <div class="kpi-percent" id="kpiYesPct">0%</div>
             </div>
             <div class="kpi-item">
-              <div class="kpi-label">❌ Rejected</div>
+              <div class="kpi-label">Rejected</div>
               <div class="kpi-value" id="kpiNo">0</div>
               <div class="kpi-percent" id="kpiNoPct">0%</div>
             </div>
             <div class="kpi-item">
-              <div class="kpi-label">⏳ Pending</div>
+              <div class="kpi-label">Pending</div>
               <div class="kpi-value" id="kpiPending">0</div>
               <div class="kpi-percent" id="kpiPendingPct">0%</div>
             </div>
             <div class="kpi-item">
-              <div class="kpi-label">👨‍🌾 Total Farmers</div>
+              <div class="kpi-label">Total Farmers</div>
               <div class="kpi-value" id="kpiTotalFarmers">0</div>
               <div class="kpi-percent" id="kpiUniqueFarmers">Unique: 0</div>
             </div>
             <div class="kpi-item">
-              <div class="kpi-label">🏪 Retailers</div>
+              <div class="kpi-label">Retailers</div>
               <div class="kpi-value" id="kpiActiveRetailers">0</div>
               <div class="kpi-percent">of 1,256 total</div>
             </div>
@@ -313,47 +313,47 @@
 
       <!-- Status Chart -->
       <div class="card" style="grid-column: span 4">
-        <h3>✅ Submission Status</h3>
+        <h3>Order Approval Status</h3>
         <canvas id="statusChart" height="280"></canvas>
       </div>
 
       <!-- Trend Chart -->
       <div class="card" style="grid-column: span 8">
-        <h3>📈 Time Trend (Scans per Day)</h3>
+        <h3>Time Trend (Scans per Day)</h3>
         <canvas id="trendChart" height="280"></canvas>
       </div>
 
       <!-- Top States Table -->
       <div class="card" style="grid-column: span 6">
-        <h3>🏆 Top States by Scans</h3>
+        <h3>States by Scans</h3>
         <div id="statesTable" style="overflow-y:auto;max-height:380px;margin-top:12px"></div>
       </div>
 
       <!-- Retailer Performance -->
       <div class="card" style="grid-column: span 6">
-        <h3>🏪 Retailer Performance</h3>
+        <h3>Retailer Performance</h3>
         <canvas id="retailerChart" height="240"></canvas>
       </div>
 
       <!-- District Scans -->
       <div class="card" style="grid-column: span 6">
-        <h3>🏘️ District-wise Scans</h3>
+        <h3>District-wise Scans</h3>
         <canvas id="districtChart" height="180"></canvas>
       </div>
 
       <!-- Product Basket -->
       <div class="card" style="grid-column: span 6">
-        <h3>🛒 Product Basket</h3>
+        <h3>Product Basket</h3>
         <canvas id="productChart" height="180"></canvas>
       </div>
 
       <!-- India Map - Now at bottom and full width -->
       <div class="card" style="grid-column: span 12">
-        <h3>🗺️ India - State-wise Distribution</h3>
+        <h3>India - State-wise Distribution</h3>
         <div id="indiaMapContainer">
           <div id="indiaMap"></div>
           <div class="legend">
-            <div class="legend-title">🎯 Approval Levels</div>
+            <div class="legend-title">Approval Levels</div>
             <div class="legend-item"><div class="legend-color" style="background:#10b981;border-color:#10b981"></div><span>Elite (1000+)</span></div>
             <div class="legend-item"><div class="legend-color" style="background:#22c55e;border-color:#22c55e"></div><span>High (500-999)</span></div>
             <div class="legend-item"><div class="legend-color" style="background:#84cc16;border-color:#84cc16"></div><span>Medium (250-499)</span></div>
@@ -366,7 +366,7 @@
   </main>
 
   <div class="footer">
-    © 2025 Coromandel CPC — Empowering Agriculture
+    © 2025 Coromandel CPC
   </div>
 </div>
 
@@ -1078,3 +1078,4 @@
 </script>
 </body>
 </html>
+
