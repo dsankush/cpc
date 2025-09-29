@@ -4,69 +4,146 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Coromandel CPC — Campaign Dashboard</title>
-  <!-- Lightweight fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Chart.js & PapaParse (CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <style>
     :root{
-      --bg:#0f172a;          /* slate-900 */
-      --panel:#0b1223;       /* deeper */
-      --card:#111c32;        /* card */
-      --muted:#94a3b8;       /* slate-400 */
-      --text:#e2e8f0;        /* slate-200 */
-      --acc1:#22d3ee;        /* cyan-400 */
-      --acc2:#fb923c;        /* orange-400 */
-      --acc3:#10b981;        /* emerald-500 */
-      --ring:#1e293b;        /* slate-800 */
+      --bg:#050B1F;
+      --panel:#0A1128;
+      --card:#111C32;
+      --card-hover:#1A2742;
+      --muted:#94a3b8;
+      --text:#e2e8f0;
+      --acc1:#22d3ee;
+      --acc2:#fb923c;
+      --acc3:#10b981;
+      --acc4:#a78bfa;
+      --ring:#1e293b;
+      --glow1:rgba(34,211,238,.15);
+      --glow2:rgba(251,146,60,.12);
     }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,var(--bg),#0a0f1e) fixed;color:var(--text)}
-    .app{display:grid;grid-template-rows:auto 1fr;min-height:100vh}
-    header{position:sticky;top:0;z-index:30;backdrop-filter:saturate(140%) blur(10px);background:linear-gradient(180deg,rgba(15,23,42,.9),rgba(15,23,42,.6));border-bottom:1px solid var(--ring)}
-    .bar{display:flex;align-items:center;gap:16px;padding:14px 18px}
-    .logo{display:flex;align-items:center;gap:10px;font-weight:700}
-    .dot{width:10px;height:10px;border-radius:999px;background:linear-gradient(135deg,var(--acc1),var(--acc2))}
-    .title{letter-spacing:.3px}
-    .pill{margin-left:auto;display:flex;gap:8px}
-    .pill > div{background:var(--card);border:1px solid var(--ring);padding:6px 10px;border-radius:999px;font-size:12px;color:var(--muted)}
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;overflow-x:hidden}
+    body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:radial-gradient(ellipse 120% 80% at 50% -20%, var(--glow1), transparent 60%),
+                 radial-gradient(ellipse 100% 60% at 80% 100%, var(--glow2), transparent 50%),
+                 linear-gradient(180deg,var(--bg),#020815);
+      background-attachment:fixed;color:var(--text)}
+    .app{display:grid;grid-template-rows:auto 1fr auto;min-height:100vh}
+    
+    /* Header */
+    header{position:sticky;top:0;z-index:30;
+      backdrop-filter:saturate(180%) blur(20px);
+      background:linear-gradient(180deg,rgba(10,17,40,.95),rgba(10,17,40,.85));
+      border-bottom:1px solid var(--ring);
+      box-shadow:0 4px 20px rgba(0,0,0,.3)}
+    .bar{display:flex;align-items:center;gap:20px;padding:16px 24px;flex-wrap:wrap}
+    .logo{display:flex;align-items:center;gap:12px;font-weight:700;font-size:18px}
+    .dot{width:12px;height:12px;border-radius:999px;
+      background:linear-gradient(135deg,var(--acc1),var(--acc2));
+      box-shadow:0 0 20px var(--acc1),0 0 40px var(--acc1);
+      animation:pulse 2s ease-in-out infinite}
+    @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.1);opacity:.8}}
+    .title{letter-spacing:.5px}
+    .header-actions{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 16px;border-radius:12px;border:1px solid rgba(255,255,255,.1);
+      background:linear-gradient(135deg,rgba(34,211,238,.15),rgba(16,185,129,.1));
+      color:var(--text);font-weight:600;cursor:pointer;font-size:13px;
+      transition:all .3s ease;white-space:nowrap}
+    .btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(34,211,238,.25);
+      border-color:var(--acc1)}
+    .btn-logout{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(220,38,38,.15));
+      border-color:rgba(239,68,68,.3)}
+    .btn-logout:hover{border-color:#ef4444;box-shadow:0 8px 24px rgba(239,68,68,.3)}
 
     /* Layout */
-    .main{display:grid;grid-template-columns:280px 1fr;gap:18px;padding:18px}
-    .side{display:flex;flex-direction:column;gap:12px}
-    .panel{background:var(--panel);border:1px solid var(--ring);border-radius:16px;padding:14px}
+    .main{display:grid;grid-template-columns:300px 1fr;gap:24px;padding:24px;max-width:2000px;margin:0 auto}
+    .side{display:flex;flex-direction:column;gap:16px;position:sticky;top:90px;height:fit-content}
+    .panel{background:var(--panel);border:1px solid var(--ring);border-radius:20px;padding:20px;
+      box-shadow:0 8px 32px rgba(0,0,0,.2);transition:all .3s ease}
+    .panel:hover{border-color:rgba(34,211,238,.3);box-shadow:0 12px 40px rgba(0,0,0,.3)}
 
-    .filters .group{display:flex;flex-direction:column;gap:6px}
-    .filters label{font-size:12px;color:var(--muted)}
-    .filters select,.filters input{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--ring);background:#0d1933;color:var(--text);outline:none}
+    /* Filters */
+    .filters .group{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+    .filters label{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+    .filters select,.filters input{width:100%;padding:12px 14px;border-radius:12px;
+      border:1px solid var(--ring);background:var(--card);color:var(--text);outline:none;
+      font-size:14px;transition:all .2s ease}
+    .filters select:hover,.filters input:hover{border-color:var(--acc1)}
+    .filters select:focus,.filters input:focus{border-color:var(--acc1);box-shadow:0 0 0 3px rgba(34,211,238,.1)}
 
-    .content{display:grid;grid-template-columns:repeat(12,1fr);gap:18px}
-    .card{background:var(--card);border:1px solid var(--ring);border-radius:18px;padding:14px;min-height:140px;display:flex;flex-direction:column}
-    .card h3{margin:0 0 8px;font-size:14px;color:#cbd5e1;font-weight:600}
-    .kpi{font-size:34px;font-weight:700;line-height:1.1}
-    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:12px}
+    /* Content Grid */
+    .content{display:grid;grid-template-columns:repeat(12,1fr);gap:24px}
+    .card{background:var(--card);border:1px solid var(--ring);border-radius:20px;
+      padding:24px;min-height:160px;display:flex;flex-direction:column;
+      box-shadow:0 8px 32px rgba(0,0,0,.2);transition:all .3s ease;position:relative;overflow:hidden}
+    .card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:linear-gradient(90deg,var(--acc1),var(--acc2),var(--acc3));opacity:0;transition:opacity .3s}
+    .card:hover{border-color:rgba(34,211,238,.4);transform:translateY(-4px);
+      box-shadow:0 16px 48px rgba(0,0,0,.3)}
+    .card:hover::before{opacity:1}
+    .card h3{margin:0 0 12px;font-size:13px;color:var(--muted);font-weight:600;
+      text-transform:uppercase;letter-spacing:1px}
+    
+    /* KPI Cards */
+    .kpi-main{font-size:48px;font-weight:700;line-height:1;
+      background:linear-gradient(135deg,var(--acc1),var(--acc3));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      background-clip:text;margin-bottom:12px}
+    .kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+    .kpi-item{background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.2);
+      border-radius:12px;padding:12px;text-align:center}
+    .kpi-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+    .kpi-value{font-size:24px;font-weight:700;margin-top:4px}
+    .kpi-item:nth-child(1) .kpi-value{color:var(--acc3)}
+    .kpi-item:nth-child(2) .kpi-value{color:var(--acc2)}
+    .kpi-item:nth-child(3) .kpi-value{color:var(--acc4)}
 
-    .footer{padding:10px 18px;color:var(--muted);border-top:1px solid var(--ring)}
+    /* India Map */
+    #indiaMap{width:100%;height:400px;background:var(--panel);border-radius:16px;
+      display:flex;align-items:center;justify-content:center;color:var(--muted);
+      position:relative;overflow:hidden}
+    .map-placeholder{text-align:center;padding:40px}
+    .state-label{position:absolute;font-size:11px;color:var(--text);font-weight:600;
+      background:rgba(0,0,0,.7);padding:4px 8px;border-radius:6px;pointer-events:none}
 
-    /* Login overlay */
-    .overlay{position:fixed;inset:0;background:radial-gradient(1200px 800px at 10% 10%,rgba(34,211,238,.15),transparent 60%),radial-gradient(1000px 700px at 100% 0,rgba(16,185,129,.1),transparent 60%),#051024;display:grid;place-items:center;z-index:50}
-    .login{width:min(92vw,380px);background:var(--panel);border:1px solid var(--ring);border-radius:20px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.45)}
-    .login h2{margin:0 0 4px;font-size:20px}
-    .login p{margin:0 0 14px;color:var(--muted);font-size:13px}
-    .field{display:flex;flex-direction:column;gap:6px;margin:10px 0}
-    .field label{font-size:12px;color:var(--muted)}
-    .field input{padding:12px;border-radius:12px;border:1px solid var(--ring);background:#0d1933;color:var(--text)}
-    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 14px;border-radius:12px;border:1px solid #174162;background:linear-gradient(180deg,#14324f,#0c2744);color:#e6f4ff;font-weight:600;cursor:pointer}
-    .btn:hover{filter:brightness(1.05)}
-    .err{color:#fca5a5;font-size:12px;min-height:16px}
+    .footer{padding:16px 24px;color:var(--muted);border-top:1px solid var(--ring);
+      text-align:center;font-size:13px;background:var(--panel)}
 
-    /* Responsive */
-    @media (max-width: 1000px){
+    /* Login */
+    .overlay{position:fixed;inset:0;
+      background:radial-gradient(ellipse 80% 60% at 50% 40%, rgba(34,211,238,.2), transparent 70%),
+                 radial-gradient(ellipse 60% 50% at 20% 80%, rgba(16,185,129,.15), transparent 60%),
+                 #020510;
+      display:grid;place-items:center;z-index:100;backdrop-filter:blur(10px)}
+    .login{width:min(92vw,420px);background:var(--panel);border:1px solid rgba(34,211,238,.3);
+      border-radius:24px;padding:32px;
+      box-shadow:0 24px 80px rgba(0,0,0,.6),0 0 100px rgba(34,211,238,.15);
+      animation:slideIn .5s ease}
+    @keyframes slideIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    .login h2{margin:0 0 8px;font-size:24px}
+    .login p{margin:0 0 24px;color:var(--muted);font-size:14px}
+    .field{display:flex;flex-direction:column;gap:8px;margin:16px 0}
+    .field label{font-size:12px;color:var(--muted);font-weight:600}
+    .field input{padding:14px;border-radius:12px;border:1px solid var(--ring);
+      background:var(--card);color:var(--text);font-size:14px}
+    .field input:focus{outline:none;border-color:var(--acc1);box-shadow:0 0 0 3px rgba(34,211,238,.1)}
+    .err{color:#fca5a5;font-size:13px;min-height:18px;margin-top:8px}
+
+    @media (max-width: 1100px){
       .main{grid-template-columns:1fr}
+      .side{position:relative;top:0}
+      .kpi-grid{grid-template-columns:repeat(3,1fr)}
+    }
+    @media (max-width: 640px){
+      .bar{padding:12px 16px}
+      .main{padding:16px;gap:16px}
+      .kpi-grid{grid-template-columns:1fr}
+      .header-actions{width:100%;justify-content:flex-start}
     }
   </style>
 </head>
@@ -74,117 +151,157 @@
 <div class="app">
   <header>
     <div class="bar">
-      <div class="logo"><span class="dot"></span><span class="title">Coromandel CPC Reward Campaign Dashboard</span></div>
-      <div class="pill">
-        <div id="kpi-total">Scans: 0</div>
-        <div id="kpi-yes">Approved: 0</div>
-        <div id="kpi-pending">Pending: 0</div>
+      <div class="logo"><span class="dot"></span><span class="title">CPC Campaign Dashboard</span></div>
+      <div class="header-actions">
+        <button class="btn" id="downloadBtn">📥 Download Data</button>
+        <button class="btn btn-logout" id="logoutBtn">🚪 Logout</button>
       </div>
     </div>
   </header>
 
   <main class="main">
-    <!-- Sidebar Filters -->
     <aside class="side">
       <div class="panel filters">
+        <h3 style="margin-bottom:20px;font-size:16px;color:var(--text)">🎯 Filters</h3>
         <div class="group">
-          <label for="state">State</label>
+          <label for="dateFrom">📅 Date From</label>
+          <input id="dateFrom" type="date" />
+        </div>
+        <div class="group">
+          <label for="dateTo">📅 Date To</label>
+          <input id="dateTo" type="date" />
+        </div>
+        <div class="group">
+          <label for="state">📍 State</label>
           <select id="state"></select>
         </div>
         <div class="group">
-          <label for="district">District</label>
+          <label for="district">🏘️ District</label>
           <select id="district"></select>
         </div>
         <div class="group">
-          <label for="retailer">Retailer</label>
+          <label for="retailer">🏪 Retailer</label>
           <select id="retailer"></select>
         </div>
         <div class="group">
-          <label for="product">Product</label>
+          <label for="product">📦 Product</label>
           <select id="product"></select>
         </div>
         <div class="group">
-          <label for="qtyMin">Quantity (≥)</label>
+          <label for="qtyMin">🔢 Quantity (≥)</label>
           <input id="qtyMin" type="number" min="0" step="1" placeholder="0" />
         </div>
         <div class="group">
-          <label for="status">Approved Status</label>
+          <label for="status">✅ Approved Status</label>
           <select id="status"></select>
         </div>
-        <div class="row" style="margin-top:6px">
-          <button class="btn" id="resetBtn">Reset Filters</button>
-        </div>
+        <button class="btn" id="resetBtn" style="width:100%;margin-top:8px">🔄 Reset Filters</button>
       </div>
-      <div class="panel">
-        <div class="row">CSV Source:</div>
-        <div class="row" style="word-break:break-all"><code id="csvPath">./data.csv</code></div>
+      <div class="panel" style="padding:16px">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px">CSV Source:</div>
+        <div style="word-break:break-all;font-size:12px;font-family:monospace;color:var(--acc1)" id="csvPath">./data.csv</div>
       </div>
     </aside>
 
-    <!-- Content -->
     <section class="content">
-      <div class="card" style="grid-column: span 3">
-        <h3>Total Scans</h3>
-        <div class="kpi" id="kpiTotalBig">0</div>
-        <div class="row" id="kpiMeta"></div>
-      </div>
-      <div class="card" style="grid-column: span 3">
-        <h3>Retailer Approval Status </h3>
-        <canvas id="statusChart" height="140"></canvas>
-      </div>
+      <!-- Total Scans with sub-metrics -->
       <div class="card" style="grid-column: span 6">
-        <h3>Time Trend (Scans per Day)</h3>
+        <h3>📊 Total Scans</h3>
+        <div class="kpi-main" id="kpiTotalBig">0</div>
+        <div class="kpi-grid">
+          <div class="kpi-item">
+            <div class="kpi-label">Approved</div>
+            <div class="kpi-value" id="kpiYes">0</div>
+          </div>
+          <div class="kpi-item">
+            <div class="kpi-label">Rejected</div>
+            <div class="kpi-value" id="kpiNo">0</div>
+          </div>
+          <div class="kpi-item">
+            <div class="kpi-label">Pending</div>
+            <div class="kpi-value" id="kpiPending">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status Chart -->
+      <div class="card" style="grid-column: span 6">
+        <h3>📈 Submission Status</h3>
+        <canvas id="statusChart" height="200"></canvas>
+      </div>
+
+      <!-- Trend Chart -->
+      <div class="card" style="grid-column: span 12">
+        <h3>📉 Time Trend (Scans per Day)</h3>
         <canvas id="trendChart" height="140"></canvas>
       </div>
 
+      <!-- India Map -->
       <div class="card" style="grid-column: span 6">
-        <h3>Retailer Performance (Scans)</h3>
-        <canvas id="retailerChart" height="160"></canvas>
-      </div>
-      <div class="card" style="grid-column: span 6">
-        <h3>District-wise Scans</h3>
-        <canvas id="districtChart" height="160"></canvas>
+        <h3>🗺️ State-wise Distribution</h3>
+        <div id="indiaMap">
+          <div class="map-placeholder">
+            <div style="font-size:48px;margin-bottom:12px">🇮🇳</div>
+            <div style="font-size:14px">India Map Visualization</div>
+            <div style="font-size:12px;margin-top:8px;opacity:.7">State-wise scan distribution</div>
+          </div>
+        </div>
       </div>
 
+      <!-- Top States Table -->
+      <div class="card" style="grid-column: span 6">
+        <h3>🏆 Top States by Scans</h3>
+        <div id="statesTable" style="overflow-y:auto;max-height:380px;margin-top:12px"></div>
+      </div>
+
+      <!-- Retailer Performance -->
+      <div class="card" style="grid-column: span 6">
+        <h3>🏪 Retailer Performance</h3>
+        <canvas id="retailerChart" height="180"></canvas>
+      </div>
+
+      <!-- District Scans -->
+      <div class="card" style="grid-column: span 6">
+        <h3>🏘️ District-wise Scans</h3>
+        <canvas id="districtChart" height="180"></canvas>
+      </div>
+
+      <!-- Product Basket -->
       <div class="card" style="grid-column: span 12">
-        <h3>Product Basket (Parsed from Cart Items)</h3>
-        <canvas id="productChart" height="140"></canvas>
+        <h3>📦 Product Basket (Parsed from Cart Items)</h3>
+        <canvas id="productChart" height="160"></canvas>
       </div>
     </section>
   </main>
-  <div class="footer">© 2025 Coromandel CPC</div>
+
+  <div class="footer">
+    © 2025 Coromandel CPC — Advanced Campaign Dashboard • Built with ❤️ for Data-Driven Decisions
+  </div>
 </div>
 
 <!-- Login Overlay -->
-<div class="overlay" id="loginOverlay" aria-hidden="false">
+<div class="overlay" id="loginOverlay">
   <form class="login" id="loginForm">
-    <h2>Secure Access</h2>
-    <p>Please login to view the dashboard.</p>
+    <h2>🔐 Secure Access</h2>
+    <p>Please authenticate to view the campaign dashboard.</p>
     <div class="field">
       <label>Username</label>
-      <input id="u" autocomplete="username" placeholder="Username" />
+      <input id="u" autocomplete="username" placeholder="Enter username" />
     </div>
     <div class="field">
       <label>Password</label>
-      <input id="p" type="password" autocomplete="current-password" placeholder="Password" />
+      <input id="p" type="password" autocomplete="current-password" placeholder="Enter password" />
     </div>
-    <div class="row" style="justify-content:space-between">
-      <button class="btn" type="submit">Login</button>
-      <span class="err" id="err"></span>
-    </div>
+    <button class="btn" type="submit" style="width:100%;margin-top:8px">Login</button>
+    <div class="err" id="err"></div>
   </form>
 </div>
 
 <script>
-  // =====================
-  //  CONFIG
-  // =====================
-  const CSV_URL = './data.csv'; // Put your data.csv at repo root (or adjust path)
+  const CSV_URL = './data.csv';
   document.getElementById('csvPath').textContent = CSV_URL;
 
-  // =====================
-  //  SIMPLE LOGIN (client-side; suitable for lightweight gating only)
-  // =====================
+  // Login
   const VALID_USER = 'digicides';
   const VALID_PASS = 'coro@cpc';
   const overlay = document.getElementById('loginOverlay');
@@ -194,6 +311,7 @@
 
   function unlock(){ overlay.style.display='none'; }
   if(localStorage.getItem(LS_KEY)==='1'){ unlock(); }
+  
   form.addEventListener('submit', (e)=>{
     e.preventDefault();
     const u = document.getElementById('u').value.trim();
@@ -202,25 +320,27 @@
       localStorage.setItem(LS_KEY,'1');
       unlock();
     } else {
-      errEl.textContent = 'Invalid credentials';
+      errEl.textContent = '❌ Invalid credentials. Please try again.';
     }
   });
 
-  // =====================
-  //  UTILITIES
-  // =====================
-  const by = (k)=> (a,b)=> a[k]>b[k]?1:(a[k]<b[k]?-1:0);
+  // Logout
+  document.getElementById('logoutBtn').addEventListener('click', ()=>{
+    if(confirm('Are you sure you want to logout?')){
+      localStorage.removeItem(LS_KEY);
+      location.reload();
+    }
+  });
+
+  // Utilities
   const trim = (s)=> (s==null?'' : String(s).trim());
   const toDateKey = (dt)=>{
     if(!dt) return '';
-    const d = new Date(dt.replace(/-/g,'/')); // tolerate 'YYYY-MM-DD HH:mm:ss'
+    const d = new Date(dt.replace(/-/g,'/'));
     if(isNaN(d)) return '';
     return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
   };
-
   function uniqSorted(arr){ return [...new Set(arr.filter(Boolean))].sort((a,b)=>a.localeCompare(b)); }
-
-  // Parse "Cart Items" like: "Fantac Plus - qty 2 - 1000ml, Benofit - qty 1 - 400gms"
   function parseProducts(cartStr){
     const map = new Map();
     const s = trim(cartStr);
@@ -228,7 +348,6 @@
     const parts = s.split(',');
     for(const raw of parts){
       const item = raw.trim();
-      // capture: name, qty (optional)
       const m = item.match(/^(.+?)\s*-\s*qty\s*(\d+)/i) || item.match(/^(.+?)\s*$/);
       if(m){
         const name = trim(m[1]).replace(/\s{2,}/g,' ');
@@ -239,51 +358,70 @@
     return map;
   }
 
-  // =====================
-  //  STATE
-  // =====================
+  // State
   let RAW = [];
-  let FILTERS = { state:'', district:'', retailer:'', product:'', qtyMin:0, status:'' };
+  let FILTERS = { dateFrom:'', dateTo:'', state:'', district:'', retailer:'', product:'', qtyMin:0, status:'' };
 
-  // =====================
-  //  DOM REFS
-  // =====================
+  // DOM
+  const selDateFrom = document.getElementById('dateFrom');
+  const selDateTo = document.getElementById('dateTo');
   const selState = document.getElementById('state');
   const selDistrict = document.getElementById('district');
   const selRetailer = document.getElementById('retailer');
   const selProduct = document.getElementById('product');
   const inpQtyMin = document.getElementById('qtyMin');
   const selStatus = document.getElementById('status');
+  
   document.getElementById('resetBtn').addEventListener('click', ()=>{
-    FILTERS = { state:'', district:'', retailer:'', product:'', qtyMin:0, status:'' };
+    FILTERS = { dateFrom:'', dateTo:'', state:'', district:'', retailer:'', product:'', qtyMin:0, status:'' };
+    selDateFrom.value = selDateTo.value = '';
     selState.value = selDistrict.value = selRetailer.value = selProduct.value = selStatus.value = '';
     inpQtyMin.value = '';
     render();
   });
 
-  // =====================
-  //  CHARTS (reuse instances)
-  // =====================
+  // Download CSV
+  document.getElementById('downloadBtn').addEventListener('click', ()=>{
+    const filtered = applyFilters(RAW);
+    if(filtered.length === 0){ alert('No data to download!'); return; }
+    const csv = Papa.unparse(filtered);
+    const blob = new Blob([csv], {type:'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'cpc_data_export_' + new Date().toISOString().slice(0,10) + '.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // Charts
   const charts = {};
   function makeChart(id, type, data, opts){
     const ctx = document.getElementById(id).getContext('2d');
-    if(charts[id]){ charts[id].data = data; charts[id].options = opts; charts[id].update(); return charts[id]; }
+    if(charts[id]){ 
+      charts[id].data = data; 
+      charts[id].options = opts; 
+      charts[id].update(); 
+      return charts[id]; 
+    }
     charts[id] = new Chart(ctx, { type, data, options: opts });
     return charts[id];
   }
-
   function palette(n){
     const base = [ '#22d3ee','#fb923c','#10b981','#a78bfa','#f472b6','#fbbf24','#60a5fa','#34d399','#f87171' ];
     const arr = []; for(let i=0;i<n;i++) arr.push(base[i%base.length]);
     return arr;
   }
 
-  // =====================
-  //  RENDER PIPELINE
-  // =====================
+  // Apply Filters
   function applyFilters(rows){
     const f = FILTERS;
     return rows.filter(r=>{
+      if(f.dateFrom || f.dateTo){
+        const scanDate = toDateKey(trim(r['Scan Date']));
+        if(f.dateFrom && scanDate < f.dateFrom) return false;
+        if(f.dateTo && scanDate > f.dateTo) return false;
+      }
       if(f.state && trim(r.State)!==f.state) return false;
       if(f.district && trim(r.District)!==f.district) return false;
       if(f.retailer && trim(r['Retailer Name'])!==f.retailer) return false;
@@ -295,7 +433,6 @@
           if(!has) return false;
           if((f.qtyMin||0)>0 && (map.get(f.product)||0) < f.qtyMin) return false;
         } else if((f.qtyMin||0)>0){
-          // any product >= qtyMin qualifies
           let ok=false; for(const v of map.values()){ if(v>=f.qtyMin){ ok=true; break; } }
           if(!ok) return false;
         }
@@ -309,11 +446,11 @@
     const yes = rows.filter(r=>/^yes$/i.test(trim(r['Submission Status']))).length;
     const pending = rows.filter(r=>/^pending$/i.test(trim(r['Submission Status']))).length;
     const no = rows.filter(r=>/^no$/i.test(trim(r['Submission Status']))).length;
-    document.getElementById('kpi-total').textContent = `Scans: ${total}`;
-    document.getElementById('kpi-yes').textContent = `Approved: ${yes}`;
-    document.getElementById('kpi-pending').textContent = `Pending: ${pending}`;
+    
     document.getElementById('kpiTotalBig').textContent = total.toLocaleString();
-    document.getElementById('kpiMeta').textContent = `${yes} Yes • ${no} No • ${pending} Pending`;
+    document.getElementById('kpiYes').textContent = yes.toLocaleString();
+    document.getElementById('kpiNo').textContent = no.toLocaleString();
+    document.getElementById('kpiPending').textContent = pending.toLocaleString();
   }
 
   function buildCounts(rows, key){
@@ -325,127 +462,71 @@
     return [...m.entries()].sort((a,b)=>b[1]-a[1]);
   }
 
+  function renderStatesTable(rows){
+    const states = buildCounts(rows, 'State').slice(0, 10);
+    let html = '<div style="font-size:13px">';
+    states.forEach((s, i)=>{
+      const bar = Math.round((s[1] / (states[0][1] || 1)) * 100);
+      html += `<div style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+          <span style="font-weight:600;color:var(--text)">${i+1}. ${s[0]}</span>
+          <span style="color:var(--acc1);font-weight:700">${s[1]}</span>
+        </div>
+        <div style="width:100%;height:6px;background:rgba(34,211,238,.15);border-radius:3px;overflow:hidden">
+          <div style="width:${bar}%;height:100%;background:linear-gradient(90deg,var(--acc1),var(--acc3));border-radius:3px"></div>
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+    document.getElementById('statesTable').innerHTML = html;
+  }
+
   function renderCharts(rows){
-    // Status donut
+    // Status
     const sYes = rows.filter(r=>/^yes$/i.test(trim(r['Submission Status']))).length;
     const sNo = rows.filter(r=>/^no$/i.test(trim(r['Submission Status']))).length;
     const sPending = rows.filter(r=>/^pending$/i.test(trim(r['Submission Status']))).length;
     makeChart('statusChart','doughnut',{
-      labels:['Yes','No','Pending'],
-      datasets:[{ data:[sYes,sNo,sPending], backgroundColor:palette(3) }]
+      labels:['Approved','Rejected','Pending'],
+      datasets:[{ data:[sYes,sNo,sPending], backgroundColor:['#10b981','#fb923c','#a78bfa'], borderWidth:0 }]
     },{
-      plugins:{ legend:{ labels:{ color: '#cbd5e1' } } },
-      cutout:'62%'
+      plugins:{ legend:{ labels:{ color: '#cbd5e1', padding:15, font:{size:13} } } },
+      cutout:'65%'
     });
 
-    // Trend by day
+    // Trend
     const trendMap = new Map();
     for(const r of rows){ const k = toDateKey(trim(r['Scan Date'])); if(k) trendMap.set(k,(trendMap.get(k)||0)+1); }
     const trend = [...trendMap.entries()].sort((a,b)=>a[0].localeCompare(b[0]));
     makeChart('trendChart','line',{
       labels: trend.map(x=>x[0]),
-      datasets:[{ data: trend.map(x=>x[1]), borderWidth:2, tension:.3 }]
-    },{ scales:{ x:{ ticks:{ color:'#8aa1c6' } }, y:{ ticks:{ color:'#8aa1c6' }, grid:{ color:'#1e2a44' } } }, plugins:{ legend:{ display:false } } });
+      datasets:[{ 
+        data: trend.map(x=>x[1]), 
+        borderColor:'#22d3ee',
+        backgroundColor:'rgba(34,211,238,.1)',
+        borderWidth:3, 
+        tension:.4,
+        fill:true,
+        pointRadius:4,
+        pointHoverRadius:6
+      }]
+    },{ 
+      scales:{ 
+        x:{ ticks:{ color:'#8aa1c6', maxRotation:45 }, grid:{display:false} }, 
+        y:{ ticks:{ color:'#8aa1c6' }, grid:{ color:'#1e2a44' } } 
+      }, 
+      plugins:{ legend:{ display:false } } 
+    });
 
-    // Retailer performance
-    const retailers = buildCounts(rows,'Retailer Name').slice(0,12);
+    // Retailer
+    const retailers = buildCounts(rows,'Retailer Name').slice(0,10);
     makeChart('retailerChart','bar',{
       labels: retailers.map(x=>x[0]),
-      datasets:[{ data: retailers.map(x=>x[1]), backgroundColor: palette(retailers.length) }]
-    },{ indexAxis:'y', plugins:{ legend:{ display:false } }, scales:{ x:{ ticks:{ color:'#8aa1c6' } }, y:{ ticks:{ color:'#cbd5e1' } } } });
+      datasets:[{ data: retailers.map(x=>x[1]), backgroundColor: palette(retailers.length), borderWidth:0 }]
+    },{ 
+      indexAxis:'y', 
+      plugins:{ legend:{ display:false } }, 
+      scales:{ x:{ ticks:{ color:'#8aa1c6' }, grid:{color:'#1e2a44'} }, y:{ ticks:{ color:'#cbd5e1',font:{size:11} }, grid:{display:false} } } 
+    });
 
-    // District scans
-    const districts = buildCounts(rows,'District').slice(0,12);
-    makeChart('districtChart','bar',{
-      labels: districts.map(x=>x[0]),
-      datasets:[{ data: districts.map(x=>x[1]), backgroundColor: palette(districts.length) }]
-    },{ indexAxis:'y', plugins:{ legend:{ display:false } }, scales:{ x:{ ticks:{ color:'#8aa1c6' } }, y:{ ticks:{ color:'#cbd5e1' } } } });
-
-    // Product basket
-    const pMap = new Map();
-    for(const r of rows){
-      const m = parseProducts(r['Cart Items']);
-      for(const [name,qty] of m){ pMap.set(name,(pMap.get(name)||0)+qty); }
-    }
-    const pArr = [...pMap.entries()].sort((a,b)=>b[1]-a[1]).slice(0,16);
-    makeChart('productChart','bar',{
-      labels: pArr.map(x=>x[0]),
-      datasets:[{ data: pArr.map(x=>x[1]), backgroundColor: palette(pArr.length) }]
-    },{ plugins:{ legend:{ display:false } }, scales:{ x:{ ticks:{ color:'#cbd5e1', maxRotation:30, minRotation:0 } }, y:{ ticks:{ color:'#8aa1c6' } } } });
-  }
-
-  function populateFilters(rows){
-    const states = uniqSorted(rows.map(r=>trim(r.State)));
-    const dists  = uniqSorted(rows.map(r=>trim(r.District)));
-    const rets   = uniqSorted(rows.map(r=>trim(r['Retailer Name'])));
-    const products = uniqSorted(rows.flatMap(r=>[...parseProducts(r['Cart Items']).keys()]));
-    const statuses = ['','Yes','No','Pending'];
-
-    function fill(sel, items){ sel.innerHTML = ''; const opt0 = document.createElement('option'); opt0.value=''; opt0.textContent='All'; sel.appendChild(opt0); for(const v of items){ const o=document.createElement('option'); o.value=v; o.textContent=v; sel.appendChild(o);} }
-    fill(selState, states); fill(selDistrict, dists); fill(selRetailer, rets); fill(selProduct, products);
-    fill(selStatus, statuses);
-  }
-
-  function attachFilterHandlers(){
-    selState.onchange = ()=>{ FILTERS.state = selState.value; render(); };
-    selDistrict.onchange = ()=>{ FILTERS.district = selDistrict.value; render(); };
-    selRetailer.onchange = ()=>{ FILTERS.retailer = selRetailer.value; render(); };
-    selProduct.onchange = ()=>{ FILTERS.product = selProduct.value; render(); };
-    selStatus.onchange = ()=>{ FILTERS.status = selStatus.value; render(); };
-    let to=null; inpQtyMin.oninput = ()=>{ clearTimeout(to); to=setTimeout(()=>{ FILTERS.qtyMin = Number(inpQtyMin.value||0); render(); }, 180); };
-  }
-
-  function render(){
-    const rows = applyFilters(RAW);
-    updateKpis(rows);
-    // Defer charts to next frame for smoother feel
-    requestAnimationFrame(()=> renderCharts(rows));
-  }
-
-  // =====================
-  //  LOAD CSV
-  // =====================
-  function normalizeRow(r){
-    // ensure all expected columns exist
-    const obj = {
-      'User ID': r['User ID']||r['UserID']||r['id']||'',
-      'Phone Number': r['Phone Number']||r['Phone']||r['phone']||'',
-      'First Name': r['First Name']||r['FirstName']||'',
-      'Last Name': r['Last Name']||r['LastName']||'',
-      'District': r['District']||'',
-      'State': r['State']||'',
-      'Language': r['Language']||'',
-      'Pin Code': r['Pin Code']||r['Pincode']||'',
-      'QR Code': r['QR Code']||'',
-      'Land Acreage': r['Land Acreage']||r['Land']||'',
-      'Crop Name': r['Crop Name']||'',
-      'Scan Date': r['Scan Date']||r['Date']||'',
-      'RIN': r['RIN']||'',
-      'Retailer Name': r['Retailer Name']||r['Retailer']||'',
-      'Cart Items': r['Cart Items']||'',
-      'Coupon Code': r['Coupon Code']||'',
-      'Submission Status': r['Submission Status']||r['Approved Status']||''
-    };
-    return obj;
-  }
-
-  Papa.parse(CSV_URL, {
-    download: true,
-    header: true,
-    skipEmptyLines: true,
-    complete: (res)=>{
-      RAW = res.data.map(normalizeRow);
-      populateFilters(RAW);
-      attachFilterHandlers();
-      render();
-    },
-    error: (err)=>{
-      console.error('CSV load error', err);
-      alert('Failed to load data.csv. Ensure the file exists at '+CSV_URL);
-    }
-  });
-</script>
-</body>
-</html>
-
-
+    // District
