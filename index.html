@@ -7,6 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <style>
@@ -104,17 +106,18 @@
     .kpi-item:nth-child(3) .kpi-value{color:var(--acc4)}
 
     /* India Map */
-    #indiaMapContainer{width:100%;height:600px;position:relative;background:var(--bg);
+    #indiaMapContainer{width:100%;height:600px;position:relative;
       border-radius:16px;overflow:hidden;border:2px solid var(--ring)}
-    #indiaMap{width:100%;height:100%}
-    .state-region{cursor:pointer;transition:all .2s ease;stroke:#94a3b8;stroke-width:1.5}
-    .state-region:hover{opacity:.8;stroke:#0ea5e9;stroke-width:2}
-    .map-tooltip{position:absolute;background:rgba(255,255,255,.98);
-      padding:12px 16px;border-radius:10px;pointer-events:none;
-      box-shadow:0 8px 24px rgba(15,23,42,.15);border:2px solid var(--acc1);
-      font-size:13px;font-weight:600;color:var(--text);display:none;z-index:100}
+    #indiaMap{width:100%;height:100%;z-index:1}
+    .leaflet-container{background:var(--bg);font-family:Inter,sans-serif}
+    .leaflet-popup-content-wrapper{background:white;border-radius:12px;box-shadow:0 8px 24px rgba(15,23,42,.2);border:2px solid var(--acc1)}
+    .leaflet-popup-content{margin:14px;font-size:13px;font-weight:600;color:var(--text)}
+    .leaflet-popup-tip{background:white;border:2px solid var(--acc1)}
+    .map-popup-state{font-size:15px;font-weight:700;color:var(--acc1);margin-bottom:6px}
+    .map-popup-count{font-size:20px;font-weight:700;color:var(--text)}
+    .map-popup-label{font-size:11px;color:var(--muted);text-transform:uppercase}
     .legend{position:absolute;bottom:20px;right:20px;background:rgba(255,255,255,.95);
-      padding:16px;border-radius:12px;box-shadow:0 4px 16px var(--shadow);border:2px solid var(--ring)}
+      padding:16px;border-radius:12px;box-shadow:0 4px 16px var(--shadow);border:2px solid var(--ring);z-index:1000}
     .legend-title{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;text-transform:uppercase}
     .legend-item{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:11px}
     .legend-color{width:24px;height:16px;border-radius:4px;border:1px solid var(--border)}
@@ -271,8 +274,7 @@
       <div class="card" style="grid-column: span 12">
         <h3>🗺️ India - State-wise Distribution</h3>
         <div id="indiaMapContainer">
-          <svg id="indiaMap" viewBox="0 0 400 450" preserveAspectRatio="xMidYMid meet"></svg>
-          <div class="map-tooltip" id="mapTooltip"></div>
+          <div id="indiaMap"></div>
           <div class="legend">
             <div class="legend-title">Scan Intensity</div>
             <div class="legend-item"><div class="legend-color" style="background:#dcfce7"></div><span>Low (0-25%)</span></div>
@@ -578,99 +580,146 @@
     });
   }
 
-  // India Map with accurate state boundaries
-  const stateCoords = {
-    'Jammu and Kashmir': 'M174,48 L176,46 L178,44 L182,43 L186,42 L190,43 L194,45 L197,48 L199,52 L200,56 L199,60 L197,63 L194,65 L190,66 L186,66 L183,65 L180,63 L177,60 L175,56 L174,52 Z',
-    'Ladakh': 'M200,30 L205,28 L210,28 L215,30 L218,33 L220,37 L220,42 L218,46 L215,49 L210,51 L205,51 L200,49 L197,46 L195,42 L195,37 L197,33 Z',
-    'Himachal Pradesh': 'M186,68 L190,67 L194,68 L197,70 L199,73 L200,77 L199,81 L197,84 L194,86 L190,87 L186,86 L183,84 L181,81 L180,77 L181,73 L183,70 Z',
-    'Punjab': 'M175,70 L179,69 L183,70 L186,72 L188,75 L189,79 L188,83 L186,86 L183,88 L179,89 L175,88 L172,86 L170,83 L169,79 L170,75 L172,72 Z',
-    'Chandigarh': 'M180,77 L181,76 L182,77 L181,78 Z',
-    'Uttarakhand': 'M200,78 L204,77 L208,78 L211,80 L213,83 L214,87 L213,91 L211,94 L208,96 L204,97 L200,96 L197,94 L195,91 L194,87 L195,83 L197,80 Z',
-    'Haryana': 'M180,88 L184,87 L188,88 L191,90 L193,93 L194,97 L193,101 L191,104 L188,106 L184,107 L180,106 L177,104 L175,101 L174,97 L175,93 L177,90 Z',
-    'Delhi': 'M186,98 L187,97 L188,98 L187,99 Z',
-    'Rajasthan': 'M140,100 L145,99 L150,100 L155,102 L160,105 L165,109 L169,114 L172,120 L174,127 L175,134 L174,141 L172,148 L169,154 L165,159 L160,163 L155,166 L150,167 L145,167 L140,165 L135,162 L131,158 L128,153 L126,147 L125,140 L126,133 L128,126 L131,120 L135,114 L138,108 Z',
-    'Uttar Pradesh': 'M195,100 L200,99 L205,100 L210,102 L215,105 L220,109 L224,114 L227,120 L229,127 L230,134 L229,141 L227,148 L224,154 L220,159 L215,163 L210,166 L205,167 L200,167 L195,165 L191,162 L188,158 L186,153 L185,147 L186,140 L188,133 L191,126 L194,120 L197,114 L200,108 L203,102 Z',
-    'Bihar': 'M232,148 L237,147 L242,148 L246,150 L249,153 L251,157 L252,161 L251,165 L249,168 L246,170 L242,171 L237,171 L233,169 L230,166 L228,162 L227,158 L228,154 L230,151 Z',
-    'Sikkim': 'M253,130 L254,129 L255,130 L254,131 Z',
-    'Arunachal Pradesh': 'M260,115 L268,113 L276,114 L283,117 L288,122 L291,128 L292,135 L290,141 L286,146 L280,149 L273,150 L266,148 L260,144 L256,138 L254,131 L254,124 L256,118 Z',
-    'Nagaland': 'M280,152 L283,151 L286,152 L288,154 L289,157 L288,160 L286,162 L283,163 L280,162 L278,160 L277,157 L278,154 Z',
-    'Manipur': 'M283,165 L285,164 L287,165 L288,167 L288,170 L287,172 L285,173 L283,172 L282,170 L282,167 Z',
-    'Mizoram': 'M280,175 L282,174 L284,175 L285,177 L285,179 L284,181 L282,182 L280,181 L279,179 L279,177 Z',
-    'Tripura': 'M275,168 L277,167 L279,168 L280,170 L280,172 L279,174 L277,175 L275,174 L274,172 L274,170 Z',
-    'Meghalaya': 'M268,155 L271,154 L274,155 L276,157 L277,160 L276,163 L274,165 L271,166 L268,165 L266,163 L265,160 L266,157 Z',
-    'Assam': 'M254,135 L262,133 L270,135 L276,139 L280,144 L282,150 L280,156 L276,160 L270,162 L262,163 L254,161 L248,157 L245,152 L244,146 L246,140 L250,136 Z',
-    'West Bengal': 'M240,172 L245,171 L250,172 L254,174 L257,177 L259,181 L260,185 L259,189 L257,192 L254,194 L250,195 L245,195 L241,193 L238,190 L236,186 L235,182 L236,178 L238,175 Z',
-    'Jharkhand': 'M228,168 L233,167 L238,168 L242,170 L245,173 L247,177 L248,181 L247,185 L245,188 L242,190 L238,191 L233,191 L229,189 L226,186 L224,182 L223,178 L224,174 L226,171 Z',
-    'Odisha': 'M238,193 L243,192 L248,193 L252,195 L255,198 L257,202 L258,207 L257,212 L255,216 L252,219 L248,221 L243,222 L239,221 L235,218 L232,214 L230,209 L229,204 L230,199 L232,196 Z',
-    'Chhattisgarh': 'M215,168 L220,167 L225,168 L229,170 L232,173 L234,177 L235,181 L234,185 L232,188 L229,190 L225,191 L220,191 L216,189 L213,186 L211,182 L210,178 L211,174 L213,171 Z',
-    'Madhya Pradesh': 'M175,148 L182,147 L189,148 L196,150 L203,153 L209,157 L214,162 L217,168 L219,174 L219,181 L217,187 L214,192 L209,196 L203,199 L196,200 L189,200 L182,198 L176,195 L171,190 L167,184 L165,177 L165,170 L167,163 L171,157 L174,152 Z',
-    'Gujarat': 'M120,150 L127,149 L134,151 L140,154 L145,159 L149,165 L151,172 L152,179 L151,186 L149,192 L145,197 L140,201 L134,203 L127,204 L121,203 L115,200 L110,196 L106,190 L104,183 L104,176 L106,169 L110,163 L115,158 L119,154 Z',
-    'Daman and Diu': 'M128,192 L129,191 L130,192 L129,193 Z',
-    'Dadra and Nagar Haveli': 'M135,195 L136,194 L137,195 L136,196 Z',
-    'Maharashtra': 'M145,205 L152,204 L159,206 L166,209 L172,214 L177,220 L180,227 L182,234 L182,241 L180,247 L177,252 L172,256 L166,259 L159,260 L152,260 L145,258 L139,255 L134,250 L130,244 L128,237 L127,230 L128,223 L130,216 L134,210 L139,207 Z',
-    'Telangana': 'M183,240 L188,239 L193,240 L197,242 L200,245 L202,249 L203,253 L202,257 L200,260 L197,262 L193,263 L188,263 L184,261 L181,258 L179,254 L178,250 L179,246 L181,243 Z',
-    'Andhra Pradesh': 'M195,264 L202,263 L209,265 L215,268 L220,273 L223,279 L225,286 L225,293 L223,299 L220,304 L215,308 L209,310 L202,311 L196,310 L190,307 L185,302 L182,296 L180,289 L180,282 L182,275 L185,270 L190,267 Z',
-    'Karnataka': 'M152,262 L159,261 L166,263 L172,266 L177,271 L181,277 L183,284 L184,291 L183,298 L181,304 L177,309 L172,313 L166,315 L159,316 L153,315 L147,312 L142,307 L138,301 L136,294 L136,287 L138,280 L142,274 L147,269 Z',
-    'Goa': 'M145,257 L148,256 L151,257 L153,259 L154,262 L153,265 L151,267 L148,268 L145,267 L143,265 L142,262 L143,259 Z',
-    'Kerala': 'M148,317 L153,316 L158,318 L161,321 L163,325 L164,330 L163,335 L161,339 L158,342 L153,344 L149,344 L144,342 L140,338 L137,333 L135,328 L135,323 L137,318 L140,315 L144,314 Z',
-    'Tamil Nadu': 'M160,318 L167,317 L174,319 L180,323 L185,328 L188,334 L190,341 L190,348 L188,354 L185,359 L180,363 L174,365 L167,366 L161,365 L155,362 L150,357 L147,351 L145,344 L145,337 L147,330 L150,324 L155,320 Z',
-    'Puducherry': 'M172,348 L173,347 L174,348 L173,349 Z',
-    'Lakshadweep': 'M95,310 L97,309 L99,310 L100,312 L100,314 L99,316 L97,317 L95,316 L94,314 L94,312 Z',
-    'Andaman and Nicobar Islands': 'M305,340 L308,338 L311,340 L312,343 L312,347 L311,350 L308,352 L305,351 L303,348 L303,343 Z'
+  // India Map with Leaflet and GeoJSON
+  let indiaMap = null;
+  let mapLayer = null;
+
+  // State coordinates (centroids for markers)
+  const stateCoordinates = {
+    'Andhra Pradesh': [15.9129, 79.7400],
+    'Arunachal Pradesh': [28.2180, 94.7278],
+    'Assam': [26.2006, 92.9376],
+    'Bihar': [25.0961, 85.3131],
+    'Chhattisgarh': [21.2787, 81.8661],
+    'Goa': [15.2993, 74.1240],
+    'Gujarat': [22.2587, 71.1924],
+    'Haryana': [29.0588, 76.0856],
+    'Himachal Pradesh': [31.1048, 77.1734],
+    'Jharkhand': [23.6102, 85.2799],
+    'Karnataka': [15.3173, 75.7139],
+    'Kerala': [10.8505, 76.2711],
+    'Madhya Pradesh': [22.9734, 78.6569],
+    'Maharashtra': [19.7515, 75.7139],
+    'Manipur': [24.6637, 93.9063],
+    'Meghalaya': [25.4670, 91.3662],
+    'Mizoram': [23.1645, 92.9376],
+    'Nagaland': [26.1584, 94.5624],
+    'Odisha': [20.9517, 85.0985],
+    'Punjab': [31.1471, 75.3412],
+    'Rajasthan': [27.0238, 74.2179],
+    'Sikkim': [27.5330, 88.5122],
+    'Tamil Nadu': [11.1271, 78.6569],
+    'Telangana': [18.1124, 79.0193],
+    'Tripura': [23.9408, 91.9882],
+    'Uttar Pradesh': [26.8467, 80.9462],
+    'Uttarakhand': [30.0668, 79.0193],
+    'West Bengal': [22.9868, 87.8550],
+    'Andaman and Nicobar Islands': [11.7401, 92.6586],
+    'Chandigarh': [30.7333, 76.7794],
+    'Dadra and Nagar Haveli': [20.1809, 73.0169],
+    'Daman and Diu': [20.4283, 72.8397],
+    'Lakshadweep': [10.5667, 72.6417],
+    'Delhi': [28.7041, 77.1025],
+    'Puducherry': [11.9416, 79.8083],
+    'Jammu and Kashmir': [33.7782, 76.5762],
+    'Ladakh': [34.1526, 77.5771]
   };
 
-  function renderIndiaMap(rows){
-    const stateCounts = new Map();
-    for(const r of rows){
-      const st = trim(r.State);
-      if(st) stateCounts.set(st, (stateCounts.get(st)||0)+1);
+  function getColorByIntensity(intensity) {
+    if (intensity > 0.75) return '#15803d';
+    if (intensity > 0.5) return '#22c55e';
+    if (intensity > 0.25) return '#86efac';
+    if (intensity > 0) return '#dcfce7';
+    return '#f1f5f9';
+  }
+
+  function initMap() {
+    if (indiaMap) return;
+    
+    indiaMap = L.map('indiaMap', {
+      center: [22.5, 82.5],
+      zoom: 5,
+      minZoom: 4,
+      maxZoom: 8,
+      zoomControl: true
+    });
+
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors',
+      maxZoom: 19
+    }).addTo(indiaMap);
+  }
+
+  function renderIndiaMap(rows) {
+    if (!indiaMap) {
+      initMap();
     }
-    
+
+    // Clear existing markers
+    if (mapLayer) {
+      indiaMap.removeLayer(mapLayer);
+    }
+
+    // Count scans by state
+    const stateCounts = new Map();
+    for (const r of rows) {
+      const st = trim(r.State);
+      if (st) stateCounts.set(st, (stateCounts.get(st) || 0) + 1);
+    }
+
     const maxCount = Math.max(...stateCounts.values(), 1);
-    const svg = document.getElementById('indiaMap');
-    const tooltip = document.getElementById('mapTooltip');
     
-    svg.innerHTML = '';
-    
-    for(const [state, path] of Object.entries(stateCoords)){
+    // Create marker cluster group
+    mapLayer = L.layerGroup();
+
+    // Add circle markers for each state
+    for (const [state, coords] of Object.entries(stateCoordinates)) {
       const count = stateCounts.get(state) || 0;
+      if (count === 0) continue;
+
       const intensity = count / maxCount;
-      let fillColor = '#f1f5f9';
-      if(intensity > 0.75) fillColor = '#15803d';
-      else if(intensity > 0.5) fillColor = '#22c55e';
-      else if(intensity > 0.25) fillColor = '#86efac';
-      else if(intensity > 0) fillColor = '#dcfce7';
-      
-      const pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      pathEl.setAttribute('d', path);
-      pathEl.setAttribute('fill', fillColor);
-      pathEl.setAttribute('class', 'state-region');
-      pathEl.setAttribute('data-state', state);
-      pathEl.setAttribute('data-count', count);
-      
-      pathEl.addEventListener('mouseenter', (e)=>{
-        tooltip.textContent = `${state}: ${count.toLocaleString()} scans`;
-        tooltip.style.display = 'block';
+      const color = getColorByIntensity(intensity);
+      const radius = Math.max(8, Math.min(40, Math.sqrt(count) * 3));
+
+      const circle = L.circleMarker(coords, {
+        radius: radius,
+        fillColor: color,
+        color: '#0ea5e9',
+        weight: 2,
+        opacity: 0.8,
+        fillOpacity: 0.7
       });
-      
-      pathEl.addEventListener('mousemove', (e)=>{
-        const rect = document.getElementById('indiaMapContainer').getBoundingClientRect();
-        tooltip.style.left = (e.clientX - rect.left + 15) + 'px';
-        tooltip.style.top = (e.clientY - rect.top - 40) + 'px';
+
+      const popupContent = `
+        <div class="map-popup-state">${state}</div>
+        <div class="map-popup-label">Total Scans</div>
+        <div class="map-popup-count">${count.toLocaleString()}</div>
+      `;
+
+      circle.bindPopup(popupContent, {
+        closeButton: true,
+        className: 'custom-popup'
       });
-      
-      pathEl.addEventListener('mouseleave', ()=>{
-        tooltip.style.display = 'none';
-      });
-      
-      pathEl.addEventListener('click', ()=>{
+
+      circle.on('click', () => {
         FILTERS.state = state;
         selState.value = state;
         render();
       });
-      
-      svg.appendChild(pathEl);
+
+      circle.addTo(mapLayer);
     }
+
+    mapLayer.addTo(indiaMap);
+
+    // Fit bounds to India
+    setTimeout(() => {
+      indiaMap.fitBounds([
+        [8, 68],
+        [37, 97]
+      ]);
+    }, 100);
   }
 
   function populateFilters(rows){
