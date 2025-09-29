@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Digicides • Campaign Analytics</title>
+  <!-- TailwindCSS (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <!-- PapaParse for CSV -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Day.js for dates -->
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.11/dayjs.min.js"></script>
+
+  <style>
+    :root{
+      --bg: #0b0f19;
+      --panel: #101528;
+      --accent: #9bff57;
+      --accent2: #6ce1ff;
+      --text: #e8eef9;
+      --muted: #98a2b3;
+      --chip: #1a2140;
+      --chip-active: #2a345d;
+    }
+    html, body { background: #070a12; color: var(--text); font-family: 'Inter', sans-serif; }
+    .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; }
+    .btn { background: linear-gradient(90deg, var(--accent), var(--accent2)); color:#00131a; font-weight:700; transition: all .2s; }
+    .btn:hover { filter: brightness(1.1); }
+    .chip { background: var(--chip); padding: 6px 12px; border-radius: 999px; cursor: pointer; color: var(--muted); }
+    .chip.active { background: var(--chip-active); color: var(--text); }
+    .grid-cards { display:grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 14px; }
+    canvas { background: #0c1224; border-radius: 12px; padding:10px; }
+    .neon-title { font-weight: 800; letter-spacing: .5px; background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .login-bg { position: fixed; inset:0; display:flex; align-items:center; justify-content:center; background:#05070f; z-index:50; }
+    .chart-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(320px,1fr)); gap:20px; }
+    .table-wrapper { max-height: 360px; overflow:auto; }
+    table { width:100%; border-collapse: collapse; font-size: 13px; }
+    th, td { border-bottom: 1px solid rgba(255,255,255,0.06); padding: 8px 10px; }
+    th { position: sticky; top:0; background: #0f1630; text-align:left; }
+  </style>
+</head>
+<body>
+  <!-- LOGIN OVERLAY -->
+  <div id="loginOverlay" class="login-bg">
+    <div class="glass p-8 w-full max-w-md">
+      <h1 class="text-2xl neon-title mb-4">Digicides • Campaign Dashboard</h1>
+      <form id="loginForm" class="space-y-4" autocomplete="off">
+        <input id="username" class="w-full px-3 py-2 rounded bg-[#0a1022] border border-slate-700" placeholder="Username" />
+        <input id="password" type="password" class="w-full px-3 py-2 rounded bg-[#0a1022] border border-slate-700" placeholder="Password" />
+        <button class="btn w-full py-2 rounded" type="submit">Login</button>
+        <p id="loginErr" class="hidden text-red-400 text-sm">Invalid credentials.</p>
+      </form>
+    </div>
+  </div>
+
+  <header class="p-5 flex items-center justify-between">
+    <h1 class="text-xl neon-title">Coromandel Campaign Insights</h1>
+  </header>
+
+  <!-- KPI CARDS -->
+  <section class="px-5">
+    <div class="grid-cards">
+      <div class="glass p-4"><p class="text-xs">Total Scans</p><p id="kpiTotal" class="text-2xl font-bold">0</p></div>
+      <div class="glass p-4"><p class="text-xs">Completed (Yes)</p><p id="kpiYes" class="text-2xl font-bold">0</p></div>
+      <div class="glass p-4"><p class="text-xs">Pending</p><p id="kpiPending" class="text-2xl font-bold">0</p></div>
+      <div class="glass p-4"><p class="text-xs">Completion Rate</p><p id="kpiRate" class="text-2xl font-bold">0%</p></div>
+    </div>
+  </section>
+
+  <!-- CHARTS -->
+  <section class="px-5 mt-6 chart-grid">
+    <div class="glass p-4"><h3 class="font-semibold mb-2">1) Submission Status</h3><canvas id="statusChart" height="150"></canvas></div>
+    <div class="glass p-4"><h3 class="font-semibold mb-2">2) Retailer Performance</h3><canvas id="retailerChart" height="150"></canvas></div>
+    <div class="glass p-4"><h3 class="font-semibold mb-2">3) Crop-wise Registrations</h3><canvas id="cropChart" height="150"></canvas></div>
+    <div class="glass p-4"><h3 class="font-semibold mb-2">4) Top Products</h3><canvas id="productChart" height="150"></canvas></div>
+    <div class="glass p-4"><h3 class="font-semibold mb-2">5) District/State Activity</h3><canvas id="regionChart" height="150"></canvas></div>
+    <div class="glass p-4"><h3 class="font-semibold mb-2">6) Avg Land by Crop</h3><canvas id="landChart" height="150"></canvas></div>
+    <div class="glass p-4 col-span-full"><h3 class="font-semibold mb-2">7) Time Trend</h3><canvas id="timeChart" height="200"></canvas></div>
+  </section>
+
+  <!-- DATA TABLE -->
+  <section class="px-5 mt-6 mb-16">
+    <div class="glass p-4">
+      <h3 class="font-semibold mb-2">Records</h3>
+      <div class="table-wrapper">
+        <table id="dataTable"><thead></thead><tbody></tbody></table>
+      </div>
+    </div>
+  </section>
+
+<script>
+// Login
+(function auth(){
+  if(sessionStorage.getItem('digicides_auth_ok')==='1'){ document.getElementById('loginOverlay').style.display='none'; fetchData(); return; }
+  document.getElementById('loginForm').addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const u=document.getElementById('username').value.trim();
+    const p=document.getElementById('password').value.trim();
+    if(u==='digicides' && p==='coromandel@cpc'){
+      sessionStorage.setItem('digicides_auth_ok','1');
+      document.getElementById('loginOverlay').style.display='none';
+      fetchData();
+    } else { document.getElementById('loginErr').classList.remove('hidden'); }
+  });
+})();
+
+let rows=[]; let charts={};
+const columnsOrder=['User ID','Phone Number','First Name','Last Name','District','State','Language','Pin Code','QR Code','Land Acreage','Crop Name','Scan Date','RIN','Retailer Name','Cart Items','Coupon Code','Submission Status'];
+
+function parseCartItems(cart){
+  if(!cart) return [];
+  return String(cart).split(/\s*,\s*/).map(p=>{const m=p.match(/^(.+?)\s*-\s*qty\s*(\d+)\s*-\s*([\w.]+)$/i); if(m){return{name:m[1].trim(),qty:+m[2],size:m[3]}} else return{name:p,qty:1,size:''};});
+}
+
+function normalizeAndParse(data){
+  rows=data.map(r=>{const o={}; columnsOrder.forEach(c=>o[c]=r[c]||''); o._cartParsed=parseCartItems(o['Cart Items']); return o;});
+  rebuild();
+}
+
+function fetchData(){
+  const url='https://raw.githubusercontent.com/USERNAME/REPO/main/data.csv'; // replace with your repo path
+  Papa.parse(url,{download:true,header:true,skipEmptyLines:true,complete:(res)=>normalizeAndParse(res.data)});
+}
+
+function rebuild(){
+  updateKPIs(rows);
+  updateCharts(rows);
+  renderTable(rows);
+}
+
+function updateKPIs(data){
+  const total=data.length;
+  const yes=data.filter(r=>r['Submission Status']==='Yes').length;
+  const pending=data.filter(r=>r['Submission Status']==='Pending').length;
+  const rate=total?Math.round(yes/total*100):0;
+  document.getElementById('kpiTotal').textContent=total;
+  document.getElementById('kpiYes').textContent=yes;
+  document.getElementById('kpiPending').textContent=pending;
+  document.getElementById('kpiRate').textContent=rate+'%';
+}
+
+function destroyChart(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+function makeChart(id,type,labels,data,label){destroyChart(id);charts[id]=new Chart(document.getElementById(id),{type,data:{labels,datasets:[{label,data}]},options:{plugins:{legend:{labels:{color:'#fff'}}},scales:{x:{ticks:{color:'#ccc'}},y:{ticks:{color:'#ccc'}}}}});}
+
+function updateCharts(data){
+  const status=data.reduce((m,r)=>(m[r['Submission Status']]=(m[r['Submission Status']]||0)+1,m),{});
+  makeChart('statusChart','doughnut',Object.keys(status),Object.values(status),'Status');
+  const retailers=data.reduce((m,r)=>(m[r['Retailer Name']]=(m[r['Retailer Name']]||0)+1,m),{});
+  makeChart('retailerChart','bar',Object.keys(retailers),Object.values(retailers),'Retailers');
+  const crops={}; data.forEach(r=>String(r['Crop Name']).split(',').forEach(c=>{crops[c]=(crops[c]||0)+1}));
+  makeChart('cropChart','bar',Object.keys(crops),Object.values(crops),'Crops');
+  const prods={}; data.forEach(r=>r._cartParsed.forEach(ci=>{prods[ci.name]=(prods[ci.name]||0)+ci.qty}));
+  makeChart('productChart','bar',Object.keys(prods),Object.values(prods),'Products');
+  const dists={}; data.forEach(r=>{dists[r.District]=(dists[r.District]||0)+1});
+  makeChart('regionChart','bar',Object.keys(dists),Object.values(dists),'Districts');
+  const land={}; const cnt={}; data.forEach(r=>{const c=r['Crop Name'];const a=parseFloat(r['Land Acreage'])||0;land[c]=(land[c]||0)+a;cnt[c]=(cnt[c]||0)+1});
+  const avg=Object.keys(land).map(k=>({k,v:land[k]/cnt[k]}));
+  makeChart('landChart','bar',avg.map(x=>x.k),avg.map(x=>x.v),'Avg Land');
+  const time={}; data.forEach(r=>{const d=dayjs(r['Scan Date']);if(d.isValid()){const k=d.format('YYYY-MM-DD HH');time[k]=(time[k]||0)+1}});
+  makeChart('timeChart','line',Object.keys(time),Object.values(time),'Trend');
+}
+
+function renderTable(data){
+  const thead=document.querySelector('#dataTable thead');
+  const tbody=document.querySelector('#dataTable tbody');
+  thead.innerHTML='<tr>'+columnsOrder.map(c=>`<th>${c}</th>`).join('')+'<th>Parsed Products</th></tr>';
+  tbody.innerHTML=data.map(r=>'<tr>'+columnsOrder.map(c=>`<td>${r[c]}</td>`).join('')+'<td>'+r._cartParsed.map(ci=>ci.name+' ('+ci.qty+')').join(', ')+'</td></tr>').join('');
+}
+</script>
+</body>
+</html>
