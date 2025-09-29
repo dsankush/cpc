@@ -10,150 +10,149 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <style>
-    :root{
-      --bg:#0f172a;--panel:#0b1223;--card:#111c32;--muted:#94a3b8;
-      --text:#e2e8f0;--acc1:#22d3ee;--acc2:#fb923c;--acc3:#10b981;--ring:#1e293b;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      background:linear-gradient(180deg,var(--bg),#0a0f1e) fixed;color:var(--text)}
+    :root{--bg:#0f172a;--panel:#0b1223;--card:#111c32;--muted:#94a3b8;
+      --text:#e2e8f0;--acc1:#22d3ee;--acc2:#fb923c;--acc3:#10b981;--ring:#1e293b;}
+    body{margin:0;font-family:Inter,sans-serif;background:linear-gradient(180deg,var(--bg),#0a0f1e);color:var(--text)}
     .app{display:grid;grid-template-rows:auto 1fr;min-height:100vh}
-    header{position:sticky;top:0;z-index:30;backdrop-filter:saturate(140%) blur(10px);
-      background:linear-gradient(180deg,rgba(15,23,42,.9),rgba(15,23,42,.6));border-bottom:1px solid var(--ring)}
+    header{position:sticky;top:0;z-index:30;background:rgba(15,23,42,.9);border-bottom:1px solid var(--ring)}
     .bar{display:flex;align-items:center;gap:16px;padding:14px 18px}
     .logo{display:flex;align-items:center;gap:10px;font-weight:700}
-    .dot{width:10px;height:10px;border-radius:999px;background:linear-gradient(135deg,var(--acc1),var(--acc2))}
-    .title{letter-spacing:.3px}
+    .dot{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,var(--acc1),var(--acc2))}
     .pill{margin-left:auto;display:flex;gap:8px;align-items:center}
-    .pill > div{background:var(--card);border:1px solid var(--ring);padding:6px 10px;border-radius:999px;
-      font-size:12px;color:var(--muted)}
-    .btn-small{padding:6px 12px;border-radius:8px;background:var(--card);color:var(--text);
-      font-size:12px;cursor:pointer;border:1px solid var(--ring)}
-    .btn-small:hover{filter:brightness(1.1)}
+    .pill>div{background:var(--card);border:1px solid var(--ring);padding:6px 10px;border-radius:999px;font-size:12px;color:var(--muted)}
+    .btn-small{padding:6px 12px;border-radius:8px;background:var(--card);color:var(--text);font-size:12px;cursor:pointer;border:1px solid var(--ring)}
     .main{display:grid;grid-template-columns:280px 1fr;gap:18px;padding:18px}
-    .side{display:flex;flex-direction:column;gap:12px}
     .panel{background:var(--panel);border:1px solid var(--ring);border-radius:16px;padding:14px}
-    .filters .group{display:flex;flex-direction:column;gap:6px}
+    .filters .group{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
     .filters label{font-size:12px;color:var(--muted)}
-    .filters select,.filters input{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--ring);
-      background:#0d1933;color:var(--text);outline:none}
+    .filters select,.filters input{padding:8px;border-radius:10px;border:1px solid var(--ring);background:#0d1933;color:var(--text)}
     .content{display:grid;grid-template-columns:repeat(12,1fr);gap:18px}
-    .card{background:var(--card);border:1px solid var(--ring);border-radius:18px;padding:14px;
-      min-height:140px;display:flex;flex-direction:column}
-    .card h3{margin:0 0 8px;font-size:14px;color:#cbd5e1;font-weight:600}
-    .kpi{font-size:34px;font-weight:700;line-height:1.1}
-    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:12px}
+    .card{background:var(--card);border:1px solid var(--ring);border-radius:18px;padding:14px}
+    .card h3{margin:0 0 8px;font-size:14px;color:#cbd5e1}
+    .kpi{font-size:34px;font-weight:700}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--muted)}
     .footer{padding:10px 18px;color:var(--muted);border-top:1px solid var(--ring)}
     .overlay{position:fixed;inset:0;background:#051024;display:grid;place-items:center;z-index:50}
-    .login{width:min(92vw,380px);background:var(--panel);border:1px solid var(--ring);
-      border-radius:20px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.45)}
-    .login h2{margin:0 0 4px;font-size:20px}
-    .login p{margin:0 0 14px;color:var(--muted);font-size:13px}
+    .login{width:min(92vw,380px);background:var(--panel);border:1px solid var(--ring);border-radius:20px;padding:22px}
+    .login h2{margin:0 0 6px;font-size:20px}
     .field{display:flex;flex-direction:column;gap:6px;margin:10px 0}
-    .field label{font-size:12px;color:var(--muted)}
-    .field input{padding:12px;border-radius:12px;border:1px solid var(--ring);background:#0d1933;color:var(--text)}
-    .btn{padding:11px 14px;border-radius:12px;border:1px solid #174162;background:#0c2744;
-      color:#e6f4ff;font-weight:600;cursor:pointer}
+    .field input{padding:10px;border-radius:10px;border:1px solid var(--ring);background:#0d1933;color:var(--text)}
+    .btn{padding:8px 12px;border-radius:8px;border:1px solid #174162;background:#0c2744;color:#e6f4ff;font-weight:600;cursor:pointer}
   </style>
 </head>
 <body>
 <div class="app">
   <header>
     <div class="bar">
-      <div class="logo"><span class="dot"></span><span class="title">CPC Campaign Dashboard</span></div>
+      <div class="logo"><span class="dot"></span>CPC Campaign Dashboard</div>
       <div class="pill">
         <div id="kpi-total">Scans: 0</div>
         <div id="kpi-yes">Approved: 0</div>
         <div id="kpi-pending">Pending: 0</div>
-        <!-- Logout Button -->
         <button class="btn-small" id="logoutBtn">Logout</button>
       </div>
     </div>
   </header>
 
   <main class="main">
-    <!-- Sidebar Filters -->
-    <aside class="side">
+    <!-- Sidebar -->
+    <aside>
       <div class="panel filters">
-        <div class="group"><label for="state">State</label><select id="state"></select></div>
-        <div class="group"><label for="district">District</label><select id="district"></select></div>
-        <div class="group"><label for="retailer">Retailer</label><select id="retailer"></select></div>
-        <div class="group"><label for="product">Product</label><select id="product"></select></div>
-        <div class="group"><label for="qtyMin">Quantity (≥)</label><input id="qtyMin" type="number" min="0" step="1" placeholder="0" /></div>
-        <div class="group"><label for="status">Approved Status</label><select id="status"></select></div>
-        <!-- Date Range -->
-        <div class="group"><label for="fromDate">From Date</label><input id="fromDate" type="date"></div>
-        <div class="group"><label for="toDate">To Date</label><input id="toDate" type="date"></div>
-        <div class="row" style="margin-top:6px">
-          <button class="btn" id="resetBtn">Reset Filters</button>
-          <button class="btn" id="downloadBtn">Download CSV</button>
+        <div class="group"><label>State</label><select id="state"></select></div>
+        <div class="group"><label>District</label><select id="district"></select></div>
+        <div class="group"><label>Retailer</label><select id="retailer"></select></div>
+        <div class="group"><label>Product</label><select id="product"></select></div>
+        <div class="group"><label>Quantity ≥</label><input id="qtyMin" type="number" min="0"></div>
+        <div class="group"><label>Status</label><select id="status"></select></div>
+        <div class="group"><label>From Date</label><input id="fromDate" type="date"></div>
+        <div class="group"><label>To Date</label><input id="toDate" type="date"></div>
+        <div class="row">
+          <button class="btn" id="resetBtn">Reset</button>
+          <button class="btn" id="downloadBtn">Download</button>
         </div>
-      </div>
-      <div class="panel">
-        <div class="row">CSV Source:</div>
-        <div class="row" style="word-break:break-all"><code id="csvPath">./data.csv</code></div>
       </div>
     </aside>
 
-    <!-- Content (unchanged charts) -->
+    <!-- Charts -->
     <section class="content">
-      <div class="card" style="grid-column: span 3"><h3>Total Scans</h3><div class="kpi" id="kpiTotalBig">0</div><div class="row" id="kpiMeta"></div></div>
-      <div class="card" style="grid-column: span 3"><h3>Submission Status (Approved)</h3><canvas id="statusChart" height="140"></canvas></div>
-      <div class="card" style="grid-column: span 6"><h3>Time Trend (Scans per Day)</h3><canvas id="trendChart" height="140"></canvas></div>
-      <div class="card" style="grid-column: span 6"><h3>Retailer Performance (Scans)</h3><canvas id="retailerChart" height="160"></canvas></div>
-      <div class="card" style="grid-column: span 6"><h3>District-wise Scans</h3><canvas id="districtChart" height="160"></canvas></div>
-      <div class="card" style="grid-column: span 12"><h3>Product Basket (Parsed from Cart Items)</h3><canvas id="productChart" height="140"></canvas></div>
+      <div class="card" style="grid-column: span 3"><h3>Total Scans</h3><div class="kpi" id="kpiTotalBig">0</div><div id="kpiMeta"></div></div>
+      <div class="card" style="grid-column: span 3"><h3>Status</h3><canvas id="statusChart"></canvas></div>
+      <div class="card" style="grid-column: span 6"><h3>Trend</h3><canvas id="trendChart"></canvas></div>
+      <div class="card" style="grid-column: span 6"><h3>Retailer</h3><canvas id="retailerChart"></canvas></div>
+      <div class="card" style="grid-column: span 6"><h3>District</h3><canvas id="districtChart"></canvas></div>
+      <div class="card" style="grid-column: span 12"><h3>Products</h3><canvas id="productChart"></canvas></div>
     </section>
   </main>
-  <div class="footer">© 2025 Coromandel CPC — Lightweight dashboard (no frameworks). Built for GitHub Pages.</div>
+  <div class="footer">© 2025 Coromandel CPC</div>
 </div>
 
-<!-- Login Overlay -->
+<!-- Login -->
 <div class="overlay" id="loginOverlay"><form class="login" id="loginForm">
   <h2>Secure Access</h2>
-  <p>Please login to view the dashboard.</p>
-  <div class="field"><label>Username</label><input id="u" /></div>
-  <div class="field"><label>Password</label><input id="p" type="password" /></div>
-  <div class="row"><button class="btn" type="submit">Login</button><span class="err" id="err"></span></div>
+  <div class="field"><input id="u" placeholder="Username"></div>
+  <div class="field"><input id="p" type="password" placeholder="Password"></div>
+  <button class="btn" type="submit">Login</button><span id="err" style="color:red;font-size:12px"></span>
 </form></div>
 
 <script>
-const CSV_URL='./data.csv';document.getElementById('csvPath').textContent=CSV_URL;
-const VALID_USER='digicides',VALID_PASS='coro@cpc',overlay=document.getElementById('loginOverlay'),LS_KEY='cpc_login_ok';
-function unlock(){overlay.style.display='none';}
-if(localStorage.getItem(LS_KEY)==='1'){unlock();}
-document.getElementById('loginForm').addEventListener('submit',e=>{
+const CSV_URL='./data.csv';
+const VALID_USER='digicides',VALID_PASS='coro@cpc';
+const overlay=document.getElementById('loginOverlay'),LS_KEY='cpc_login_ok';
+if(localStorage.getItem(LS_KEY)==='1') overlay.style.display='none';
+document.getElementById('loginForm').onsubmit=e=>{
  e.preventDefault();
- if(u.value.trim()===VALID_USER&&p.value===VALID_PASS){localStorage.setItem(LS_KEY,'1');unlock();}else err.textContent='Invalid credentials';
-});
-document.getElementById('logoutBtn').addEventListener('click',()=>{localStorage.removeItem(LS_KEY);location.reload();});
+ if(u.value.trim()===VALID_USER && p.value===VALID_PASS){localStorage.setItem(LS_KEY,'1');overlay.style.display='none';}
+ else err.textContent='Invalid!';
+};
+document.getElementById('logoutBtn').onclick=()=>{localStorage.removeItem(LS_KEY);location.reload();};
 
 let RAW=[],FILTERS={state:'',district:'',retailer:'',product:'',qtyMin:0,status:'',fromDate:'',toDate:''};
-fromDate.onchange=()=>{FILTERS.fromDate=fromDate.value;render();};
-toDate.onchange=()=>{FILTERS.toDate=toDate.value;render();};
+
+function trim(s){return (s||'').toString().trim();}
+function parseProducts(str){let m=new Map();if(!str)return m;str.split(',').forEach(it=>{let mt=it.match(/(.+?)\s*-\s*qty\s*(\d+)/i);if(mt){m.set(mt[1].trim(),(m.get(mt[1].trim())||0)++mt[2]);}});return m;}
+function toDateKey(dt){let d=new Date(dt);return isNaN(d)?'':d;}
 
 function applyFilters(rows){
  return rows.filter(r=>{
-   const dKey=new Date(r['Scan Date']);
-   if(FILTERS.fromDate&&dKey<new Date(FILTERS.fromDate))return false;
-   if(FILTERS.toDate&&dKey>new Date(FILTERS.toDate))return false;
-   return true; // rest of filters unchanged (your existing logic will still apply here)
+   if(FILTERS.state && trim(r.State)!==FILTERS.state) return false;
+   if(FILTERS.district && trim(r.District)!==FILTERS.district) return false;
+   if(FILTERS.retailer && trim(r['Retailer Name'])!==FILTERS.retailer) return false;
+   if(FILTERS.status && trim(r['Submission Status']).toLowerCase()!==FILTERS.status.toLowerCase()) return false;
+   let d=toDateKey(r['Scan Date']);
+   if(FILTERS.fromDate && d<new Date(FILTERS.fromDate)) return false;
+   if(FILTERS.toDate && d>new Date(FILTERS.toDate)) return false;
+   return true;
  });
 }
 
-// download filtered data
-downloadBtn.onclick=()=>{
- const rows=applyFilters(RAW);
- if(!rows.length){alert('No data');return;}
- const csv=[Object.keys(rows[0]).join(',')].concat(rows.map(r=>Object.values(r).map(v=>`"${(v||'').toString().replace(/"/g,'""')}"`).join(','))).join('\n');
- const blob=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='filtered_data.csv';a.click();
+// Reset
+resetBtn.onclick=()=>{
+  FILTERS={state:'',district:'',retailer:'',product:'',qtyMin:0,status:'',fromDate:'',toDate:''};
+  state.value=district.value=retailer.value=product.value=status.value='';
+  qtyMin.value=fromDate.value=toDate.value='';
+  render();
 };
 
-// keep your existing Papa.parse, populateFilters, renderCharts, render etc
-Papa.parse(CSV_URL,{download:true,header:true,skipEmptyLines:true,
- complete:(res)=>{RAW=res.data;render();},
- error:(err)=>{alert('Failed to load CSV: '+err);}
-});
+// Download
+downloadBtn.onclick=()=>{
+ let rows=applyFilters(RAW);
+ if(!rows.length){alert('No data');return;}
+ let csv=[Object.keys(rows[0]).join(',')].concat(rows.map(r=>Object.values(r).join(','))).join('\n');
+ let blob=new Blob([csv],{type:'text/csv'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='filtered.csv';a.click();
+};
+
+// Charts (simplified demo, reuse your full ones)
+const charts={};
+function makeChart(id,type,data){if(charts[id]){charts[id].data=data;charts[id].update();}else{charts[id]=new Chart(document.getElementById(id),{type,data});}}
+
+function render(){
+ let rows=applyFilters(RAW);
+ document.getElementById('kpi-total').textContent='Scans: '+rows.length;
+ document.getElementById('kpiTotalBig').textContent=rows.length;
+ makeChart('statusChart','doughnut',{labels:['Yes','No'],datasets:[{data:[rows.filter(r=>/yes/i.test(r['Submission Status'])).length,rows.filter(r=>/no/i.test(r['Submission Status'])).length]}]});
+}
+
+Papa.parse(CSV_URL,{download:true,header:true,skipEmptyLines:true,complete:res=>{RAW=res.data;render();}});
 </script>
 </body>
 </html>
