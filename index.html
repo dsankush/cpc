@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,7 +16,7 @@
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
   <style>
-   :root{
+    :root{
       --bg:#f8fafc;
       --panel:#ffffff;
       --card:#ffffff;
@@ -49,7 +50,26 @@
       border-bottom:2px solid var(--ring);
       box-shadow:0 4px 16px var(--shadow);
     }
-    .bar{display:flex;align-items:center;gap:20px;padding:20px 40px;flex-wrap:wrap}
+    .bar{display:flex;align-items:center;gap:20px;padding:20px 40px;flex-wrap:wrap;position:relative}
+    .hidden-theme-btn{
+      position:absolute;
+      top:10px;
+      left:10px;
+      width:40px;
+      height:40px;
+      background:transparent;
+      border:none;
+      cursor:pointer;
+      opacity:0;
+      z-index:999;
+      transition:opacity 0.3s ease;
+      display:none;
+    }
+    .hidden-theme-btn:hover{
+      opacity:0.1;
+      background:linear-gradient(135deg,var(--acc1),var(--acc4));
+      border-radius:8px;
+    }
     .logo{
       display:flex;align-items:center;gap:16px;
       padding:14px 28px;
@@ -503,6 +523,7 @@
 <div class="app">
   <header>
     <div class="bar">
+      <button class="hidden-theme-btn" onclick="window.location.href='theme-controller.html?key=theme2025'" title="Theme Controller (Authorized)"></button>
       <div class="logo">
         <span class="dot"></span>
         <h1 class="title">Coromandel CPC Campaign Dashboard</h1>
@@ -688,7 +709,7 @@
   </main>
 
   <div class="footer">
-    © 2025 Coromandel CPC
+    ✨ © 2025 Coromandel CPC — Empowering Agriculture through Innovation ✨
   </div>
 </div>
 
@@ -714,22 +735,47 @@
   const CSV_URL = './data.csv';
 
   // Login
-  const VALID_USER = 'digicides';
-  const VALID_PASS = 'coro@cpc';
+  const USERS = {
+    'digicides': { password: 'coro@cpc', role: 'user' },
+    'developer': { password: 'de^el0per', role: 'developer' }
+  };
+  
   const overlay = document.getElementById('loginOverlay');
   const form = document.getElementById('loginForm');
   const errEl = document.getElementById('err');
   const LS_KEY = 'cpc_login_ok';
+  const LS_ROLE_KEY = 'cpc_user_role';
+  const LS_USERNAME_KEY = 'cpc_username';
 
-  function unlock(){ overlay.style.display='none'; }
-  if(localStorage.getItem(LS_KEY)==='1'){ unlock(); }
+  function unlock(){ 
+    overlay.style.display='none';
+    const userRole = localStorage.getItem(LS_ROLE_KEY);
+    const themeBtn = document.querySelector('.hidden-theme-btn');
+    if(themeBtn) {
+      if(userRole === 'developer') {
+        themeBtn.style.display = 'block';
+      } else {
+        themeBtn.style.display = 'none';
+      }
+    }
+  }
+  
+  // Check if already logged in
+  if(localStorage.getItem(LS_KEY)==='1'){ 
+    unlock();
+  }
   
   form.addEventListener('submit', (e)=>{
     e.preventDefault();
     const u = document.getElementById('u').value.trim();
     const p = document.getElementById('p').value;
-    if(u===VALID_USER && p===VALID_PASS){
+    
+    // Check if user exists and password matches
+    if(USERS[u] && USERS[u].password === p){
       localStorage.setItem(LS_KEY,'1');
+      localStorage.setItem(LS_ROLE_KEY, USERS[u].role);
+      localStorage.setItem(LS_USERNAME_KEY, u);
+      
       unlock();
     } else {
       errEl.textContent = 'Invalid credentials. Please try again.';
@@ -739,7 +785,10 @@
   // Logout
   document.getElementById('logoutBtn').addEventListener('click', ()=>{
     if(confirm('Are you sure you want to logout?')){
+      // Clear all login-related data
       localStorage.removeItem(LS_KEY);
+      localStorage.removeItem(LS_ROLE_KEY);
+      localStorage.removeItem(LS_USERNAME_KEY);
       location.reload();
     }
   });
@@ -1487,9 +1536,60 @@
     }
   });
 </script>
+
+<!-- Theme Auto-Sync Script -->
+<script>
+  // Auto-apply theme from theme-controller
+  function applyThemeFromController() {
+    const savedTheme = localStorage.getItem('dashboardThemeActive');
+    if (savedTheme) {
+      try {
+        const theme = JSON.parse(savedTheme);
+        const root = document.documentElement;
+        
+        // Apply all CSS variables
+        if (theme.bg) root.style.setProperty('--bg', theme.bg);
+        if (theme.panel) root.style.setProperty('--panel', theme.panel);
+        if (theme.card) root.style.setProperty('--card', theme.card);
+        if (theme.cardHover) root.style.setProperty('--card-hover', theme.cardHover);
+        if (theme.muted) root.style.setProperty('--muted', theme.muted);
+        if (theme.text) root.style.setProperty('--text', theme.text);
+        if (theme.acc1) root.style.setProperty('--acc1', theme.acc1);
+        if (theme.acc2) root.style.setProperty('--acc2', theme.acc2);
+        if (theme.acc3) root.style.setProperty('--acc3', theme.acc3);
+        if (theme.acc4) root.style.setProperty('--acc4', theme.acc4);
+        if (theme.acc5) root.style.setProperty('--acc5', theme.acc5);
+        if (theme.ring) root.style.setProperty('--ring', theme.ring);
+        if (theme.border) root.style.setProperty('--border', theme.border);
+        if (theme.shadow) root.style.setProperty('--shadow', theme.shadow);
+        if (theme.shadowLg) root.style.setProperty('--shadow-lg', theme.shadowLg);
+        
+        // Apply fonts
+        if (theme.fontBody) document.body.style.fontFamily = theme.fontBody;
+        if (theme.fontHeadings) {
+          document.querySelectorAll('.title, .kpi-value').forEach(el => {
+            el.style.fontFamily = theme.fontHeadings;
+          });
+        }
+        
+        console.log('✅ Theme applied from Theme Controller');
+      } catch (e) {
+        console.error('Failed to apply theme:', e);
+      }
+    }
+  }
+  
+  // Apply theme on page load
+  applyThemeFromController();
+  
+  // Listen for theme updates from theme-controller (if both pages are open)
+  window.addEventListener('storage', function(e) {
+    if (e.key === 'dashboardThemeActive') {
+      applyThemeFromController();
+      console.log('🎨 Theme updated live!');
+    }
+  });
+</script>
+
 </body>
 </html>
-
-
-
-
