@@ -6,209 +6,432 @@
   <title>Coromandel CPC — Campaign Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-
-  <!-- 🔥 NEW: flatpickr for date-range picker -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
   <style>
-  :root{
-      --primary:#6366f1;
-      --secondary:#ec4899;
-      --accent:#10b981;
-      --warning:#f59e0b;
-      --danger:#ef4444;
-      --bg:#f8fafc;
+    :root{
+      --bg:#fefefe;
+      --panel:#ffffff;
       --card:#ffffff;
-      --text:#0f172a;
-      --muted:#64748b;
-      --border:#e2e8f0;
-      --shadow:rgba(0,0,0,0.05);
-      --shadow-lg:rgba(0,0,0,0.12);
-      }
-
+      --card-hover:#f8f9ff;
+      --muted:#6b7280;
+      --text:#1f2937;
+      --acc1:#6366f1;
+      --acc2:#f59e0b;
+      --acc3:#10b981;
+      --acc4:#ec4899;
+      --acc5:#8b5cf6;
+      --ring:#e5e7eb;
+      --border:#d1d5db;
+      --shadow:rgba(99,102,241,.08);
+      --shadow-lg:rgba(99,102,241,.15);
+      --gradient-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --gradient-accent: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      --gradient-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
     *{box-sizing:border-box;margin:0;padding:0}
     html,body{height:100%;overflow-x:hidden}
-    body {
-          font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-          background: linear-gradient(135deg, #f0f9ff 0%, #fef9c3 50%, #fdf2f8 100%);
-          background-attachment: fixed;
-          color: var(--text);
-        }
+    body{
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+      background-attachment:fixed;
+      color:var(--text);
+    }
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
     .app{display:grid;grid-template-rows:auto 1fr auto;min-height:100vh}
     
     /* Header */
-    header{position:sticky;top:0;z-index:30;
+    header{
+      position:sticky;top:0;z-index:30;
       backdrop-filter:saturate(180%) blur(20px);
-      background:rgba(255,255,255,.95);
-      border-bottom:2px solid var(--ring);
-      box-shadow:0 4px 20px var(--shadow)}
-    .bar{display:flex;align-items:center;gap:20px;padding:16px 24px;flex-wrap:wrap}
-    .logo{display:flex;align-items:center;gap:12px;font-weight:700;font-size:18px;color:var(--text)}
-    .dot{width:12px;height:12px;border-radius:999px;
-      background:linear-gradient(135deg,var(--acc1),var(--acc3));
-      box-shadow:0 0 20px rgba(14,165,233,.4);
-      animation:pulse 2s ease-in-out infinite}
-    @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.15);opacity:.7}}
-    .title{letter-spacing:.5px}
-    .header-actions{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      padding:10px 16px;border-radius:12px;border:2px solid var(--acc1);
-      background:linear-gradient(135deg,var(--acc1),#0284c7);
-      color:white;font-weight:600;cursor:pointer;font-size:13px;
-      transition:all .3s ease;white-space:nowrap;box-shadow:0 4px 12px rgba(14,165,233,.25)}
-    .btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(14,165,233,.4)}
-    .btn-logout{background:linear-gradient(135deg,#ef4444,#dc2626);
-      border-color:#ef4444;box-shadow:0 4px 12px rgba(239,68,68,.25)}
-    .btn-logout:hover{box-shadow:0 8px 24px rgba(239,68,68,.4)}
+      background:rgba(255,255,255,.98);
+      border-bottom:3px solid transparent;
+      border-image: linear-gradient(90deg, #667eea, #764ba2, #f093fb) 1;
+      box-shadow:0 8px 32px rgba(102,126,234,.2);
+    }
+    .bar{display:flex;align-items:center;gap:20px;padding:20px 32px;flex-wrap:wrap}
+    .logo{
+      display:flex; align-items:center; gap:20px;
+      padding:16px 32px;
+      border-radius:20px;
+      background:rgba(255,255,255,0.3);
+      backdrop-filter:blur(12px);
+      box-shadow:0 8px 24px rgba(102,126,234,0.25);
+      border: 2px solid rgba(255,255,255,0.5);
+    }
+    .dot{
+      width:22px; height:22px; border-radius:50%;
+      background:linear-gradient(135deg,#4facfe,#00f2fe);
+      box-shadow:0 4px 12px rgba(79,172,254,0.5);
+      animation:pulseGlow 2s ease-in-out infinite;
+    }
+    @keyframes pulseGlow{
+      0%,100%{transform:scale(1);opacity:1;box-shadow:0 4px 12px rgba(79,172,254,0.5)}
+      50%{transform:scale(1.2);opacity:.8;box-shadow:0 8px 24px rgba(79,172,254,0.8)}
+    }
+    .title{
+      font-size:2rem; 
+      margin:0;
+      color:#1f2937;
+      letter-spacing:0.5px;
+      font-weight:800;
+      background:linear-gradient(90deg,#667eea,#764ba2);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      background-clip:text;
+    }
+    .header-actions{margin-left:auto;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:12px 24px;border-radius:14px;border:none;
+      background:linear-gradient(135deg,#667eea,#764ba2);
+      color:white;font-weight:700;cursor:pointer;font-size:14px;
+      transition:all .3s ease;white-space:nowrap;
+      box-shadow:0 4px 16px rgba(102,126,234,.3);
+      position:relative;
+      overflow:hidden;
+    }
+    .btn::before{
+      content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);
+      transition:left .5s;
+    }
+    .btn:hover::before{left:100%}
+    .btn:hover{
+      transform:translateY(-3px) scale(1.02);
+      box-shadow:0 12px 32px rgba(102,126,234,.45);
+    }
+    .btn-logout{
+      background:linear-gradient(135deg,#f093fb,#f5576c);
+      box-shadow:0 4px 16px rgba(245,87,108,.3);
+    }
+    .btn-logout:hover{
+      box-shadow:0 12px 32px rgba(245,87,108,.45);
+    }
 
     /* Layout */
-    .main{display:flex;flex-direction:column;gap:24px;padding:24px 24px 24px 48px;max-width:100%;margin:0}
-    .panel{background:var(--panel);border:2px solid var(--ring);border-radius:16px;padding:20px;
-      box-shadow:0 4px 16px var(--shadow);transition:all .3s ease}
-    .panel:hover{border-color:var(--acc1);box-shadow:0 8px 24px var(--shadow-lg)}
+    .main{display:flex;flex-direction:column;gap:28px;padding:32px 48px 32px 48px;max-width:100%;margin:0}
+    .panel{
+      background:rgba(255,255,255,.95);
+      border:2px solid rgba(255,255,255,.5);
+      border-radius:20px;
+      padding:24px;
+      box-shadow:0 8px 32px rgba(102,126,234,.15);
+      backdrop-filter:blur(10px);
+      transition:all .3s ease;
+    }
+    .panel:hover{
+      border-color:rgba(102,126,234,.6);
+      box-shadow:0 12px 40px rgba(102,126,234,.25);
+      transform:translateY(-2px);
+    }
 
     /* Filters */
-    .filters-horizontal{background:var(--panel);border:2px solid var(--ring);border-radius:16px;
-      padding:20px 24px;box-shadow:0 4px 16px var(--shadow);display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;align-items:end}
-    .filters-horizontal .group{display:flex;flex-direction:column;gap:6px}
-    .filters-horizontal label{font-size:11px;color:var(--muted);font-weight:600;
-      text-transform:uppercase;letter-spacing:.5px}
-    .filters-horizontal select,.filters-horizontal input{width:100%;padding:10px 12px;
-      border-radius:10px;border:2px solid var(--ring);background:var(--bg);
-      color:var(--text);outline:none;font-size:13px;transition:all .2s ease}
-    .filters-horizontal select:hover,.filters-horizontal input:hover{border-color:var(--acc1)}
-    .filters-horizontal select:focus,.filters-horizontal input:focus{border-color:var(--acc1);
-      box-shadow:0 0 0 3px rgba(14,165,233,.1)}
-    .filters-horizontal .btn{padding:10px 20px;font-size:13px;white-space:nowrap}
+    .filters-horizontal{
+      background:rgba(255,255,255,.95);
+      border:2px solid rgba(255,255,255,.5);
+      border-radius:20px;
+      padding:24px 28px;
+      box-shadow:0 8px 32px rgba(102,126,234,.15);
+      backdrop-filter:blur(10px);
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+      gap:18px;
+      align-items:end;
+    }
+    .filters-horizontal .group{display:flex;flex-direction:column;gap:8px}
+    .filters-horizontal label{
+      font-size:11px;color:var(--muted);font-weight:700;
+      text-transform:uppercase;letter-spacing:.8px;
+    }
+    .filters-horizontal select,.filters-horizontal input{
+      width:100%;padding:12px 14px;
+      border-radius:12px;
+      border:2px solid var(--ring);
+      background:white;
+      color:var(--text);
+      outline:none;
+      font-size:13px;
+      font-weight:500;
+      transition:all .2s ease;
+    }
+    .filters-horizontal select:hover,.filters-horizontal input:hover{
+      border-color:#667eea;
+    }
+    .filters-horizontal select:focus,.filters-horizontal input:focus{
+      border-color:#667eea;
+      box-shadow:0 0 0 4px rgba(102,126,234,.1);
+    }
+    .filters-horizontal .btn{padding:12px 24px;font-size:13px;white-space:nowrap}
 
     /* Content Grid */
-    .content{display:grid;grid-template-columns:repeat(12,1fr);gap:24px}
-    .card{background:var(--card);border:2px solid var(--ring);border-radius:16px;
-      padding:24px;min-height:160px;display:flex;flex-direction:column;
-      box-shadow:0 4px 16px var(--shadow);transition:all .3s ease;position:relative;overflow:hidden}
-    .card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
-      background:linear-gradient(90deg,var(--acc1),var(--acc3),var(--acc2));opacity:0;transition:opacity .3s}
-    .card:hover{border-color:var(--acc1);transform:translateY(-4px);
-      box-shadow:0 12px 32px var(--shadow-lg)}
+    .content{display:grid;grid-template-columns:repeat(12,1fr);gap:28px}
+    .card{
+      background:rgba(255,255,255,.95);
+      border:2px solid rgba(255,255,255,.5);
+      border-radius:20px;
+      padding:28px;
+      min-height:180px;
+      display:flex;
+      flex-direction:column;
+      box-shadow:0 8px 32px rgba(102,126,234,.15);
+      backdrop-filter:blur(10px);
+      transition:all .3s ease;
+      position:relative;
+      overflow:hidden;
+    }
+    .card::before{
+      content:'';position:absolute;top:0;left:0;right:0;height:5px;
+      background:linear-gradient(90deg,#667eea,#764ba2,#f093fb,#f5576c);
+      opacity:0;transition:opacity .3s;
+    }
+    .card:hover{
+      border-color:rgba(102,126,234,.6);
+      transform:translateY(-4px);
+      box-shadow:0 16px 48px rgba(102,126,234,.25);
+    }
     .card:hover::before{opacity:1}
-    .card h3{margin:0 0 12px;font-size:13px;color:var(--muted);font-weight:700;
-      text-transform:uppercase;letter-spacing:1px}
+    .card h3{
+      margin:0 0 16px;
+      font-size:13px;
+      color:var(--muted);
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:1.2px;
+    }
     
     /* KPI Cards */
-    .kpi-hero{display:grid;grid-template-columns:200px 1fr;gap:32px;align-items:center}
-    .kpi-main-circle{width:200px;height:200px;border-radius:50%;
+    .kpi-hero{display:grid;grid-template-columns:220px 1fr;gap:40px;align-items:center}
+    .kpi-main-circle{
+      width:220px;height:220px;border-radius:50%;
       display:flex;flex-direction:column;align-items:center;justify-content:center;
-      background:linear-gradient(135deg,rgba(14,165,233,.15),rgba(16,185,129,.15));
-      border:4px solid var(--acc1);box-shadow:0 8px 32px rgba(14,165,233,.25);
-      position:relative}
-    .kpi-main-circle::after{content:'';position:absolute;inset:-8px;border-radius:50%;
-      background:linear-gradient(135deg,var(--acc1),var(--acc3));opacity:.2;z-index:-1;
-      animation:pulse 3s ease-in-out infinite}
-    .kpi-main-label{font-size:12px;color:var(--muted);font-weight:700;
-      text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
-    .kpi-main-value{font-size:56px;font-weight:800;line-height:1;
-      background:linear-gradient(135deg,var(--acc1),var(--acc3));
+      background:linear-gradient(135deg,rgba(102,126,234,.15),rgba(118,75,162,.15));
+      border:5px solid #667eea;
+      box-shadow:0 12px 48px rgba(102,126,234,.35);
+      position:relative;
+    }
+    .kpi-main-circle::after{
+      content:'';position:absolute;inset:-12px;border-radius:50%;
+      background:linear-gradient(135deg,#667eea,#764ba2);
+      opacity:.15;z-index:-1;
+      animation:pulseRing 3s ease-in-out infinite;
+    }
+    @keyframes pulseRing{
+      0%,100%{transform:scale(.95);opacity:.15}
+      50%{transform:scale(1.05);opacity:.25}
+    }
+    .kpi-main-label{
+      font-size:13px;color:var(--muted);font-weight:800;
+      text-transform:uppercase;letter-spacing:1.2px;margin-bottom:8px;
+    }
+    .kpi-main-value{
+      font-size:64px;font-weight:900;line-height:1;
+      background:linear-gradient(135deg,#667eea,#764ba2);
       -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-      background-clip:text}
-    .kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
-    .kpi-item{background:linear-gradient(135deg,rgba(14,165,233,.05),rgba(16,185,129,.05));
-      border:2px solid rgba(14,165,233,.15);border-radius:16px;padding:20px;
-      text-align:center;transition:all .3s ease;position:relative;overflow:hidden}
-    .kpi-item::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
-      background:linear-gradient(90deg,var(--acc3),var(--acc1));opacity:0;transition:opacity .3s}
-    .kpi-item:hover{transform:translateY(-4px);border-color:var(--acc1);
-      box-shadow:0 8px 24px rgba(14,165,233,.2)}
+      background-clip:text;
+    }
+    .kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:18px}
+    .kpi-item{
+      background:linear-gradient(135deg,rgba(255,255,255,.9),rgba(255,255,255,.7));
+      border:2px solid rgba(102,126,234,.2);
+      border-radius:18px;
+      padding:24px;
+      text-align:center;
+      transition:all .3s ease;
+      position:relative;
+      overflow:hidden;
+      backdrop-filter:blur(5px);
+    }
+    .kpi-item::before{
+      content:'';position:absolute;top:0;left:0;right:0;height:4px;
+      opacity:0;transition:opacity .3s;
+    }
+    .kpi-item:hover{
+      transform:translateY(-6px) scale(1.03);
+      box-shadow:0 12px 40px rgba(102,126,234,.25);
+      border-color:rgba(102,126,234,.4);
+    }
     .kpi-item:hover::before{opacity:1}
-    .kpi-label{font-size:11px;color:var(--muted);text-transform:uppercase;
-      letter-spacing:.8px;font-weight:700;margin-bottom:12px}
-    .kpi-value{font-size:36px;font-weight:800;margin-bottom:8px}
-    .kpi-item:nth-child(1){border-color:rgba(16,185,129,.2)}
-    .kpi-item:nth-child(1)::before{background:var(--acc3)}
-    .kpi-item:nth-child(1) .kpi-value{color:var(--acc3)}
-    .kpi-item:nth-child(2){border-color:rgba(249,115,22,.2)}
-    .kpi-item:nth-child(2)::before{background:var(--acc2)}
-    .kpi-item:nth-child(2) .kpi-value{color:var(--acc2)}
-    .kpi-item:nth-child(3){border-color:rgba(139,92,246,.2)}
-    .kpi-item:nth-child(3)::before{background:var(--acc4)}
-    .kpi-item:nth-child(3) .kpi-value{color:var(--acc4)}
-    .kpi-item:nth-child(4){border-color:rgba(59,130,246,.2)}
+    .kpi-label{
+      font-size:11px;color:var(--muted);text-transform:uppercase;
+      letter-spacing:1px;font-weight:800;margin-bottom:14px;
+    }
+    .kpi-value{font-size:40px;font-weight:900;margin-bottom:10px}
+    .kpi-item:nth-child(1){border-color:rgba(16,185,129,.25)}
+    .kpi-item:nth-child(1)::before{background:#10b981}
+    .kpi-item:nth-child(1) .kpi-value{color:#10b981}
+    .kpi-item:nth-child(2){border-color:rgba(245,158,11,.25)}
+    .kpi-item:nth-child(2)::before{background:#f59e0b}
+    .kpi-item:nth-child(2) .kpi-value{color:#f59e0b}
+    .kpi-item:nth-child(3){border-color:rgba(139,92,246,.25)}
+    .kpi-item:nth-child(3)::before{background:#8b5cf6}
+    .kpi-item:nth-child(3) .kpi-value{color:#8b5cf6}
+    .kpi-item:nth-child(4){border-color:rgba(59,130,246,.25)}
     .kpi-item:nth-child(4)::before{background:#3b82f6}
     .kpi-item:nth-child(4) .kpi-value{color:#3b82f6}
-    .kpi-item:nth-child(5){border-color:rgba(236,72,153,.2)}
+    .kpi-item:nth-child(5){border-color:rgba(236,72,153,.25)}
     .kpi-item:nth-child(5)::before{background:#ec4899}
     .kpi-item:nth-child(5) .kpi-value{color:#ec4899}
-    .kpi-percent{font-size:13px;color:var(--muted);font-weight:600}
+    .kpi-percent{font-size:13px;color:var(--muted);font-weight:700}
 
     /* India Map */
-    #indiaMapContainer{width:100%;height:700px;position:relative;
-      border-radius:16px;overflow:hidden;border:2px solid var(--ring)}
+    #indiaMapContainer{
+      width:100%;height:700px;position:relative;
+      border-radius:20px;overflow:hidden;
+      border:2px solid rgba(255,255,255,.5);
+    }
     #indiaMap{width:100%;height:100%;z-index:1}
-    .leaflet-container{background:linear-gradient(135deg, #f0f9ff 0%, #fef3c7 50%, #fce7f3 100%);font-family:Inter,sans-serif}
-    .leaflet-popup-content-wrapper{background:white;border-radius:16px;box-shadow:0 12px 40px rgba(15,23,42,.3);border:3px solid var(--acc1)}
-    .leaflet-popup-content{margin:20px;font-size:13px;color:var(--text)}
-    .leaflet-popup-tip{background:white;border:3px solid var(--acc1)}
-    .map-popup-state{font-size:18px;font-weight:800;color:var(--acc1);margin-bottom:12px;padding-bottom:10px;border-bottom:3px solid var(--ring)}
-    .map-popup-row{display:flex;justify-content:space-between;align-items:center;margin:10px 0;padding:8px 0}
-    .map-popup-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
-    .map-popup-value{font-size:20px;font-weight:800;color:var(--text)}
-    .map-popup-success{color:var(--acc3)!important}
-    .map-popup-pending{color:var(--acc4)!important}
-    .map-popup-rejected{color:var(--acc2)!important}
+    .leaflet-container{
+      background:linear-gradient(135deg, #f0f9ff 0%, #fef3c7 50%, #fce7f3 100%);
+      font-family:Inter,sans-serif;
+    }
+    .leaflet-popup-content-wrapper{
+      background:white;border-radius:18px;
+      box-shadow:0 16px 64px rgba(99,102,241,.3);
+      border:3px solid #667eea;
+    }
+    .leaflet-popup-content{margin:24px;font-size:14px;color:var(--text)}
+    .leaflet-popup-tip{background:white;border:3px solid #667eea}
+    .map-popup-state{
+      font-size:20px;font-weight:900;color:#667eea;
+      margin-bottom:16px;padding-bottom:12px;
+      border-bottom:3px solid var(--ring);
+    }
+    .map-popup-row{
+      display:flex;justify-content:space-between;align-items:center;
+      margin:12px 0;padding:10px 0;
+    }
+    .map-popup-label{
+      font-size:12px;color:var(--muted);
+      text-transform:uppercase;letter-spacing:.6px;font-weight:700;
+    }
+    .map-popup-value{font-size:22px;font-weight:900;color:var(--text)}
+    .map-popup-success{color:#10b981!important}
+    .map-popup-pending{color:#8b5cf6!important}
+    .map-popup-rejected{color:#f59e0b!important}
     .state-marker-pin{position:relative;width:60px;height:60px;display:flex;align-items:center;justify-content:center}
-    .state-marker-inner{position:relative;z-index:2;background:white;border-radius:12px;
-      padding:8px 12px;box-shadow:0 8px 24px rgba(15,23,42,.25);border:3px solid;
-      font-weight:800;font-size:14px;text-align:center;min-width:80px;
-      transition:all .3s ease;cursor:pointer}
-    .state-marker-inner:hover{transform:translateY(-4px) scale(1.05);box-shadow:0 12px 32px rgba(15,23,42,.4)}
-    .state-marker-name{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
-    .state-marker-count{font-size:18px;font-weight:900;display:flex;align-items:center;justify-content:center;gap:4px}
-    .marker-ripple{position:absolute;width:100%;height:100%;border-radius:50%;
-      background:radial-gradient(circle, rgba(14,165,233,.3) 0%, rgba(14,165,233,0) 70%);
-      animation:ripple 2s ease-in-out infinite;z-index:1}
-    @keyframes ripple{0%{transform:scale(.8);opacity:.7}50%{transform:scale(1.2);opacity:.3}100%{transform:scale(.8);opacity:.7}}
-    .state-marker-level-1{border-color:var(--acc3)}
-    .state-marker-level-1 .state-marker-count{color:var(--acc3)}
+    .state-marker-inner{
+      position:relative;z-index:2;
+      background:white;
+      border-radius:14px;
+      padding:10px 14px;
+      box-shadow:0 10px 32px rgba(99,102,241,.3);
+      border:3px solid;
+      font-weight:900;font-size:15px;
+      text-align:center;min-width:85px;
+      transition:all .3s ease;cursor:pointer;
+    }
+    .state-marker-inner:hover{
+      transform:translateY(-6px) scale(1.08);
+      box-shadow:0 16px 48px rgba(99,102,241,.5);
+    }
+    .state-marker-name{
+      font-size:10px;color:var(--muted);
+      text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px;
+    }
+    .state-marker-count{
+      font-size:19px;font-weight:900;
+      display:flex;align-items:center;justify-content:center;gap:5px;
+    }
+    .marker-ripple{
+      position:absolute;width:100%;height:100%;border-radius:50%;
+      background:radial-gradient(circle, rgba(102,126,234,.4) 0%, rgba(102,126,234,0) 70%);
+      animation:rippleEffect 2.5s ease-in-out infinite;z-index:1;
+    }
+    @keyframes rippleEffect{
+      0%{transform:scale(.8);opacity:.8}
+      50%{transform:scale(1.3);opacity:.3}
+      100%{transform:scale(.8);opacity:.8}
+    }
+    .state-marker-level-1{border-color:#10b981}
+    .state-marker-level-1 .state-marker-count{color:#10b981}
     .state-marker-level-2{border-color:#22c55e}
     .state-marker-level-2 .state-marker-count{color:#22c55e}
     .state-marker-level-3{border-color:#84cc16}
     .state-marker-level-3 .state-marker-count{color:#84cc16}
     .state-marker-level-4{border-color:#eab308}
     .state-marker-level-4 .state-marker-count{color:#eab308}
-    .state-marker-level-5{border-color:var(--acc2)}
-    .state-marker-level-5 .state-marker-count{color:var(--acc2)}
-    .legend{position:absolute;bottom:20px;right:20px;background:rgba(255,255,255,.98);
-      padding:20px;border-radius:16px;box-shadow:0 8px 24px var(--shadow-lg);border:3px solid var(--acc1);z-index:1000}
-    .legend-title{font-size:13px;font-weight:800;color:var(--text);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px}
-    .legend-item{display:flex;align-items:center;gap:10px;margin:8px 0;font-size:12px;font-weight:600}
-    .legend-color{width:28px;height:20px;border-radius:6px;border:2px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,.1)}
+    .state-marker-level-5{border-color:#f59e0b}
+    .state-marker-level-5 .state-marker-count{color:#f59e0b}
+    .legend{
+      position:absolute;bottom:24px;right:24px;
+      background:rgba(255,255,255,.98);
+      padding:24px;border-radius:18px;
+      box-shadow:0 12px 40px rgba(99,102,241,.25);
+      border:3px solid #667eea;z-index:1000;
+      backdrop-filter:blur(10px);
+    }
+    .legend-title{
+      font-size:14px;font-weight:900;color:var(--text);
+      margin-bottom:16px;text-transform:uppercase;letter-spacing:1.2px;
+    }
+    .legend-item{
+      display:flex;align-items:center;gap:12px;
+      margin:10px 0;font-size:13px;font-weight:700;
+    }
+    .legend-color{
+      width:32px;height:22px;border-radius:8px;
+      border:2px solid var(--border);
+      box-shadow:0 3px 10px rgba(0,0,0,.12);
+    }
 
-    .footer{padding:16px 24px;color:var(--muted);border-top:2px solid var(--ring);
-      text-align:center;font-size:13px;background:var(--panel);font-weight:500}
+    .footer{
+      padding:20px 32px;color:var(--muted);
+      border-top:3px solid transparent;
+      border-image: linear-gradient(90deg, #667eea, #764ba2, #f093fb) 1;
+      text-align:center;font-size:14px;
+      background:rgba(255,255,255,.95);
+      font-weight:600;
+      backdrop-filter:blur(10px);
+    }
 
     /* Login */
-    .overlay{position:fixed;inset:0;
-      background:linear-gradient(135deg, rgba(224,242,254,.95) 0%, rgba(254,243,199,.95) 50%, rgba(252,231,243,.95) 100%);
-      display:grid;place-items:center;z-index:100;backdrop-filter:blur(10px)}
-    .login{width:min(92vw,420px);background:white;border:2px solid var(--acc1);
-      border-radius:20px;padding:32px;
-      box-shadow:0 24px 80px rgba(15,23,42,.2);
-      animation:slideIn .5s ease}
-    @keyframes slideIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-    .login h2{margin:0 0 8px;font-size:24px;color:var(--text)}
-    .login p{margin:0 0 24px;color:var(--muted);font-size:14px}
-    .field{display:flex;flex-direction:column;gap:8px;margin:16px 0}
-    .field label{font-size:12px;color:var(--muted);font-weight:600}
-    .field input{padding:14px;border-radius:12px;border:2px solid var(--ring);
-      background:var(--bg);color:var(--text);font-size:14px}
-    .field input:focus{outline:none;border-color:var(--acc1);box-shadow:0 0 0 3px rgba(14,165,233,.1)}
-    .err{color:#ef4444;font-size:13px;min-height:18px;margin-top:8px;font-weight:500}
+    .overlay{
+      position:fixed;inset:0;
+      background:linear-gradient(135deg, rgba(102,126,234,.95) 0%, rgba(118,75,162,.95) 50%, rgba(240,147,251,.95) 100%);
+      display:grid;place-items:center;z-index:100;
+      backdrop-filter:blur(15px);
+    }
+    .login{
+      width:min(92vw,440px);
+      background:white;
+      border:3px solid rgba(255,255,255,.8);
+      border-radius:24px;
+      padding:40px;
+      box-shadow:0 32px 96px rgba(99,102,241,.3);
+      animation:slideIn .6s ease;
+    }
+    @keyframes slideIn{
+      from{opacity:0;transform:translateY(30px) scale(.95)}
+      to{opacity:1;transform:translateY(0) scale(1)}
+    }
+    .login h2{margin:0 0 10px;font-size:28px;color:var(--text);font-weight:900}
+    .login p{margin:0 0 28px;color:var(--muted);font-size:15px;font-weight:500}
+    .field{display:flex;flex-direction:column;gap:10px;margin:18px 0}
+    .field label{font-size:13px;color:var(--muted);font-weight:700;letter-spacing:.5px}
+    .field input{
+      padding:16px;border-radius:14px;
+      border:2px solid var(--ring);
+      background:white;color:var(--text);font-size:15px;
+      transition:all .2s ease;
+    }
+    .field input:focus{
+      outline:none;border-color:#667eea;
+      box-shadow:0 0 0 4px rgba(102,126,234,.15);
+    }
+    .err{color:#f5576c;font-size:14px;min-height:20px;margin-top:10px;font-weight:600}
 
     @media (max-width: 1100px){
       .kpi-hero{grid-template-columns:1fr}
@@ -218,12 +441,13 @@
       #indiaMapContainer{height:500px}
     }
     @media (max-width: 640px){
-      .bar{padding:12px 16px}
-      .main{padding:16px;gap:16px}
+      .bar{padding:16px 20px}
+      .main{padding:20px;gap:20px}
       .kpi-grid{grid-template-columns:1fr}
       .header-actions{width:100%;justify-content:flex-start}
       #indiaMapContainer{height:400px}
       .filters-horizontal{grid-template-columns:1fr}
+      .title{font-size:1.5rem}
     }
   </style>
 </head>
@@ -231,49 +455,13 @@
 <div class="app">
   <header>
     <div class="bar">
-      <div class="logo" style="
-    display:flex; align-items:center; gap:20px;
-    padding:20px 40px;
-    border-radius:20px;
-    background:rgba(255,255,255,0.2);
-    backdrop-filter:blur(12px);
-    box-shadow:0 8px 20px rgba(0,0,0,0.15);">
-
-    <!-- Clean dot -->
-    <span style="
-      width:22px; height:22px; border-radius:50%;
-      background:linear-gradient(135deg,#4facfe,#00f2fe);
-      box-shadow:0 3px 8px rgba(0,0,0,0.2);">
-    </span>
-
-    <!-- Modern quirky title -->
-    <h1 style="
-      font-size:2rem; 
-      margin:0;
-      color:#2c3e50;
-      letter-spacing:1px;
-      font-weight:700;
-      background:linear-gradient(90deg,#4facfe,#00f2fe);
-      -webkit-background-clip:text;
-      -webkit-text-fill-color:transparent;">
-      Coromandel CPC Campaign Dashboard
-    </h1>
-
-  </div>
-      <!-- Animations -->
-  <style>
-    @keyframes pulse {
-      from { transform:scale(1); opacity:0.9; }
-      to { transform:scale(1.3); opacity:1; }
-    }
-    @keyframes flicker {
-      0%,18%,22%,25%,53%,57%,100% { opacity:1; }
-      20%,24%,55% { opacity:0.6; }
-    }
-  </style>
+      <div class="logo">
+        <span class="dot"></span>
+        <h1 class="title">Coromandel CPC Campaign Dashboard</h1>
+      </div>
       <div class="header-actions">
-        <button class="btn" id="downloadBtn">Download Data</button>
-        <button class="btn btn-logout" id="logoutBtn">Logout</button>
+        <button class="btn" id="downloadBtn">📥 Download Data</button>
+        <button class="btn btn-logout" id="logoutBtn">🔒 Logout</button>
       </div>
     </div>
   </header>
@@ -281,13 +469,11 @@
   <main class="main">
     <!-- Horizontal Filters -->
     <div class="filters-horizontal">
-      <!-- 🔥 NEW: Single Date Range input -->
       <div class="group">
-        <label for="dateRange">Date Range</label>
+        <label for="dateRange">📅 Date Range</label>
         <input id="dateRange" placeholder="Select range" />
       </div>
 
-      <!-- Keep originals but hide (safest way to not break anything else) -->
       <div class="group" style="display:none">
         <label for="dateFrom">Date From</label>
         <input id="dateFrom" type="date" />
@@ -298,45 +484,44 @@
       </div>
 
       <div class="group">
-        <label for="state">State</label>
+        <label for="state">🌍 State</label>
         <select id="state"></select>
       </div>
       <div class="group">
-        <label for="district">District</label>
+        <label for="district">📍 District</label>
         <select id="district"></select>
       </div>
       <div class="group">
-        <label for="retailer">Retailer</label>
+        <label for="retailer">🏪 Retailer</label>
         <select id="retailer"></select>
       </div>
       <div class="group">
-        <label for="product">Product</label>
+        <label for="product">📦 Product</label>
         <select id="product"></select>
       </div>
 
-      <!-- 🔥 NEW: Quantity Unit filter -->
       <div class="group">
-        <label for="unit">Quantity Unit</label>
+        <label for="unit">📏 Quantity Unit</label>
         <select id="unit"></select>
       </div>
 
       <div class="group">
-        <label for="qtyMin">Quantity (≥)</label>
+        <label for="qtyMin">🔢 Quantity (≥)</label>
         <input id="qtyMin" type="number" min="0" step="1" placeholder="0" />
       </div>
       <div class="group">
-        <label for="status">Status</label>
+        <label for="status">✅ Status</label>
         <select id="status"></select>
       </div>
       <div class="group" style="display:flex;align-items:flex-end">
-        <button class="btn" id="resetBtn" style="width:100%">Reset</button>
+        <button class="btn" id="resetBtn" style="width:100%">🔄 Reset</button>
       </div>
     </div>
 
     <section class="content">
       <!-- Total Scans with Hero Design -->
       <div class="card" style="grid-column: span 12">
-        <h3>Campaign Performance Overview</h3>
+        <h3>📊 Campaign Performance Overview</h3>
         <div class="kpi-hero">
           <div class="kpi-main-circle">
             <div class="kpi-main-label">Total Scans</div>
@@ -344,29 +529,29 @@
           </div>
           <div class="kpi-grid">
             <div class="kpi-item">
-              <div class="kpi-label">Approved</div>
+              <div class="kpi-label">✅ Approved</div>
               <div class="kpi-value" id="kpiYes">0</div>
               <div class="kpi-percent" id="kpiYesPct">0%</div>
             </div>
             <div class="kpi-item">
-              <div class="kpi-label">Rejected</div>
+              <div class="kpi-label">❌ Rejected</div>
               <div class="kpi-value" id="kpiNo">0</div>
               <div class="kpi-percent" id="kpiNoPct">0%</div>
             </div>
             <div class="kpi-item">
-              <div class="kpi-label">Pending</div>
+              <div class="kpi-label">⏳ Pending</div>
               <div class="kpi-value" id="kpiPending">0</div>
               <div class="kpi-percent" id="kpiPendingPct">0%</div>
             </div>
             <div class="kpi-item">
-              <div class="kpi-label">Total Farmers</div>
+              <div class="kpi-label">👨‍🌾 Total Farmers</div>
               <div class="kpi-value" id="kpiTotalFarmers">0</div>
               <div class="kpi-percent" id="kpiUniqueFarmers">Unique: 0</div>
             </div>
             <div class="kpi-item">
-              <div class="kpi-label">Retailers</div>
+              <div class="kpi-label">🏪 Retailers</div>
               <div class="kpi-value" id="kpiActiveRetailers">0</div>
-              <div class="kpi-percent">of 1,903 total</div>
+              <div class="kpi-percent" id="kpiTotalRetailers">of 0 total</div>
             </div>
           </div>
         </div>
@@ -374,43 +559,43 @@
 
       <!-- Status Chart -->
       <div class="card" style="grid-column: span 4">
-        <h3>Order Approval Status</h3>
+        <h3>📈 Order Approval Status</h3>
         <canvas id="statusChart" height="280"></canvas>
       </div>
 
       <!-- Trend Chart -->
       <div class="card" style="grid-column: span 8">
-        <h3>Time Trend (Scans per Day)</h3>
+        <h3>📅 Time Trend (Scans per Day)</h3>
         <canvas id="trendChart" height="280"></canvas>
       </div>
 
       <!-- Top States Table -->
       <div class="card" style="grid-column: span 6">
-        <h3>States by Scans</h3>
+        <h3>🌍 States by Scans</h3>
         <div id="statesTable" style="overflow-y:auto;max-height:380px;margin-top:12px"></div>
       </div>
 
       <!-- Retailer Performance -->
       <div class="card" style="grid-column: span 6">
-        <h3>Retailer Performance</h3>
+        <h3>🏪 Retailer Performance</h3>
         <canvas id="retailerChart" height="240"></canvas>
       </div>
 
       <!-- District Scans -->
       <div class="card" style="grid-column: span 6">
-        <h3>District-wise Scans</h3>
+        <h3>📍 District-wise Scans</h3>
         <canvas id="districtChart" height="180"></canvas>
       </div>
 
       <!-- Product Basket -->
       <div class="card" style="grid-column: span 6">
-        <h3>Product Basket</h3>
+        <h3>📦 Product Basket</h3>
         <canvas id="productChart" height="180"></canvas>
       </div>
 
-      <!-- India Map - Now at bottom and full width -->
+      <!-- India Map -->
       <div class="card" style="grid-column: span 12">
-        <h3>India - State-wise Distribution</h3>
+        <h3>🗺️ India - State-wise Distribution</h3>
         <div id="indiaMapContainer">
           <div id="indiaMap"></div>
           <div class="legend">
@@ -419,7 +604,7 @@
             <div class="legend-item"><div class="legend-color" style="background:#22c55e;border-color:#22c55e"></div><span>High (500-999)</span></div>
             <div class="legend-item"><div class="legend-color" style="background:#84cc16;border-color:#84cc16"></div><span>Medium (250-499)</span></div>
             <div class="legend-item"><div class="legend-color" style="background:#eab308;border-color:#eab308"></div><span>Growing (100-249)</span></div>
-            <div class="legend-item"><div class="legend-color" style="background:#f97316;border-color:#f97316"></div><span>Emerging (1-99)</span></div>
+            <div class="legend-item"><div class="legend-color" style="background:#f59e0b;border-color:#f59e0b"></div><span>Emerging (1-99)</span></div>
           </div>
         </div>
       </div>
@@ -427,7 +612,7 @@
   </main>
 
   <div class="footer">
-    © 2025 Coromandel CPC
+    ✨ © 2025 Coromandel CPC — Empowering Agriculture through Innovation ✨
   </div>
 </div>
 
@@ -437,14 +622,14 @@
     <h2>🔐 Secure Access</h2>
     <p>Please authenticate to view the campaign dashboard.</p>
     <div class="field">
-      <label>Username</label>
+      <label>👤 Username</label>
       <input id="u" autocomplete="username" placeholder="Enter username" />
     </div>
     <div class="field">
-      <label>Password</label>
+      <label>🔑 Password</label>
       <input id="p" type="password" autocomplete="current-password" placeholder="Enter password" />
     </div>
-    <button class="btn" type="submit" style="width:100%;margin-top:8px">Login</button>
+    <button class="btn" type="submit" style="width:100%;margin-top:12px">Login</button>
     <div class="err" id="err"></div>
   </form>
 </div>
@@ -511,7 +696,7 @@
     return map;
   }
 
-  // 🔥 NEW: detailed parser to capture product + qty + unit lines
+  // Detailed parser to capture product + qty + unit lines
   function parseCartItems(cartStr){
     const s = trim(cartStr);
     if(!s) return [];
@@ -519,12 +704,10 @@
     const items = [];
     for(const raw of parts){
       const t = raw.trim();
-      // Matches: "Product - qty 1 - 250ml" (unit optional)
       const m = t.match(/^(.+?)\s*-\s*qty\s*(\d+)(?:\s*-\s*(.+))?$/i);
       if(m){
         items.push({ name: trim(m[1]), qty: Number(m[2])||1, unit: m[3]?trim(m[3]):'' });
       } else {
-        // fallback: treat it as just a name with qty 1
         items.push({ name: t, qty: 1, unit: '' });
       }
     }
@@ -536,18 +719,18 @@
   let FILTERS = { dateFrom:'', dateTo:'', state:'', district:'', retailer:'', product:'', unit:'', qtyMin:0, status:'' };
 
   // DOM
-  const selDateFrom = document.getElementById('dateFrom'); // kept (hidden)
-  const selDateTo = document.getElementById('dateTo');     // kept (hidden)
-  const selDateRange = document.getElementById('dateRange'); // NEW
+  const selDateFrom = document.getElementById('dateFrom');
+  const selDateTo = document.getElementById('dateTo');
+  const selDateRange = document.getElementById('dateRange');
   const selState = document.getElementById('state');
   const selDistrict = document.getElementById('district');
   const selRetailer = document.getElementById('retailer');
   const selProduct = document.getElementById('product');
-  const selUnit = document.getElementById('unit'); // NEW
+  const selUnit = document.getElementById('unit');
   const inpQtyMin = document.getElementById('qtyMin');
   const selStatus = document.getElementById('status');
   
-  // 🔥 NEW: flatpickr single date-range controlling FILTERS.dateFrom/dateTo
+  // flatpickr single date-range controlling FILTERS.dateFrom/dateTo
   flatpickr("#dateRange",{
     mode:"range",
     dateFormat:"Y-m-d",
@@ -555,7 +738,6 @@
       if(dates.length===2){
         FILTERS.dateFrom = dates[0].toISOString().slice(0,10);
         FILTERS.dateTo   = dates[1].toISOString().slice(0,10);
-        // Keep hidden original inputs synced (in case any other logic reads them)
         selDateFrom.value = FILTERS.dateFrom;
         selDateTo.value   = FILTERS.dateTo;
         render();
@@ -566,10 +748,10 @@
   document.getElementById('resetBtn').addEventListener('click', ()=>{
     FILTERS = { dateFrom:'', dateTo:'', state:'', district:'', retailer:'', product:'', unit:'', qtyMin:0, status:'' };
     selDateFrom.value = selDateTo.value = '';
-    selDateRange._flatpickr && selDateRange._flatpickr.clear(); // clear range UI
+    selDateRange._flatpickr && selDateRange._flatpickr.clear();
     selState.value = selDistrict.value = selRetailer.value = selProduct.value = selUnit.value = selStatus.value = '';
     inpQtyMin.value = '';
-    populateFilters(RAW); // rebuild all lists to full
+    populateFilters(RAW);
     render();
   });
 
@@ -601,12 +783,12 @@
     return charts[id];
   }
   function palette(n){
-    const base = [ '#0ea5e9','#f97316','#10b981','#8b5cf6','#ec4899','#eab308','#3b82f6','#14b8a6','#f43f5e' ];
+    const base = [ '#667eea','#764ba2','#f093fb','#f5576c','#4facfe','#00f2fe','#10b981','#f59e0b','#ec4899','#8b5cf6' ];
     const arr = []; for(let i=0;i<n;i++) arr.push(base[i%base.length]);
     return arr;
   }
 
-  // Apply Filters (kept logic, only added unit filter + better product/unit handling)
+  // Apply Filters
   function applyFilters(rows){
     const f = FILTERS;
     return rows.filter(r=>{
@@ -620,7 +802,6 @@
       if(f.retailer && trim(r['Retailer Name'])!==f.retailer) return false;
       if(f.status && trim((r['Submission Status']||'').toLowerCase())!==f.status.toLowerCase()) return false;
 
-      // Product & qty using original parseProducts()
       if(f.product || (f.qtyMin||0)>0){
         const m = parseProducts(r['Cart Items']);
         if(f.product){
@@ -632,10 +813,8 @@
         }
       }
 
-      // 🔥 NEW: Unit filter using detailed line items
       if(f.unit){
         const items = parseCartItems(r['Cart Items']);
-        // If product selected, unit must be present for that product
         const has = items.some(it=>{
           if(f.product) return it.name===f.product && it.unit===f.unit;
           return it.unit===f.unit;
@@ -659,9 +838,35 @@
     const totalFarmers = allPhones.length;
     const uniqueFarmers = uniquePhones.size;
     
-    // Calculate retailer metrics
+    // Calculate ACTIVE retailers from current FILTERED data (all filters applied)
     const activeRINs = new Set(rows.map(r=>trim(r['RIN'])).filter(rin=>rin));
     const activeRetailers = activeRINs.size;
+    
+    // Calculate TOTAL retailers based on REFERENCE DATA (hardcoded state-wise totals)
+    // Reference: West Bengal=183, Maharashtra=616, Telangana=161, Andhra Pradesh=307, Karnataka=636
+    // Total across all states = 1,903
+    const STATE_RETAILER_TOTALS = {
+      'West Bengal': 183,
+      'Maharashtra': 616,
+      'Telangana': 161,
+      'Andhra Pradesh': 307,
+      'Karnataka': 636
+      // Add more states from your reference data if available
+    };
+    
+    let totalRetailers = 1903; // Default: total across ALL states
+    
+    if(FILTERS.state){
+      // If state is selected, use the hardcoded total for that state
+      totalRetailers = STATE_RETAILER_TOTALS[FILTERS.state] || 0;
+      
+      // Fallback: if state not in hardcoded list, calculate from RAW data
+      if(totalRetailers === 0){
+        const stateRetailers = RAW.filter(r=>trim(r.State)===FILTERS.state);
+        const stateRetailerRINs = new Set(stateRetailers.map(r=>trim(r['RIN'])).filter(rin=>rin));
+        totalRetailers = stateRetailerRINs.size;
+      }
+    }
     
     document.getElementById('kpiTotalBig').textContent = total.toLocaleString();
     document.getElementById('kpiYes').textContent = yes.toLocaleString();
@@ -670,6 +875,9 @@
     document.getElementById('kpiTotalFarmers').textContent = totalFarmers.toLocaleString();
     document.getElementById('kpiUniqueFarmers').textContent = `Unique: ${uniqueFarmers.toLocaleString()}`;
     document.getElementById('kpiActiveRetailers').textContent = activeRetailers.toLocaleString();
+    
+    // 🔥 NEW: Update total retailers display
+    document.getElementById('kpiTotalRetailers').textContent = `of ${totalRetailers.toLocaleString()} total`;
     
     // Calculate percentages
     const yesPct = total > 0 ? ((yes / total) * 100).toFixed(1) : '0.0';
@@ -695,13 +903,15 @@
     let html = '<div style="font-size:13px">';
     states.forEach((s, i)=>{
       const bar = Math.round((s[1] / (states[0][1] || 1)) * 100);
-      html += `<div style="margin-bottom:14px">
-        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
-          <span style="font-weight:600;color:var(--text)">${i+1}. ${s[0]}</span>
-          <span style="color:var(--acc1);font-weight:700">${s[1]}</span>
+      const colors = ['#667eea','#764ba2','#f093fb','#f5576c','#4facfe','#00f2fe','#10b981','#f59e0b','#ec4899','#8b5cf6'];
+      const color = colors[i % colors.length];
+      html += `<div style="margin-bottom:18px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+          <span style="font-weight:700;color:var(--text)">${i+1}. ${s[0]}</span>
+          <span style="color:${color};font-weight:800">${s[1].toLocaleString()}</span>
         </div>
-        <div style="width:100%;height:8px;background:rgba(14,165,233,.12);border-radius:4px;overflow:hidden">
-          <div style="width:${bar}%;height:100%;background:linear-gradient(90deg,var(--acc1),var(--acc3));border-radius:4px"></div>
+        <div style="width:100%;height:10px;background:rgba(102,126,234,.12);border-radius:6px;overflow:hidden">
+          <div style="width:${bar}%;height:100%;background:${color};border-radius:6px;transition:width .3s ease"></div>
         </div>
       </div>`;
     });
@@ -718,10 +928,10 @@
       labels:['Approved','Rejected','Pending'],
       datasets:[{ 
         data:[sYes,sNo,sPending], 
-        backgroundColor:['#10b981','#f97316','#8b5cf6'], 
-        borderWidth: 3,
+        backgroundColor:['#10b981','#f59e0b','#8b5cf6'], 
+        borderWidth: 4,
         borderColor: '#fff',
-        hoverOffset: 8
+        hoverOffset: 10
       }]
     },{
       plugins:{ 
@@ -729,9 +939,9 @@
           display: true,
           position: 'bottom',
           labels:{ 
-            color: '#0f172a', 
-            padding: 18, 
-            font:{ size: 13, weight: '700' },
+            color: '#1f2937', 
+            padding: 20, 
+            font:{ size: 13, weight: '800' },
             usePointStyle: true,
             pointStyle: 'circle',
             generateLabels: function(chart) {
@@ -765,7 +975,7 @@
           }
         }
       },
-      cutout:'60%'
+      cutout:'65%'
     });
 
     // Trend
@@ -776,21 +986,21 @@
       labels: trend.map(x=>x[0]),
       datasets:[{ 
         data: trend.map(x=>x[1]), 
-        borderColor:'#0ea5e9',
-        backgroundColor:'rgba(14,165,233,.15)',
+        borderColor:'#667eea',
+        backgroundColor:'rgba(102,126,234,.2)',
         borderWidth:3, 
         tension:.4,
         fill:true,
-        pointRadius:4,
-        pointHoverRadius:6,
-        pointBackgroundColor:'#0ea5e9',
+        pointRadius:5,
+        pointHoverRadius:7,
+        pointBackgroundColor:'#667eea',
         pointBorderColor:'#fff',
-        pointBorderWidth:2
+        pointBorderWidth:3
       }]
     },{ 
       scales:{ 
-        x:{ ticks:{ color:'#64748b', maxRotation:45, font:{weight:'500'} }, grid:{display:false} }, 
-        y:{ ticks:{ color:'#64748b', font:{weight:'500'} }, grid:{ color:'#e2e8f0' } } 
+        x:{ ticks:{ color:'#6b7280', maxRotation:45, font:{weight:'600',size:11} }, grid:{display:false} }, 
+        y:{ ticks:{ color:'#6b7280', font:{weight:'600',size:12} }, grid:{ color:'#e5e7eb' } } 
       }, 
       plugins:{ legend:{ display:false } } 
     });
@@ -804,15 +1014,38 @@
     makeChart('retailerChart','bar',{
       labels: retailers.map(x=>x[0]),
       datasets:[
-        { label: 'Approved', data: retailerApproved, backgroundColor: '#10b981', borderRadius: 8, barThickness: 20 },
-        { label: 'Pending',  data: retailerPending,  backgroundColor: '#8b5cf6', borderRadius: 8, barThickness: 20 },
-        { label: 'Rejected', data: retailerRejected, backgroundColor: '#f97316', borderRadius: 8, barThickness: 20 }
+        { label: 'Approved', data: retailerApproved, backgroundColor: '#10b981', borderRadius: 10, barThickness: 22 },
+        { label: 'Pending',  data: retailerPending,  backgroundColor: '#8b5cf6', borderRadius: 10, barThickness: 22 },
+        { label: 'Rejected', data: retailerRejected, backgroundColor: '#f59e0b', borderRadius: 10, barThickness: 22 }
       ]
     },{ 
-      plugins: { legend: { display: true, position: 'top', labels: { color: '#0f172a', padding: 15, font: { size: 12, weight: '600' }, usePointStyle: true, pointStyle: 'circle' } } }, 
+      plugins: { 
+        legend: { 
+          display: true, 
+          position: 'top', 
+          labels: { 
+            color: '#1f2937', 
+            padding: 16, 
+            font: { size: 13, weight: '700' }, 
+            usePointStyle: true, 
+            pointStyle: 'circle' 
+          } 
+        } 
+      }, 
       scales: { 
-        x: { ticks: { color: '#0f172a', maxRotation: 45, minRotation: 25, font: { size: 11, weight: '600' } }, grid: { display: false } }, 
-        y: { ticks: { color: '#64748b', font: { weight: '500' } }, grid: { color: '#e2e8f0' } } 
+        x: { 
+          ticks: { 
+            color: '#1f2937', 
+            maxRotation: 45, 
+            minRotation: 25, 
+            font: { size: 11, weight: '700' } 
+          }, 
+          grid: { display: false } 
+        }, 
+        y: { 
+          ticks: { color: '#6b7280', font: { weight: '600' } }, 
+          grid: { color: '#e5e7eb' } 
+        } 
       } 
     });
 
@@ -820,11 +1053,19 @@
     const districts = buildCounts(rows,'District').slice(0,10);
     makeChart('districtChart','bar',{
       labels: districts.map(x=>x[0]),
-      datasets:[{ data: districts.map(x=>x[1]), backgroundColor: palette(districts.length), borderWidth:0, borderRadius:6 }]
+      datasets:[{ 
+        data: districts.map(x=>x[1]), 
+        backgroundColor: palette(districts.length), 
+        borderWidth:0, 
+        borderRadius:8 
+      }]
     },{ 
       indexAxis:'y', 
       plugins:{ legend:{ display:false } }, 
-      scales:{ x:{ ticks:{ color:'#64748b', font:{weight:'500'} }, grid:{color:'#e2e8f0'} }, y:{ ticks:{ color:'#0f172a',font:{size:11,weight:'600'} }, grid:{display:false} } } 
+      scales:{ 
+        x:{ ticks:{ color:'#6b7280', font:{weight:'600'} }, grid:{color:'#e5e7eb'} }, 
+        y:{ ticks:{ color:'#1f2937',font:{size:11,weight:'700'} }, grid:{display:false} } 
+      } 
     });
 
     // Product
@@ -836,15 +1077,33 @@
     const pArr = [...pMap.entries()].sort((a,b)=>b[1]-a[1]).slice(0,16);
     makeChart('productChart','bar',{
       labels: pArr.map(x=>x[0]),
-      datasets:[{ data: pArr.map(x=>x[1]), backgroundColor: palette(pArr.length), borderWidth:0, borderRadius:8 }]
+      datasets:[{ 
+        data: pArr.map(x=>x[1]), 
+        backgroundColor: palette(pArr.length), 
+        borderWidth:0, 
+        borderRadius:10 
+      }]
     },{ 
       plugins:{ legend:{ display:false } }, 
-      scales:{ x:{ ticks:{ color:'#0f172a', maxRotation:45, minRotation:20, font:{size:11,weight:'600'} }, grid:{display:false} }, 
-               y:{ ticks:{ color:'#64748b', font:{weight:'500'} }, grid:{color:'#e2e8f0'} } } 
+      scales:{ 
+        x:{ 
+          ticks:{ 
+            color:'#1f2937', 
+            maxRotation:45, 
+            minRotation:20, 
+            font:{size:11,weight:'700'} 
+          }, 
+          grid:{display:false} 
+        }, 
+        y:{ 
+          ticks:{ color:'#6b7280', font:{weight:'600'} }, 
+          grid:{color:'#e5e7eb'} 
+        } 
+      } 
     });
   }
 
-  // India Map with Leaflet (unchanged)
+  // India Map with Leaflet
   let indiaMap = null;
   let mapLayer = null;
 
@@ -959,11 +1218,11 @@
         <div class="map-popup-row"><span class="map-popup-label">✅ Approved</span><span class="map-popup-value map-popup-success">${data.approved.toLocaleString()}</span></div>
         <div class="map-popup-row"><span class="map-popup-label">⏳ Pending</span><span class="map-popup-value map-popup-pending">${data.pending.toLocaleString()}</span></div>
         <div class="map-popup-row"><span class="map-popup-label">❌ Rejected</span><span class="map-popup-value map-popup-rejected">${data.rejected.toLocaleString()}</span></div>
-        <div class="map-popup-row" style="border-top:3px solid var(--ring);margin-top:10px;padding-top:10px"><span class="map-popup-label">📊 Total Scans</span><span class="map-popup-value">${data.total.toLocaleString()}</span></div>
+        <div class="map-popup-row" style="border-top:3px solid var(--ring);margin-top:12px;padding-top:12px"><span class="map-popup-label">📊 Total Scans</span><span class="map-popup-value">${data.total.toLocaleString()}</span></div>
         <div class="map-popup-row"><span class="map-popup-label">🎯 Approval Rate</span><span class="map-popup-value map-popup-success">${approvalRate}%</span></div>
       `;
 
-      marker.bindPopup(popupContent, { closeButton: true, maxWidth: 320, className: 'custom-popup' });
+      marker.bindPopup(popupContent, { closeButton: true, maxWidth: 340, className: 'custom-popup' });
       marker.on('click', () => { FILTERS.state = state; selState.value = state; render(); });
       marker.addTo(mapLayer);
     }
@@ -988,7 +1247,6 @@
       for(const v of items){ const o=document.createElement('option'); o.value=v; o.textContent=v; sel.appendChild(o); }
     }
 
-    // Initial full lists
     fill(selState, states); 
     fill(selDistrict, dists); 
     fill(selRetailer, rets); 
@@ -998,22 +1256,18 @@
   }
 
   function attachFilterHandlers(){
-    // Old date inputs (kept for compatibility)
     selDateFrom.onchange = ()=>{ FILTERS.dateFrom = selDateFrom.value; render(); };
     selDateTo.onchange   = ()=>{ FILTERS.dateTo   = selDateTo.value; render(); };
 
-    // Cascading: State -> District
     selState.onchange = ()=>{
       FILTERS.state = selState.value;
 
-      // Rebuild districts from selected state
       const dists = uniqSorted(RAW.filter(r=>!FILTERS.state || trim(r.State)===FILTERS.state).map(r=>trim(r.District)));
       selDistrict.innerHTML = ''; 
       const opt0=document.createElement('option'); opt0.value=''; opt0.textContent='All'; selDistrict.appendChild(opt0);
       for(const v of dists){ const o=document.createElement('option'); o.value=v; o.textContent=v; selDistrict.appendChild(o); }
       FILTERS.district = ''; selDistrict.value='';
 
-      // Rebuild retailers from selected state (all districts)
       const rets = uniqSorted(RAW.filter(r=>!FILTERS.state || trim(r.State)===FILTERS.state).map(r=>trim(r['Retailer Name'])));
       selRetailer.innerHTML = ''; 
       const optR=document.createElement('option'); optR.value=''; optR.textContent='All'; selRetailer.appendChild(optR);
@@ -1023,11 +1277,9 @@
       render();
     };
 
-    // Cascading: District -> Retailer
     selDistrict.onchange = ()=>{
       FILTERS.district = selDistrict.value;
 
-      // Rebuild retailers from selected district (within state if chosen)
       const rets = uniqSorted(RAW.filter(r=>{
         if(FILTERS.state && trim(r.State)!==FILTERS.state) return false;
         if(FILTERS.district && trim(r.District)!==FILTERS.district) return false;
@@ -1041,14 +1293,11 @@
       render();
     };
 
-    // Retailer
     selRetailer.onchange = ()=>{ FILTERS.retailer = selRetailer.value; render(); };
 
-    // Product -> Unit
     selProduct.onchange = ()=>{
       FILTERS.product = selProduct.value;
 
-      // Build units available for the selected product
       const unitsSet = new Set();
       RAW.forEach(r=>{
         parseCartItems(r['Cart Items']).forEach(it=>{
@@ -1069,7 +1318,6 @@
     selUnit.onchange = ()=>{ FILTERS.unit = selUnit.value; render(); };
     selStatus.onchange = ()=>{ FILTERS.status = selStatus.value; render(); };
 
-    // Quantity min (debounced)
     let to=null; 
     inpQtyMin.oninput = ()=>{ 
       clearTimeout(to); 
@@ -1125,16 +1373,6 @@
       alert('Failed to load data.csv. Ensure the file exists at '+CSV_URL);
     }
   });
-
-  // 🔥 Initialize flatpickr after DOM ready (already called above, but safe if re-run)
-  if (window.flatpickr && document.getElementById('dateRange')) {
-    // no-op (already initialized)
-  }
 </script>
 </body>
 </html>
-
-
-
-
-
