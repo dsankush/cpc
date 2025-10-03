@@ -15,30 +15,40 @@
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
   <style>
-    :root{
-      --bg:#f8fafc;
-      --panel:#ffffff;
-      --card:#ffffff;
-      --card-hover:#f8f9ff;
-      --muted:#6b7280;
-      --text:#1f2937;
-      --acc1:#6366f1;
-      --acc2:#f59e0b;
-      --acc3:#10b981;
-      --acc4:#ec4899;
-      --acc5:#8b5cf6;
-      --ring:#e5e7eb;
-      --border:#d1d5db;
-      --shadow:rgba(99,102,241,.08);
-      --shadow-lg:rgba(99,102,241,.15);
-    }
-    *{box-sizing:border-box;margin:0;padding:0}
-    html,body{height:100%;overflow-x:hidden}
-    body{
-      font-family:'Outfit',sans-serif;
-      background:var(--bg);
-      color:var(--text);
-    }
+    :root {
+  /* Background Colors */
+  --bg: #faf5ff;
+  --panel: #ffffff;
+  --card: #ffffff;
+  --card-hover: #f3e8ff;
+  
+  /* Text Colors */
+  --muted: #7e22ce;
+  --text: #581c87;
+  
+  /* Accent Colors */
+  --acc1: #a855f7;
+  --acc2: #9333ea;
+  --acc3: #c084fc;
+  --acc4: #d8b4fe;
+  --acc5: #7c3aed;
+  
+  /* Borders & Shadows */
+  --ring: #f3e8ff;
+  --border: #e9d5ff;
+  --shadow: rgba(168,85,247,.1);
+  --shadow-lg: rgba(168,85,247,.2);
+  
+}
+
+/* Fonts */
+body {
+  font-family: 'Outfit', sans-serif;
+}
+
+.title, .kpi-value, .preview-kpi-value {
+  font-family: 'Space Grotesk', sans-serif;
+}
     .app{display:grid;grid-template-rows:auto 1fr auto;min-height:100vh}
     
     /* Header */
@@ -1489,4 +1499,5 @@
 </script>
 </body>
 </html>
+
 
