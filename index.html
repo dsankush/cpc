@@ -6,7 +6,7 @@
   <title>Coromandel CPC — Campaign Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -16,7 +16,7 @@
 
   <style>
     :root{
-      --bg:#fefefe;
+      --bg:#f8fafc;
       --panel:#ffffff;
       --card:#ffffff;
       --card-hover:#f8f9ff;
@@ -31,24 +31,13 @@
       --border:#d1d5db;
       --shadow:rgba(99,102,241,.08);
       --shadow-lg:rgba(99,102,241,.15);
-      --gradient-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      --gradient-accent: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-      --gradient-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
     }
     *{box-sizing:border-box;margin:0;padding:0}
     html,body{height:100%;overflow-x:hidden}
     body{
-      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
-      background-size: 400% 400%;
-      animation: gradientShift 15s ease infinite;
-      background-attachment:fixed;
+      font-family:'Outfit',sans-serif;
+      background:var(--bg);
       color:var(--text);
-    }
-    @keyframes gradientShift {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
     }
     .app{display:grid;grid-template-rows:auto 1fr auto;min-height:100vh}
     
@@ -57,37 +46,37 @@
       position:sticky;top:0;z-index:30;
       backdrop-filter:saturate(180%) blur(20px);
       background:rgba(255,255,255,.98);
-      border-bottom:3px solid transparent;
-      border-image: linear-gradient(90deg, #667eea, #764ba2, #f093fb) 1;
-      box-shadow:0 8px 32px rgba(102,126,234,.2);
+      border-bottom:2px solid var(--ring);
+      box-shadow:0 4px 16px var(--shadow);
     }
-    .bar{display:flex;align-items:center;gap:20px;padding:20px 32px;flex-wrap:wrap}
+    .bar{display:flex;align-items:center;gap:20px;padding:20px 40px;flex-wrap:wrap}
     .logo{
-      display:flex; align-items:center; gap:20px;
-      padding:16px 32px;
-      border-radius:20px;
-      background:rgba(255,255,255,0.3);
-      backdrop-filter:blur(12px);
-      box-shadow:0 8px 24px rgba(102,126,234,0.25);
-      border: 2px solid rgba(255,255,255,0.5);
+      display:flex;align-items:center;gap:16px;
+      padding:14px 28px;
+      border-radius:16px;
+      background:rgba(255,255,255,0.5);
+      backdrop-filter:blur(10px);
+      box-shadow:0 4px 16px rgba(99,102,241,0.2);
+      border:2px solid rgba(99,102,241,0.1);
     }
     .dot{
-      width:22px; height:22px; border-radius:50%;
-      background:linear-gradient(135deg,#4facfe,#00f2fe);
-      box-shadow:0 4px 12px rgba(79,172,254,0.5);
+      width:20px;height:20px;border-radius:50%;
+      background:linear-gradient(135deg,var(--acc1),var(--acc4));
+      box-shadow:0 4px 12px rgba(99,102,241,0.4);
       animation:pulseGlow 2s ease-in-out infinite;
     }
     @keyframes pulseGlow{
-      0%,100%{transform:scale(1);opacity:1;box-shadow:0 4px 12px rgba(79,172,254,0.5)}
-      50%{transform:scale(1.2);opacity:.8;box-shadow:0 8px 24px rgba(79,172,254,0.8)}
+      0%,100%{transform:scale(1);opacity:1}
+      50%{transform:scale(1.15);opacity:.8}
     }
     .title{
-      font-size:2rem; 
+      font-size:1.8rem;
       margin:0;
-      color:#1f2937;
+      color:var(--text);
       letter-spacing:0.5px;
-      font-weight:800;
-      background:linear-gradient(90deg,#667eea,#764ba2);
+      font-weight:900;
+      font-family:'Space Grotesk',sans-serif;
+      background:linear-gradient(135deg,var(--acc1),var(--acc4));
       -webkit-background-clip:text;
       -webkit-text-fill-color:transparent;
       background-clip:text;
@@ -95,61 +84,42 @@
     .header-actions{margin-left:auto;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
     .btn{
       display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      padding:12px 24px;border-radius:14px;border:none;
-      background:linear-gradient(135deg,#667eea,#764ba2);
+      padding:12px 24px;border-radius:12px;border:none;
+      background:linear-gradient(135deg,var(--acc1),var(--acc5));
       color:white;font-weight:700;cursor:pointer;font-size:14px;
       transition:all .3s ease;white-space:nowrap;
-      box-shadow:0 4px 16px rgba(102,126,234,.3);
-      position:relative;
-      overflow:hidden;
+      box-shadow:0 4px 12px rgba(99,102,241,.25);
     }
-    .btn::before{
-      content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
-      background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);
-      transition:left .5s;
-    }
-    .btn:hover::before{left:100%}
     .btn:hover{
-      transform:translateY(-3px) scale(1.02);
-      box-shadow:0 12px 32px rgba(102,126,234,.45);
+      transform:translateY(-2px);
+      box-shadow:0 8px 24px rgba(99,102,241,.4);
     }
     .btn-logout{
-      background:linear-gradient(135deg,#f093fb,#f5576c);
-      box-shadow:0 4px 16px rgba(245,87,108,.3);
+      background:linear-gradient(135deg,#ef4444,#dc2626);
+      box-shadow:0 4px 12px rgba(239,68,68,.25);
     }
     .btn-logout:hover{
-      box-shadow:0 12px 32px rgba(245,87,108,.45);
+      box-shadow:0 8px 24px rgba(239,68,68,.4);
     }
 
     /* Layout */
-    .main{display:flex;flex-direction:column;gap:28px;padding:32px 48px 32px 48px;max-width:100%;margin:0}
-    .panel{
-      background:rgba(255,255,255,.95);
-      border:2px solid rgba(255,255,255,.5);
-      border-radius:20px;
-      padding:24px;
-      box-shadow:0 8px 32px rgba(102,126,234,.15);
-      backdrop-filter:blur(10px);
-      transition:all .3s ease;
-    }
-    .panel:hover{
-      border-color:rgba(102,126,234,.6);
-      box-shadow:0 12px 40px rgba(102,126,234,.25);
-      transform:translateY(-2px);
-    }
-
+    .main{display:flex;flex-direction:column;gap:28px;padding:32px 40px;max-width:100%;margin:0}
+    
     /* Filters */
     .filters-horizontal{
-      background:rgba(255,255,255,.95);
-      border:2px solid rgba(255,255,255,.5);
-      border-radius:20px;
-      padding:24px 28px;
-      box-shadow:0 8px 32px rgba(102,126,234,.15);
-      backdrop-filter:blur(10px);
+      background:white;
+      border:2px solid var(--ring);
+      border-radius:16px;
+      padding:24px;
+      box-shadow:0 4px 16px var(--shadow);
       display:grid;
       grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
-      gap:18px;
+      gap:16px;
       align-items:end;
+      transition:all .3s ease;
+    }
+    .filters-horizontal:hover{
+      box-shadow:0 8px 24px var(--shadow-lg);
     }
     .filters-horizontal .group{display:flex;flex-direction:column;gap:8px}
     .filters-horizontal label{
@@ -158,7 +128,7 @@
     }
     .filters-horizontal select,.filters-horizontal input{
       width:100%;padding:12px 14px;
-      border-radius:12px;
+      border-radius:10px;
       border:2px solid var(--ring);
       background:white;
       color:var(--text);
@@ -168,43 +138,42 @@
       transition:all .2s ease;
     }
     .filters-horizontal select:hover,.filters-horizontal input:hover{
-      border-color:#667eea;
+      border-color:var(--acc1);
     }
     .filters-horizontal select:focus,.filters-horizontal input:focus{
-      border-color:#667eea;
-      box-shadow:0 0 0 4px rgba(102,126,234,.1);
+      border-color:var(--acc1);
+      box-shadow:0 0 0 4px rgba(99,102,241,.1);
     }
     .filters-horizontal .btn{padding:12px 24px;font-size:13px;white-space:nowrap}
 
     /* Content Grid */
-    .content{display:grid;grid-template-columns:repeat(12,1fr);gap:28px}
+    .content{display:grid;grid-template-columns:repeat(12,1fr);gap:24px}
     .card{
-      background:rgba(255,255,255,.95);
-      border:2px solid rgba(255,255,255,.5);
-      border-radius:20px;
+      background:white;
+      border:2px solid var(--ring);
+      border-radius:16px;
       padding:28px;
       min-height:180px;
       display:flex;
       flex-direction:column;
-      box-shadow:0 8px 32px rgba(102,126,234,.15);
-      backdrop-filter:blur(10px);
+      box-shadow:0 4px 16px var(--shadow);
       transition:all .3s ease;
       position:relative;
       overflow:hidden;
     }
     .card::before{
-      content:'';position:absolute;top:0;left:0;right:0;height:5px;
-      background:linear-gradient(90deg,#667eea,#764ba2,#f093fb,#f5576c);
+      content:'';position:absolute;top:0;left:0;right:0;height:4px;
+      background:linear-gradient(90deg,var(--acc1),var(--acc4),var(--acc3));
       opacity:0;transition:opacity .3s;
     }
     .card:hover{
-      border-color:rgba(102,126,234,.6);
+      border-color:var(--acc1);
       transform:translateY(-4px);
-      box-shadow:0 16px 48px rgba(102,126,234,.25);
+      box-shadow:0 12px 32px var(--shadow-lg);
     }
     .card:hover::before{opacity:1}
     .card h3{
-      margin:0 0 16px;
+      margin:0 0 20px;
       font-size:13px;
       color:var(--muted);
       font-weight:800;
@@ -217,97 +186,87 @@
     .kpi-main-circle{
       width:220px;height:220px;border-radius:50%;
       display:flex;flex-direction:column;align-items:center;justify-content:center;
-      background:linear-gradient(135deg,rgba(102,126,234,.15),rgba(118,75,162,.15));
-      border:5px solid #667eea;
-      box-shadow:0 12px 48px rgba(102,126,234,.35);
+      background:linear-gradient(135deg,rgba(99,102,241,.12),rgba(236,72,153,.12));
+      border:4px solid var(--acc1);
+      box-shadow:0 8px 32px rgba(99,102,241,.25);
       position:relative;
-    }
-    .kpi-main-circle::after{
-      content:'';position:absolute;inset:-12px;border-radius:50%;
-      background:linear-gradient(135deg,#667eea,#764ba2);
-      opacity:.15;z-index:-1;
-      animation:pulseRing 3s ease-in-out infinite;
-    }
-    @keyframes pulseRing{
-      0%,100%{transform:scale(.95);opacity:.15}
-      50%{transform:scale(1.05);opacity:.25}
     }
     .kpi-main-label{
       font-size:13px;color:var(--muted);font-weight:800;
-      text-transform:uppercase;letter-spacing:1.2px;margin-bottom:8px;
+      text-transform:uppercase;letter-spacing:1.2px;margin-bottom:10px;
     }
     .kpi-main-value{
       font-size:64px;font-weight:900;line-height:1;
-      background:linear-gradient(135deg,#667eea,#764ba2);
+      font-family:'Space Grotesk',sans-serif;
+      background:linear-gradient(135deg,var(--acc1),var(--acc4));
       -webkit-background-clip:text;-webkit-text-fill-color:transparent;
       background-clip:text;
     }
     .kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:18px}
     .kpi-item{
-      background:linear-gradient(135deg,rgba(255,255,255,.9),rgba(255,255,255,.7));
-      border:2px solid rgba(102,126,234,.2);
-      border-radius:18px;
+      background:white;
+      border:2px solid var(--ring);
+      border-radius:14px;
       padding:24px;
       text-align:center;
       transition:all .3s ease;
       position:relative;
-      overflow:hidden;
-      backdrop-filter:blur(5px);
     }
     .kpi-item::before{
-      content:'';position:absolute;top:0;left:0;right:0;height:4px;
+      content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:var(--kpi-color);
+      border-radius:14px 14px 0 0;
       opacity:0;transition:opacity .3s;
     }
     .kpi-item:hover{
-      transform:translateY(-6px) scale(1.03);
-      box-shadow:0 12px 40px rgba(102,126,234,.25);
-      border-color:rgba(102,126,234,.4);
+      transform:translateY(-4px);
+      box-shadow:0 8px 24px var(--shadow-lg);
+      border-color:var(--kpi-color);
     }
     .kpi-item:hover::before{opacity:1}
     .kpi-label{
       font-size:11px;color:var(--muted);text-transform:uppercase;
       letter-spacing:1px;font-weight:800;margin-bottom:14px;
     }
-    .kpi-value{font-size:40px;font-weight:900;margin-bottom:10px}
-    .kpi-item:nth-child(1){border-color:rgba(16,185,129,.25)}
-    .kpi-item:nth-child(1)::before{background:#10b981}
+    .kpi-value{
+      font-size:40px;font-weight:900;margin-bottom:10px;
+      font-family:'Space Grotesk',sans-serif;
+    }
+    .kpi-item:nth-child(1){--kpi-color:#10b981}
     .kpi-item:nth-child(1) .kpi-value{color:#10b981}
-    .kpi-item:nth-child(2){border-color:rgba(245,158,11,.25)}
-    .kpi-item:nth-child(2)::before{background:#f59e0b}
+    .kpi-item:nth-child(2){--kpi-color:#f59e0b}
     .kpi-item:nth-child(2) .kpi-value{color:#f59e0b}
-    .kpi-item:nth-child(3){border-color:rgba(139,92,246,.25)}
-    .kpi-item:nth-child(3)::before{background:#8b5cf6}
+    .kpi-item:nth-child(3){--kpi-color:#8b5cf6}
     .kpi-item:nth-child(3) .kpi-value{color:#8b5cf6}
-    .kpi-item:nth-child(4){border-color:rgba(59,130,246,.25)}
-    .kpi-item:nth-child(4)::before{background:#3b82f6}
+    .kpi-item:nth-child(4){--kpi-color:#3b82f6}
     .kpi-item:nth-child(4) .kpi-value{color:#3b82f6}
-    .kpi-item:nth-child(5){border-color:rgba(236,72,153,.25)}
-    .kpi-item:nth-child(5)::before{background:#ec4899}
+    .kpi-item:nth-child(5){--kpi-color:#ec4899}
     .kpi-item:nth-child(5) .kpi-value{color:#ec4899}
     .kpi-percent{font-size:13px;color:var(--muted);font-weight:700}
 
     /* India Map */
     #indiaMapContainer{
       width:100%;height:700px;position:relative;
-      border-radius:20px;overflow:hidden;
-      border:2px solid rgba(255,255,255,.5);
+      border-radius:16px;overflow:hidden;
+      border:2px solid var(--ring);
     }
     #indiaMap{width:100%;height:100%;z-index:1}
     .leaflet-container{
-      background:linear-gradient(135deg, #f0f9ff 0%, #fef3c7 50%, #fce7f3 100%);
-      font-family:Inter,sans-serif;
+      background:#f8fafc;
+      font-family:'Outfit',sans-serif;
     }
     .leaflet-popup-content-wrapper{
-      background:white;border-radius:18px;
-      box-shadow:0 16px 64px rgba(99,102,241,.3);
-      border:3px solid #667eea;
+      background:white;border-radius:14px;
+      box-shadow:0 12px 48px rgba(99,102,241,.3);
+      border:3px solid var(--acc1);
     }
     .leaflet-popup-content{margin:24px;font-size:14px;color:var(--text)}
-    .leaflet-popup-tip{background:white;border:3px solid #667eea}
+    .leaflet-popup-tip{background:white;border:3px solid var(--acc1)}
     .map-popup-state{
-      font-size:20px;font-weight:900;color:#667eea;
+      font-size:20px;font-weight:900;color:var(--acc1);
       margin-bottom:16px;padding-bottom:12px;
-      border-bottom:3px solid var(--ring);
+      border-bottom:2px solid var(--ring);
+      font-family:'Space Grotesk',sans-serif;
     }
     .map-popup-row{
       display:flex;justify-content:space-between;align-items:center;
@@ -317,29 +276,36 @@
       font-size:12px;color:var(--muted);
       text-transform:uppercase;letter-spacing:.6px;font-weight:700;
     }
-    .map-popup-value{font-size:22px;font-weight:900;color:var(--text)}
+    .map-popup-value{
+      font-size:22px;font-weight:900;
+      font-family:'Space Grotesk',sans-serif;
+      color:var(--text);
+    }
     .map-popup-success{color:#10b981!important}
     .map-popup-pending{color:#8b5cf6!important}
     .map-popup-rejected{color:#f59e0b!important}
+    
     .state-marker-pin{position:relative;width:60px;height:60px;display:flex;align-items:center;justify-content:center}
     .state-marker-inner{
       position:relative;z-index:2;
       background:white;
-      border-radius:14px;
+      border-radius:12px;
       padding:10px 14px;
-      box-shadow:0 10px 32px rgba(99,102,241,.3);
+      box-shadow:0 8px 24px rgba(99,102,241,.25);
       border:3px solid;
       font-weight:900;font-size:15px;
+      font-family:'Space Grotesk',sans-serif;
       text-align:center;min-width:85px;
       transition:all .3s ease;cursor:pointer;
     }
     .state-marker-inner:hover{
       transform:translateY(-6px) scale(1.08);
-      box-shadow:0 16px 48px rgba(99,102,241,.5);
+      box-shadow:0 16px 48px rgba(99,102,241,.4);
     }
     .state-marker-name{
       font-size:10px;color:var(--muted);
       text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px;
+      font-family:'Outfit',sans-serif;
     }
     .state-marker-count{
       font-size:19px;font-weight:900;
@@ -347,13 +313,13 @@
     }
     .marker-ripple{
       position:absolute;width:100%;height:100%;border-radius:50%;
-      background:radial-gradient(circle, rgba(102,126,234,.4) 0%, rgba(102,126,234,0) 70%);
+      background:radial-gradient(circle, rgba(99,102,241,.3) 0%, rgba(99,102,241,0) 70%);
       animation:rippleEffect 2.5s ease-in-out infinite;z-index:1;
     }
     @keyframes rippleEffect{
-      0%{transform:scale(.8);opacity:.8}
+      0%{transform:scale(.8);opacity:.7}
       50%{transform:scale(1.3);opacity:.3}
-      100%{transform:scale(.8);opacity:.8}
+      100%{transform:scale(.8);opacity:.7}
     }
     .state-marker-level-1{border-color:#10b981}
     .state-marker-level-1 .state-marker-count{color:#10b981}
@@ -365,73 +331,154 @@
     .state-marker-level-4 .state-marker-count{color:#eab308}
     .state-marker-level-5{border-color:#f59e0b}
     .state-marker-level-5 .state-marker-count{color:#f59e0b}
-    .legend{
-      position:absolute;bottom:24px;right:24px;
-      background:rgba(255,255,255,.98);
-      padding:24px;border-radius:18px;
-      box-shadow:0 12px 40px rgba(99,102,241,.25);
-      border:3px solid #667eea;z-index:1000;
+    
+    /* Map Stats Card - NEW */
+    .map-stats{
+      position:absolute;
+      top:20px;
+      right:20px;
+      z-index:1000;
+      background:white;
+      border:2px solid var(--ring);
+      border-radius:14px;
+      padding:24px;
+      min-width:280px;
+      box-shadow:0 8px 32px var(--shadow-lg);
       backdrop-filter:blur(10px);
     }
+    .map-stats-title{
+      font-size:14px;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:1.5px;
+      color:var(--acc1);
+      font-family:'Space Grotesk',sans-serif;
+      margin-bottom:16px;
+      padding-bottom:12px;
+      border-bottom:2px solid var(--ring);
+    }
+    .map-stat-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:12px 0;
+      border-bottom:1px solid var(--ring);
+    }
+    .map-stat-label{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:0.5px;
+    }
+    .map-stat-value{
+      font-size:22px;
+      font-weight:900;
+      font-family:'Space Grotesk',sans-serif;
+    }
+    .stat-success{color:var(--acc3)}
+    .stat-warning{color:var(--acc2)}
+    .stat-danger{color:#ef4444}
+    .stat-primary{color:var(--acc1)}
+    
+    /* Map Controls - NEW */
+    .map-controls{
+      position:absolute;
+      top:20px;
+      left:20px;
+      z-index:1000;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .map-control-btn{
+      padding:10px 20px;
+      background:white;
+      border:2px solid var(--ring);
+      border-radius:10px;
+      color:var(--text);
+      font-size:13px;
+      font-weight:700;
+      cursor:pointer;
+      transition:all 0.3s;
+      box-shadow:0 2px 8px var(--shadow);
+    }
+    .map-control-btn:hover{
+      background:var(--acc1);
+      color:white;
+      border-color:var(--acc1);
+      transform:translateX(4px);
+      box-shadow:0 4px 16px rgba(99,102,241,.3);
+    }
+    
+    .legend{
+      position:absolute;bottom:20px;right:20px;
+      background:white;
+      padding:20px;border-radius:14px;
+      box-shadow:0 8px 32px var(--shadow-lg);
+      border:2px solid var(--ring);z-index:1000;
+    }
     .legend-title{
-      font-size:14px;font-weight:900;color:var(--text);
-      margin-bottom:16px;text-transform:uppercase;letter-spacing:1.2px;
+      font-size:13px;font-weight:900;color:var(--text);
+      margin-bottom:14px;text-transform:uppercase;letter-spacing:1.2px;
+      font-family:'Space Grotesk',sans-serif;
     }
     .legend-item{
-      display:flex;align-items:center;gap:12px;
-      margin:10px 0;font-size:13px;font-weight:700;
+      display:flex;align-items:center;gap:10px;
+      margin:8px 0;font-size:12px;font-weight:700;
     }
     .legend-color{
-      width:32px;height:22px;border-radius:8px;
+      width:30px;height:20px;border-radius:6px;
       border:2px solid var(--border);
-      box-shadow:0 3px 10px rgba(0,0,0,.12);
+      box-shadow:0 2px 6px var(--shadow);
     }
 
     .footer{
-      padding:20px 32px;color:var(--muted);
-      border-top:3px solid transparent;
-      border-image: linear-gradient(90deg, #667eea, #764ba2, #f093fb) 1;
+      padding:20px 40px;color:var(--muted);
+      border-top:2px solid var(--ring);
       text-align:center;font-size:14px;
-      background:rgba(255,255,255,.95);
+      background:white;
       font-weight:600;
-      backdrop-filter:blur(10px);
     }
 
     /* Login */
     .overlay{
       position:fixed;inset:0;
-      background:linear-gradient(135deg, rgba(102,126,234,.95) 0%, rgba(118,75,162,.95) 50%, rgba(240,147,251,.95) 100%);
+      background:linear-gradient(135deg, rgba(99,102,241,.95) 0%, rgba(236,72,153,.95) 100%);
       display:grid;place-items:center;z-index:100;
       backdrop-filter:blur(15px);
     }
     .login{
       width:min(92vw,440px);
       background:white;
-      border:3px solid rgba(255,255,255,.8);
-      border-radius:24px;
+      border:2px solid rgba(255,255,255,.8);
+      border-radius:20px;
       padding:40px;
-      box-shadow:0 32px 96px rgba(99,102,241,.3);
-      animation:slideIn .6s ease;
+      box-shadow:0 24px 80px rgba(0,0,0,.3);
+      animation:slideIn .5s ease;
     }
     @keyframes slideIn{
-      from{opacity:0;transform:translateY(30px) scale(.95)}
-      to{opacity:1;transform:translateY(0) scale(1)}
+      from{opacity:0;transform:translateY(30px)}
+      to{opacity:1;transform:translateY(0)}
     }
-    .login h2{margin:0 0 10px;font-size:28px;color:var(--text);font-weight:900}
-    .login p{margin:0 0 28px;color:var(--muted);font-size:15px;font-weight:500}
-    .field{display:flex;flex-direction:column;gap:10px;margin:18px 0}
-    .field label{font-size:13px;color:var(--muted);font-weight:700;letter-spacing:.5px}
+    .login h2{
+      margin:0 0 10px;font-size:28px;color:var(--text);font-weight:900;
+      font-family:'Space Grotesk',sans-serif;
+    }
+    .login p{margin:0 0 28px;color:var(--muted);font-size:14px;font-weight:500}
+    .field{display:flex;flex-direction:column;gap:8px;margin:18px 0}
+    .field label{font-size:12px;color:var(--muted);font-weight:700;letter-spacing:.5px}
     .field input{
-      padding:16px;border-radius:14px;
+      padding:14px;border-radius:10px;
       border:2px solid var(--ring);
-      background:white;color:var(--text);font-size:15px;
+      background:white;color:var(--text);font-size:14px;
       transition:all .2s ease;
     }
     .field input:focus{
-      outline:none;border-color:#667eea;
-      box-shadow:0 0 0 4px rgba(102,126,234,.15);
+      outline:none;border-color:var(--acc1);
+      box-shadow:0 0 0 3px rgba(99,102,241,.1);
     }
-    .err{color:#f5576c;font-size:14px;min-height:20px;margin-top:10px;font-weight:600}
+    .err{color:#ef4444;font-size:13px;min-height:18px;margin-top:10px;font-weight:600}
 
     @media (max-width: 1100px){
       .kpi-hero{grid-template-columns:1fr}
@@ -439,6 +486,7 @@
       .kpi-grid{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
       .filters-horizontal{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
       #indiaMapContainer{height:500px}
+      .map-stats{position:relative;top:auto;right:auto;margin-bottom:16px}
     }
     @media (max-width: 640px){
       .bar{padding:16px 20px}
@@ -447,7 +495,7 @@
       .header-actions{width:100%;justify-content:flex-start}
       #indiaMapContainer{height:400px}
       .filters-horizontal{grid-template-columns:1fr}
-      .title{font-size:1.5rem}
+      .title{font-size:1.4rem}
     }
   </style>
 </head>
@@ -563,7 +611,7 @@
         <canvas id="statusChart" height="280"></canvas>
       </div>
 
-      <!-- Trend Chart -->
+      <!-- Trend Chart - ENHANCED -->
       <div class="card" style="grid-column: span 8">
         <h3>📅 Time Trend (Scans per Day)</h3>
         <canvas id="trendChart" height="280"></canvas>
@@ -593,18 +641,46 @@
         <canvas id="productChart" height="180"></canvas>
       </div>
 
-      <!-- India Map -->
+      <!-- India Map with Stats Card -->
       <div class="card" style="grid-column: span 12">
         <h3>🗺️ India - State-wise Distribution</h3>
         <div id="indiaMapContainer">
           <div id="indiaMap"></div>
+          
+          <!-- Map Controls - NEW -->
+          <div class="map-controls">
+            <button class="map-control-btn" id="mapResetBtn">🔄 Reset Map Filter</button>
+          </div>
+          
+          <!-- Live Stats Card - NEW -->
+          <div class="map-stats">
+            <div class="map-stats-title">📊 Live Statistics</div>
+            <div class="map-stat-row">
+              <span class="map-stat-label">🌍 Active States</span>
+              <span class="map-stat-value stat-primary" id="mapActiveStates">0</span>
+            </div>
+            <div class="map-stat-row">
+              <span class="map-stat-label">✅ Approved</span>
+              <span class="map-stat-value stat-success" id="mapApproved">0</span>
+            </div>
+            <div class="map-stat-row">
+              <span class="map-stat-label">⏳ Pending</span>
+              <span class="map-stat-value stat-warning" id="mapPending">0</span>
+            </div>
+            <div class="map-stat-row" style="border-bottom:none">
+              <span class="map-stat-label">❌ Rejected</span>
+              <span class="map-stat-value stat-danger" id="mapRejected">0</span>
+            </div>
+          </div>
+          
+          <!-- Legend -->
           <div class="legend">
             <div class="legend-title">Approval Levels</div>
-            <div class="legend-item"><div class="legend-color" style="background:#10b981;border-color:#10b981"></div><span>Elite (1000+)</span></div>
-            <div class="legend-item"><div class="legend-color" style="background:#22c55e;border-color:#22c55e"></div><span>High (500-999)</span></div>
-            <div class="legend-item"><div class="legend-color" style="background:#84cc16;border-color:#84cc16"></div><span>Medium (250-499)</span></div>
-            <div class="legend-item"><div class="legend-color" style="background:#eab308;border-color:#eab308"></div><span>Growing (100-249)</span></div>
-            <div class="legend-item"><div class="legend-color" style="background:#f59e0b;border-color:#f59e0b"></div><span>Emerging (1-99)</span></div>
+            <div class="legend-item"><div class="legend-color" style="background:#10b981"></div><span>Elite (1000+)</span></div>
+            <div class="legend-item"><div class="legend-color" style="background:#22c55e"></div><span>High (500-999)</span></div>
+            <div class="legend-item"><div class="legend-color" style="background:#84cc16"></div><span>Medium (250-499)</span></div>
+            <div class="legend-item"><div class="legend-color" style="background:#eab308"></div><span>Growing (100-249)</span></div>
+            <div class="legend-item"><div class="legend-color" style="background:#f59e0b"></div><span>Emerging (1-99)</span></div>
           </div>
         </div>
       </div>
@@ -668,6 +744,15 @@
     }
   });
 
+  // Map Reset Button - NEW
+  document.getElementById('mapResetBtn').addEventListener('click', ()=>{
+    if(FILTERS.state){
+      FILTERS.state = '';
+      selState.value = '';
+      render();
+    }
+  });
+
   // Utilities
   const trim = (s)=> (s==null?'' : String(s).trim());
   const toDateKey = (dt)=>{
@@ -678,7 +763,6 @@
   };
   function uniqSorted(arr){ return [...new Set(arr.filter(Boolean))].sort((a,b)=>a.localeCompare(b)); }
 
-  // ORIGINAL parseProducts — kept exactly as-is (used by charts)
   function parseProducts(cartStr){
     const map = new Map();
     const s = trim(cartStr);
@@ -696,7 +780,6 @@
     return map;
   }
 
-  // Detailed parser to capture product + qty + unit lines
   function parseCartItems(cartStr){
     const s = trim(cartStr);
     if(!s) return [];
@@ -730,7 +813,6 @@
   const inpQtyMin = document.getElementById('qtyMin');
   const selStatus = document.getElementById('status');
   
-  // flatpickr single date-range controlling FILTERS.dateFrom/dateTo
   flatpickr("#dateRange",{
     mode:"range",
     dateFormat:"Y-m-d",
@@ -783,7 +865,7 @@
     return charts[id];
   }
   function palette(n){
-    const base = [ '#667eea','#764ba2','#f093fb','#f5576c','#4facfe','#00f2fe','#10b981','#f59e0b','#ec4899','#8b5cf6' ];
+    const base = [ '#6366f1','#ec4899','#10b981','#f59e0b','#3b82f6','#8b5cf6','#14b8a6','#f97316' ];
     const arr = []; for(let i=0;i<n;i++) arr.push(base[i%base.length]);
     return arr;
   }
@@ -832,35 +914,25 @@
     const pending = rows.filter(r=>/^pending$/i.test(trim(r['Submission Status']))).length;
     const no = rows.filter(r=>/^no$/i.test(trim(r['Submission Status']))).length;
     
-    // Calculate farmer metrics
     const allPhones = rows.map(r=>trim(r['Phone Number'])).filter(p=>p);
     const uniquePhones = new Set(allPhones);
     const totalFarmers = allPhones.length;
     const uniqueFarmers = uniquePhones.size;
     
-    // Calculate ACTIVE retailers from current FILTERED data (all filters applied)
     const activeRINs = new Set(rows.map(r=>trim(r['RIN'])).filter(rin=>rin));
     const activeRetailers = activeRINs.size;
     
-    // Calculate TOTAL retailers based on REFERENCE DATA (hardcoded state-wise totals)
-    // Reference: West Bengal=183, Maharashtra=616, Telangana=161, Andhra Pradesh=307, Karnataka=636
-    // Total across all states = 1,903
     const STATE_RETAILER_TOTALS = {
       'West Bengal': 183,
       'Maharashtra': 616,
       'Telangana': 161,
       'Andhra Pradesh': 307,
       'Karnataka': 636
-      // Add more states from your reference data if available
     };
     
-    let totalRetailers = 1903; // Default: total across ALL states
-    
+    let totalRetailers = 1903;
     if(FILTERS.state){
-      // If state is selected, use the hardcoded total for that state
       totalRetailers = STATE_RETAILER_TOTALS[FILTERS.state] || 0;
-      
-      // Fallback: if state not in hardcoded list, calculate from RAW data
       if(totalRetailers === 0){
         const stateRetailers = RAW.filter(r=>trim(r.State)===FILTERS.state);
         const stateRetailerRINs = new Set(stateRetailers.map(r=>trim(r['RIN'])).filter(rin=>rin));
@@ -875,11 +947,8 @@
     document.getElementById('kpiTotalFarmers').textContent = totalFarmers.toLocaleString();
     document.getElementById('kpiUniqueFarmers').textContent = `Unique: ${uniqueFarmers.toLocaleString()}`;
     document.getElementById('kpiActiveRetailers').textContent = activeRetailers.toLocaleString();
-    
-    // 🔥 NEW: Update total retailers display
     document.getElementById('kpiTotalRetailers').textContent = `of ${totalRetailers.toLocaleString()} total`;
     
-    // Calculate percentages
     const yesPct = total > 0 ? ((yes / total) * 100).toFixed(1) : '0.0';
     const noPct = total > 0 ? ((no / total) * 100).toFixed(1) : '0.0';
     const pendingPct = total > 0 ? ((pending / total) * 100).toFixed(1) : '0.0';
@@ -903,15 +972,15 @@
     let html = '<div style="font-size:13px">';
     states.forEach((s, i)=>{
       const bar = Math.round((s[1] / (states[0][1] || 1)) * 100);
-      const colors = ['#667eea','#764ba2','#f093fb','#f5576c','#4facfe','#00f2fe','#10b981','#f59e0b','#ec4899','#8b5cf6'];
+      const colors = ['#6366f1','#ec4899','#10b981','#f59e0b','#3b82f6','#8b5cf6','#14b8a6','#f97316'];
       const color = colors[i % colors.length];
       html += `<div style="margin-bottom:18px">
         <div style="display:flex;justify-content:space-between;margin-bottom:8px">
           <span style="font-weight:700;color:var(--text)">${i+1}. ${s[0]}</span>
-          <span style="color:${color};font-weight:800">${s[1].toLocaleString()}</span>
+          <span style="color:${color};font-weight:900;font-family:Space Grotesk,sans-serif">${s[1].toLocaleString()}</span>
         </div>
-        <div style="width:100%;height:10px;background:rgba(102,126,234,.12);border-radius:6px;overflow:hidden">
-          <div style="width:${bar}%;height:100%;background:${color};border-radius:6px;transition:width .3s ease"></div>
+        <div style="width:100%;height:10px;background:#e5e7eb;border-radius:6px;overflow:hidden">
+          <div style="width:${bar}%;height:100%;background:${color};border-radius:6px;transition:width .5s ease"></div>
         </div>
       </div>`;
     });
@@ -928,7 +997,7 @@
       labels:['Approved','Rejected','Pending'],
       datasets:[{ 
         data:[sYes,sNo,sPending], 
-        backgroundColor:['#10b981','#f59e0b','#8b5cf6'], 
+        backgroundColor:['#10b981','#ef4444','#f59e0b'], 
         borderWidth: 4,
         borderColor: '#fff',
         hoverOffset: 10
@@ -940,8 +1009,8 @@
           position: 'bottom',
           labels:{ 
             color: '#1f2937', 
-            padding: 20, 
-            font:{ size: 13, weight: '800' },
+            padding: 18, 
+            font:{ size: 13, weight: '800', family: 'Outfit' },
             usePointStyle: true,
             pointStyle: 'circle',
             generateLabels: function(chart) {
@@ -978,34 +1047,89 @@
       cutout:'65%'
     });
 
-    // Trend
+    // Trend - ENHANCED with gradient area and better styling
     const trendMap = new Map();
     for(const r of rows){ const k = toDateKey(trim(r['Scan Date'])); if(k) trendMap.set(k,(trendMap.get(k)||0)+1); }
     const trend = [...trendMap.entries()].sort((a,b)=>a[0].localeCompare(b[0]));
+    
+    // Create gradient for the trend chart
+    const trendCanvas = document.getElementById('trendChart');
+    const trendCtx = trendCanvas.getContext('2d');
+    const trendGradient = trendCtx.createLinearGradient(0, 0, 0, 280);
+    trendGradient.addColorStop(0, 'rgba(99,102,241,0.4)');
+    trendGradient.addColorStop(0.5, 'rgba(99,102,241,0.2)');
+    trendGradient.addColorStop(1, 'rgba(99,102,241,0.05)');
+    
     makeChart('trendChart','line',{
       labels: trend.map(x=>x[0]),
       datasets:[{ 
+        label: 'Daily Scans',
         data: trend.map(x=>x[1]), 
-        borderColor:'#667eea',
-        backgroundColor:'rgba(102,126,234,.2)',
-        borderWidth:3, 
+        borderColor:'#6366f1',
+        backgroundColor: trendGradient,
+        borderWidth:4, 
         tension:.4,
         fill:true,
-        pointRadius:5,
-        pointHoverRadius:7,
-        pointBackgroundColor:'#667eea',
+        pointRadius:6,
+        pointHoverRadius:9,
+        pointBackgroundColor:'#6366f1',
         pointBorderColor:'#fff',
-        pointBorderWidth:3
+        pointBorderWidth:3,
+        pointHoverBackgroundColor:'#fff',
+        pointHoverBorderColor:'#6366f1',
+        pointHoverBorderWidth:3
       }]
     },{ 
       scales:{ 
-        x:{ ticks:{ color:'#6b7280', maxRotation:45, font:{weight:'600',size:11} }, grid:{display:false} }, 
-        y:{ ticks:{ color:'#6b7280', font:{weight:'600',size:12} }, grid:{ color:'#e5e7eb' } } 
+        x:{ 
+          ticks:{ 
+            color:'#6b7280', 
+            maxRotation:45, 
+            font:{weight:'600',size:11,family:'Outfit'} 
+          }, 
+          grid:{display:false},
+          border:{color:'#e5e7eb',width:2}
+        }, 
+        y:{ 
+          ticks:{ 
+            color:'#6b7280', 
+            font:{weight:'700',size:12,family:'Space Grotesk'} 
+          }, 
+          grid:{ color:'#e5e7eb',lineWidth:1 },
+          border:{color:'#e5e7eb',width:2}
+        } 
       }, 
-      plugins:{ legend:{ display:false } } 
+      plugins:{ 
+        legend:{ 
+          display:true,
+          position:'top',
+          align:'end',
+          labels:{
+            color:'#1f2937',
+            font:{size:12,weight:'700',family:'Outfit'},
+            usePointStyle:true,
+            pointStyle:'circle'
+          }
+        },
+        tooltip:{
+          backgroundColor:'rgba(15,23,42,0.95)',
+          titleColor:'#fff',
+          titleFont:{size:13,weight:'700',family:'Outfit'},
+          bodyColor:'#fff',
+          bodyFont:{size:14,weight:'600',family:'Space Grotesk'},
+          padding:12,
+          borderColor:'#6366f1',
+          borderWidth:2,
+          cornerRadius:8
+        }
+      },
+      interaction:{
+        intersect:false,
+        mode:'index'
+      }
     });
 
-    // Retailer - vertical grouped bars
+    // Retailer
     const retailers = buildCounts(rows,'Retailer Name').slice(0,8);
     const retailerApproved = retailers.map(r => rows.filter(row => trim(row['Retailer Name']) === r[0] && /^yes$/i.test(trim(row['Submission Status']))).length);
     const retailerPending  = retailers.map(r => rows.filter(row => trim(row['Retailer Name']) === r[0] && /^pending$/i.test(trim(row['Submission Status']))).length);
@@ -1025,8 +1149,8 @@
           position: 'top', 
           labels: { 
             color: '#1f2937', 
-            padding: 16, 
-            font: { size: 13, weight: '700' }, 
+            padding: 14, 
+            font: { size: 12, weight: '700', family: 'Outfit' }, 
             usePointStyle: true, 
             pointStyle: 'circle' 
           } 
@@ -1038,12 +1162,12 @@
             color: '#1f2937', 
             maxRotation: 45, 
             minRotation: 25, 
-            font: { size: 11, weight: '700' } 
+            font: { size: 11, weight: '700', family: 'Outfit' } 
           }, 
           grid: { display: false } 
         }, 
         y: { 
-          ticks: { color: '#6b7280', font: { weight: '600' } }, 
+          ticks: { color: '#6b7280', font: { weight: '700', family: 'Space Grotesk' } }, 
           grid: { color: '#e5e7eb' } 
         } 
       } 
@@ -1063,8 +1187,8 @@
       indexAxis:'y', 
       plugins:{ legend:{ display:false } }, 
       scales:{ 
-        x:{ ticks:{ color:'#6b7280', font:{weight:'600'} }, grid:{color:'#e5e7eb'} }, 
-        y:{ ticks:{ color:'#1f2937',font:{size:11,weight:'700'} }, grid:{display:false} } 
+        x:{ ticks:{ color:'#6b7280', font:{weight:'700',family:'Space Grotesk'} }, grid:{color:'#e5e7eb'} }, 
+        y:{ ticks:{ color:'#1f2937',font:{size:11,weight:'700',family:'Outfit'} }, grid:{display:false} } 
       } 
     });
 
@@ -1091,60 +1215,38 @@
             color:'#1f2937', 
             maxRotation:45, 
             minRotation:20, 
-            font:{size:11,weight:'700'} 
+            font:{size:10,weight:'700',family:'Outfit'} 
           }, 
           grid:{display:false} 
         }, 
         y:{ 
-          ticks:{ color:'#6b7280', font:{weight:'600'} }, 
+          ticks:{ color:'#6b7280', font:{weight:'700',family:'Space Grotesk'} }, 
           grid:{color:'#e5e7eb'} 
         } 
       } 
     });
   }
 
-  // India Map with Leaflet
+  // India Map
   let indiaMap = null;
   let mapLayer = null;
 
   const stateCoordinates = {
-    'Andhra Pradesh': [15.9129, 79.7400],
-    'Arunachal Pradesh': [28.2180, 94.7278],
-    'Assam': [26.2006, 92.9376],
-    'Bihar': [25.0961, 85.3131],
-    'Chhattisgarh': [21.2787, 81.8661],
-    'Goa': [15.2993, 74.1240],
-    'Gujarat': [22.2587, 71.1924],
-    'Haryana': [29.0588, 76.0856],
-    'Himachal Pradesh': [31.1048, 77.1734],
-    'Jharkhand': [23.6102, 85.2799],
-    'Karnataka': [15.3173, 75.7139],
-    'Kerala': [10.8505, 76.2711],
-    'Madhya Pradesh': [22.9734, 78.6569],
-    'Maharashtra': [19.7515, 75.7139],
-    'Manipur': [24.6637, 93.9063],
-    'Meghalaya': [25.4670, 91.3662],
-    'Mizoram': [23.1645, 92.9376],
-    'Nagaland': [26.1584, 94.5624],
-    'Odisha': [20.9517, 85.0985],
-    'Punjab': [31.1471, 75.3412],
-    'Rajasthan': [27.0238, 74.2179],
-    'Sikkim': [27.5330, 88.5122],
-    'Tamil Nadu': [11.1271, 78.6569],
-    'Telangana': [18.1124, 79.0193],
-    'Tripura': [23.9408, 91.9882],
-    'Uttar Pradesh': [26.8467, 80.9462],
-    'Uttarakhand': [30.0668, 79.0193],
-    'West Bengal': [22.9868, 87.8550],
-    'Andaman and Nicobar Islands': [11.7401, 92.6586],
-    'Chandigarh': [30.7333, 76.7794],
-    'Dadra and Nagar Haveli': [20.1809, 73.0169],
-    'Daman and Diu': [20.4283, 72.8397],
-    'Lakshadweep': [10.5667, 72.6417],
-    'Delhi': [28.7041, 77.1025],
-    'Puducherry': [11.9416, 79.8083],
-    'Jammu and Kashmir': [33.7782, 76.5762],
-    'Ladakh': [34.1526, 77.5771]
+    'Andhra Pradesh': [15.9129, 79.7400],'Arunachal Pradesh': [28.2180, 94.7278],
+    'Assam': [26.2006, 92.9376],'Bihar': [25.0961, 85.3131],'Chhattisgarh': [21.2787, 81.8661],
+    'Goa': [15.2993, 74.1240],'Gujarat': [22.2587, 71.1924],'Haryana': [29.0588, 76.0856],
+    'Himachal Pradesh': [31.1048, 77.1734],'Jharkhand': [23.6102, 85.2799],
+    'Karnataka': [15.3173, 75.7139],'Kerala': [10.8505, 76.2711],'Madhya Pradesh': [22.9734, 78.6569],
+    'Maharashtra': [19.7515, 75.7139],'Manipur': [24.6637, 93.9063],'Meghalaya': [25.4670, 91.3662],
+    'Mizoram': [23.1645, 92.9376],'Nagaland': [26.1584, 94.5624],'Odisha': [20.9517, 85.0985],
+    'Punjab': [31.1471, 75.3412],'Rajasthan': [27.0238, 74.2179],'Sikkim': [27.5330, 88.5122],
+    'Tamil Nadu': [11.1271, 78.6569],'Telangana': [18.1124, 79.0193],'Tripura': [23.9408, 91.9882],
+    'Uttar Pradesh': [26.8467, 80.9462],'Uttarakhand': [30.0668, 79.0193],
+    'West Bengal': [22.9868, 87.8550],'Andaman and Nicobar Islands': [11.7401, 92.6586],
+    'Chandigarh': [30.7333, 76.7794],'Dadra and Nagar Haveli': [20.1809, 73.0169],
+    'Daman and Diu': [20.4283, 72.8397],'Lakshadweep': [10.5667, 72.6417],
+    'Delhi': [28.7041, 77.1025],'Puducherry': [11.9416, 79.8083],
+    'Jammu and Kashmir': [33.7782, 76.5762],'Ladakh': [34.1526, 77.5771]
   };
 
   function getMarkerLevel(approved) {
@@ -1184,7 +1286,7 @@
   function initMap() {
     if (indiaMap) return;
     indiaMap = L.map('indiaMap', { center: [22.5, 82.5], zoom: 5, minZoom: 4, maxZoom: 8, zoomControl: true });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors', maxZoom: 19 }).addTo(indiaMap);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 19 }).addTo(indiaMap);
   }
 
   function renderIndiaMap(rows) {
@@ -1205,10 +1307,17 @@
     }
     
     mapLayer = L.layerGroup();
+    
+    // Track totals for stats card
+    let totalApproved = 0, totalPending = 0, totalRejected = 0;
 
     for (const [state, coords] of Object.entries(stateCoordinates)) {
       const data = stateData.get(state);
       if (!data || data.approved === 0) continue;
+
+      totalApproved += data.approved;
+      totalPending += data.pending;
+      totalRejected += data.rejected;
 
       const approvalRate = getApprovalRate(data.approved, data.total);
       const marker = L.marker(coords, { icon: getMarkerIcon(state, data.approved) });
@@ -1218,20 +1327,26 @@
         <div class="map-popup-row"><span class="map-popup-label">✅ Approved</span><span class="map-popup-value map-popup-success">${data.approved.toLocaleString()}</span></div>
         <div class="map-popup-row"><span class="map-popup-label">⏳ Pending</span><span class="map-popup-value map-popup-pending">${data.pending.toLocaleString()}</span></div>
         <div class="map-popup-row"><span class="map-popup-label">❌ Rejected</span><span class="map-popup-value map-popup-rejected">${data.rejected.toLocaleString()}</span></div>
-        <div class="map-popup-row" style="border-top:3px solid var(--ring);margin-top:12px;padding-top:12px"><span class="map-popup-label">📊 Total Scans</span><span class="map-popup-value">${data.total.toLocaleString()}</span></div>
+        <div class="map-popup-row" style="border-top:2px solid var(--ring);margin-top:10px;padding-top:10px"><span class="map-popup-label">📊 Total Scans</span><span class="map-popup-value">${data.total.toLocaleString()}</span></div>
         <div class="map-popup-row"><span class="map-popup-label">🎯 Approval Rate</span><span class="map-popup-value map-popup-success">${approvalRate}%</span></div>
       `;
 
-      marker.bindPopup(popupContent, { closeButton: true, maxWidth: 340, className: 'custom-popup' });
+      marker.bindPopup(popupContent, { closeButton: true, maxWidth: 340 });
       marker.on('click', () => { FILTERS.state = state; selState.value = state; render(); });
       marker.addTo(mapLayer);
     }
 
     mapLayer.addTo(indiaMap);
+    
+    // Update map stats card - NEW
+    document.getElementById('mapActiveStates').textContent = stateData.size;
+    document.getElementById('mapApproved').textContent = totalApproved.toLocaleString();
+    document.getElementById('mapPending').textContent = totalPending.toLocaleString();
+    document.getElementById('mapRejected').textContent = totalRejected.toLocaleString();
+    
     setTimeout(() => { indiaMap.fitBounds([[8, 68],[37, 97]]); }, 100);
   }
 
-  // Populate + Cascading
   function populateFilters(rows){
     const states = uniqSorted(rows.map(r=>trim(r.State)));
     const dists  = uniqSorted(rows.map(r=>trim(r.District)));
@@ -1333,9 +1448,8 @@
     requestAnimationFrame(()=> renderCharts(rows));
   }
 
-  // Load CSV
   function normalizeRow(r){
-    const obj = {
+    return {
       'User ID': r['User ID']||r['UserID']||r['id']||'',
       'Phone Number': r['Phone Number']||r['Phone']||r['phone']||'',
       'First Name': r['First Name']||r['FirstName']||'',
@@ -1354,7 +1468,6 @@
       'Coupon Code': r['Coupon Code']||'',
       'Submission Status': r['Submission Status']||r['Approved Status']||''
     };
-    return obj;
   }
 
   Papa.parse(CSV_URL, {
