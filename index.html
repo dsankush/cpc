@@ -975,7 +975,9 @@
     const states = uniqSorted(rows.map(r=>trim(r.State)));
     const dists  = uniqSorted(rows.map(r=>trim(r.District)));
     const rets   = uniqSorted(rows.map(r=>trim(r['Retailer Name'])));
-    const products = uniqSorted(rows.flatMap(r=>[...parseProducts(r['Cart Items']).keys()]));
+    // Fixed product list
+    const products = ['Prachand','Magnite','Fantac Plus','Benofit','Marvex'];
+
     const unitsAll = uniqSorted(rows.flatMap(r=>parseCartItems(r['Cart Items']).map(it=>it.unit).filter(Boolean)));
     const statuses = ['','Yes','No','Pending'];
 
@@ -1131,3 +1133,4 @@
 </script>
 </body>
 </html>
+
