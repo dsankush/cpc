@@ -11,8 +11,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <style>
     :root{
       --bg:#f8fafc;
@@ -37,48 +35,235 @@
       background-attachment:fixed;color:var(--text)}
     .app{display:grid;grid-template-rows:auto 1fr auto;min-height:100vh}
     
+    /* Header */
     header{position:sticky;top:0;z-index:30;
       backdrop-filter:saturate(180%) blur(20px);
       background:rgba(255,255,255,.95);
       border-bottom:2px solid var(--ring);
       box-shadow:0 4px 20px var(--shadow)}
     .bar{display:flex;align-items:center;gap:20px;padding:16px 24px;flex-wrap:wrap}
+    .logo{display:flex;align-items:center;gap:12px;font-weight:700;font-size:18px;color:var(--text)}
+    .dot{width:12px;height:12px;border-radius:999px;
+      background:linear-gradient(135deg,var(--acc1),var(--acc3));
+      box-shadow:0 0 20px rgba(14,165,233,.4);
+      animation:pulse 2s ease-in-out infinite}
+    @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.15);opacity:.7}}
+    .title{letter-spacing:.5px}
     .header-actions{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
     .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
       padding:10px 16px;border-radius:12px;border:2px solid var(--acc1);
       background:linear-gradient(135deg,var(--acc1),#0284c7);
       color:white;font-weight:600;cursor:pointer;font-size:13px;
       transition:all .3s ease;white-space:nowrap;box-shadow:0 4px 12px rgba(14,165,233,.25)}
+    .btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(14,165,233,.4)}
     .btn-logout{background:linear-gradient(135deg,#ef4444,#dc2626);
       border-color:#ef4444;box-shadow:0 4px 12px rgba(239,68,68,.25)}
+    .btn-logout:hover{box-shadow:0 8px 24px rgba(239,68,68,.4)}
 
+    /* Layout */
     .main{display:flex;flex-direction:column;gap:24px;padding:24px 24px 24px 48px;max-width:100%;margin:0}
+    .panel{background:var(--panel);border:2px solid var(--ring);border-radius:16px;padding:20px;
+      box-shadow:0 4px 16px var(--shadow);transition:all .3s ease}
+    .panel:hover{border-color:var(--acc1);box-shadow:0 8px 24px var(--shadow-lg)}
+
+    /* Filters */
     .filters-horizontal{background:var(--panel);border:2px solid var(--ring);border-radius:16px;
       padding:20px 24px;box-shadow:0 4px 16px var(--shadow);display:grid;
       grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;align-items:end}
     .filters-horizontal .group{display:flex;flex-direction:column;gap:6px}
-    .filters-horizontal label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+    .filters-horizontal label{font-size:11px;color:var(--muted);font-weight:600;
+      text-transform:uppercase;letter-spacing:.5px}
     .filters-horizontal select,.filters-horizontal input{width:100%;padding:10px 12px;
       border-radius:10px;border:2px solid var(--ring);background:var(--bg);
       color:var(--text);outline:none;font-size:13px;transition:all .2s ease}
     .filters-horizontal select:hover,.filters-horizontal input:hover{border-color:var(--acc1)}
+    .filters-horizontal select:focus,.filters-horizontal input:focus{border-color:var(--acc1);
+      box-shadow:0 0 0 3px rgba(14,165,233,.1)}
+    .filters-horizontal .btn{padding:10px 20px;font-size:13px;white-space:nowrap}
 
+    /* Content Grid */
     .content{display:grid;grid-template-columns:repeat(12,1fr);gap:24px}
     .card{background:var(--card);border:2px solid var(--ring);border-radius:16px;
-      padding:24px;min-height:160px;display:flex;flex-direction:column;box-shadow:0 4px 16px var(--shadow)}
+      padding:24px;min-height:160px;display:flex;flex-direction:column;
+      box-shadow:0 4px 16px var(--shadow);transition:all .3s ease;position:relative;overflow:hidden}
+    .card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+      background:linear-gradient(90deg,var(--acc1),var(--acc3),var(--acc2));opacity:0;transition:opacity .3s}
+    .card:hover{border-color:var(--acc1);transform:translateY(-4px);
+      box-shadow:0 12px 32px var(--shadow-lg)}
+    .card:hover::before{opacity:1}
+    .card h3{margin:0 0 12px;font-size:13px;color:var(--muted);font-weight:700;
+      text-transform:uppercase;letter-spacing:1px}
+    
+    /* KPI Cards */
+    .kpi-hero{display:grid;grid-template-columns:200px 1fr;gap:32px;align-items:center}
+    .kpi-main-circle{width:200px;height:200px;border-radius:50%;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      background:linear-gradient(135deg,rgba(14,165,233,.15),rgba(16,185,129,.15));
+      border:4px solid var(--acc1);box-shadow:0 8px 32px rgba(14,165,233,.25);
+      position:relative}
+    .kpi-main-circle::after{content:'';position:absolute;inset:-8px;border-radius:50%;
+      background:linear-gradient(135deg,var(--acc1),var(--acc3));opacity:.2;z-index:-1;
+      animation:pulse 3s ease-in-out infinite}
+    .kpi-main-label{font-size:12px;color:var(--muted);font-weight:700;
+      text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+    .kpi-main-value{font-size:56px;font-weight:800;line-height:1;
+      background:linear-gradient(135deg,var(--acc1),var(--acc3));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      background-clip:text}
+    .kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
+    .kpi-item{background:linear-gradient(135deg,rgba(14,165,233,.05),rgba(16,185,129,.05));
+      border:2px solid rgba(14,165,233,.15);border-radius:16px;padding:20px;
+      text-align:center;transition:all .3s ease;position:relative;overflow:hidden}
+    .kpi-item::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:linear-gradient(90deg,var(--acc3),var(--acc1));opacity:0;transition:opacity .3s}
+    .kpi-item:hover{transform:translateY(-4px);border-color:var(--acc1);
+      box-shadow:0 8px 24px rgba(14,165,233,.2)}
+    .kpi-item:hover::before{opacity:1}
+    .kpi-label{font-size:11px;color:var(--muted);text-transform:uppercase;
+      letter-spacing:.8px;font-weight:700;margin-bottom:12px}
+    .kpi-value{font-size:36px;font-weight:800;margin-bottom:8px}
+    .kpi-item:nth-child(1){border-color:rgba(16,185,129,.2)}
+    .kpi-item:nth-child(1)::before{background:var(--acc3)}
+    .kpi-item:nth-child(1) .kpi-value{color:var(--acc3)}
+    .kpi-item:nth-child(2){border-color:rgba(249,115,22,.2)}
+    .kpi-item:nth-child(2)::before{background:var(--acc2)}
+    .kpi-item:nth-child(2) .kpi-value{color:var(--acc2)}
+    .kpi-item:nth-child(3){border-color:rgba(139,92,246,.2)}
+    .kpi-item:nth-child(3)::before{background:var(--acc4)}
+    .kpi-item:nth-child(3) .kpi-value{color:var(--acc4)}
+    .kpi-item:nth-child(4){border-color:rgba(59,130,246,.2)}
+    .kpi-item:nth-child(4)::before{background:#3b82f6}
+    .kpi-item:nth-child(4) .kpi-value{color:#3b82f6}
+    .kpi-item:nth-child(5){border-color:rgba(236,72,153,.2)}
+    .kpi-item:nth-child(5)::before{background:#ec4899}
+    .kpi-item:nth-child(5) .kpi-value{color:#ec4899}
+    .kpi-percent{font-size:13px;color:var(--muted);font-weight:600}
+
+    /* India Map */
+    #indiaMapContainer{width:100%;height:700px;position:relative;
+      border-radius:16px;overflow:hidden;border:2px solid var(--ring)}
+    #indiaMap{width:100%;height:100%;z-index:1}
+    .leaflet-container{background:linear-gradient(135deg, #f0f9ff 0%, #fef3c7 50%, #fce7f3 100%);font-family:Inter,sans-serif}
+    .leaflet-popup-content-wrapper{background:white;border-radius:16px;box-shadow:0 12px 40px rgba(15,23,42,.3);border:3px solid var(--acc1)}
+    .leaflet-popup-content{margin:20px;font-size:13px;color:var(--text)}
+    .leaflet-popup-tip{background:white;border:3px solid var(--acc1)}
+    .map-popup-state{font-size:18px;font-weight:800;color:var(--acc1);margin-bottom:12px;padding-bottom:10px;border-bottom:3px solid var(--ring)}
+    .map-popup-row{display:flex;justify-content:space-between;align-items:center;margin:10px 0;padding:8px 0}
+    .map-popup-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+    .map-popup-value{font-size:20px;font-weight:800;color:var(--text)}
+    .map-popup-success{color:var(--acc3)!important}
+    .map-popup-pending{color:var(--acc4)!important}
+    .map-popup-rejected{color:var(--acc2)!important}
+    .state-marker-pin{position:relative;width:60px;height:60px;display:flex;align-items:center;justify-content:center}
+    .state-marker-inner{position:relative;z-index:2;background:white;border-radius:12px;
+      padding:8px 12px;box-shadow:0 8px 24px rgba(15,23,42,.25);border:3px solid;
+      font-weight:800;font-size:14px;text-align:center;min-width:80px;
+      transition:all .3s ease;cursor:pointer}
+    .state-marker-inner:hover{transform:translateY(-4px) scale(1.05);box-shadow:0 12px 32px rgba(15,23,42,.4)}
+    .state-marker-name{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+    .state-marker-count{font-size:18px;font-weight:900;display:flex;align-items:center;justify-content:center;gap:4px}
+    .marker-ripple{position:absolute;width:100%;height:100%;border-radius:50%;
+      background:radial-gradient(circle, rgba(14,165,233,.3) 0%, rgba(14,165,233,0) 70%);
+      animation:ripple 2s ease-in-out infinite;z-index:1}
+    @keyframes ripple{0%{transform:scale(.8);opacity:.7}50%{transform:scale(1.2);opacity:.3}100%{transform:scale(.8);opacity:.7}}
+    .state-marker-level-1{border-color:var(--acc3)}
+    .state-marker-level-1 .state-marker-count{color:var(--acc3)}
+    .state-marker-level-2{border-color:#22c55e}
+    .state-marker-level-2 .state-marker-count{color:#22c55e}
+    .state-marker-level-3{border-color:#84cc16}
+    .state-marker-level-3 .state-marker-count{color:#84cc16}
+    .state-marker-level-4{border-color:#eab308}
+    .state-marker-level-4 .state-marker-count{color:#eab308}
+    .state-marker-level-5{border-color:var(--acc2)}
+    .state-marker-level-5 .state-marker-count{color:var(--acc2)}
+    .legend{position:absolute;bottom:20px;right:20px;background:rgba(255,255,255,.98);
+      padding:20px;border-radius:16px;box-shadow:0 8px 24px var(--shadow-lg);border:3px solid var(--acc1);z-index:1000}
+    .legend-title{font-size:13px;font-weight:800;color:var(--text);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px}
+    .legend-item{display:flex;align-items:center;gap:10px;margin:8px 0;font-size:12px;font-weight:600}
+    .legend-color{width:28px;height:20px;border-radius:6px;border:2px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,.1)}
 
     .footer{padding:16px 24px;color:var(--muted);border-top:2px solid var(--ring);
       text-align:center;font-size:13px;background:var(--panel);font-weight:500}
+
+    /* Login */
+    .overlay{position:fixed;inset:0;
+      background:linear-gradient(135deg, rgba(224,242,254,.95) 0%, rgba(254,243,199,.95) 50%, rgba(252,231,243,.95) 100%);
+      display:grid;place-items:center;z-index:100;backdrop-filter:blur(10px)}
+    .login{width:min(92vw,420px);background:white;border:2px solid var(--acc1);
+      border-radius:20px;padding:32px;
+      box-shadow:0 24px 80px rgba(15,23,42,.2);
+      animation:slideIn .5s ease}
+    @keyframes slideIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    .login h2{margin:0 0 8px;font-size:24px;color:var(--text)}
+    .login p{margin:0 0 24px;color:var(--muted);font-size:14px}
+    .field{display:flex;flex-direction:column;gap:8px;margin:16px 0}
+    .field label{font-size:12px;color:var(--muted);font-weight:600}
+    .field input{padding:14px;border-radius:12px;border:2px solid var(--ring);
+      background:var(--bg);color:var(--text);font-size:14px}
+    .field input:focus{outline:none;border-color:var(--acc1);box-shadow:0 0 0 3px rgba(14,165,233,.1)}
+    .err{color:#ef4444;font-size:13px;min-height:18px;margin-top:8px;font-weight:500}
+
+    @media (max-width: 1100px){
+      .kpi-hero{grid-template-columns:1fr}
+      .kpi-main-circle{margin:0 auto}
+      .kpi-grid{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+      .filters-horizontal{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+      #indiaMapContainer{height:500px}
+    }
+    @media (max-width: 640px){
+      .bar{padding:12px 16px}
+      .main{padding:16px;gap:16px}
+      .kpi-grid{grid-template-columns:1fr}
+      .header-actions{width:100%;justify-content:flex-start}
+      #indiaMapContainer{height:400px}
+      .filters-horizontal{grid-template-columns:1fr}
+    }
   </style>
 </head>
 <body>
 <div class="app">
   <header>
     <div class="bar">
-      <div class="logo">
-        <span style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#4facfe,#00f2fe)"></span>
-        <h1 style="font-size:1.5rem;margin:0;background:linear-gradient(90deg,#4facfe,#00f2fe);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Coromandel CPC Campaign Dashboard</h1>
-      </div>
+      <div class="logo" style="
+    display:flex; align-items:center; gap:20px;
+    padding:20px 40px;
+    border-radius:20px;
+    background:rgba(255,255,255,0.2);
+    backdrop-filter:blur(12px);
+    box-shadow:0 8px 20px rgba(0,0,0,0.15);">
+
+    <!-- Clean dot -->
+    <span style="
+      width:22px; height:22px; border-radius:50%;
+      background:linear-gradient(135deg,#4facfe,#00f2fe);
+      box-shadow:0 3px 8px rgba(0,0,0,0.2);">
+    </span>
+
+    <!-- Modern quirky title -->
+    <h1 style="
+      font-size:2rem; 
+      margin:0;
+      color:#2c3e50;
+      letter-spacing:1px;
+      font-weight:700;
+      background:linear-gradient(90deg,#4facfe,#00f2fe);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;">
+      Coromandel CPC Campaign Dashboard
+    </h1>
+
+  </div>
+      <!-- Animations -->
+  <style>
+    @keyframes pulse {
+      from { transform:scale(1); opacity:0.9; }
+      to { transform:scale(1.3); opacity:1; }
+    }
+    @keyframes flicker {
+      0%,18%,22%,25%,53%,57%,100% { opacity:1; }
+      20%,24%,55% { opacity:0.6; }
+    }
+  </style>
       <div class="header-actions">
         <button class="btn" id="downloadBtn">Download Data</button>
         <button class="btn btn-logout" id="logoutBtn">Logout</button>
@@ -87,11 +272,15 @@
   </header>
 
   <main class="main">
-    <!-- 🔥 Filters -->
+    <!-- Horizontal Filters -->
     <div class="filters-horizontal">
       <div class="group">
-        <label for="dateRange">Date Range</label>
-        <input id="dateRange" placeholder="Select range" />
+        <label for="dateFrom">Date From</label>
+        <input id="dateFrom" type="date" />
+      </div>
+      <div class="group">
+        <label for="dateTo">Date To</label>
+        <input id="dateTo" type="date" />
       </div>
       <div class="group">
         <label for="state">State</label>
@@ -110,10 +299,6 @@
         <select id="product"></select>
       </div>
       <div class="group">
-        <label for="unit">Quantity Unit</label>
-        <select id="unit"></select>
-      </div>
-      <div class="group">
         <label for="qtyMin">Quantity (≥)</label>
         <input id="qtyMin" type="number" min="0" step="1" placeholder="0" />
       </div>
@@ -126,110 +311,815 @@
       </div>
     </div>
 
-    <!-- Dashboard content (charts, KPIs, map etc.) stays unchanged -->
     <section class="content">
-      <div class="card" style="grid-column: span 12"><h3>Dashboard Content…</h3></div>
+      <!-- Total Scans with Hero Design -->
+      <div class="card" style="grid-column: span 12">
+        <h3>Campaign Performance Overview</h3>
+        <div class="kpi-hero">
+          <div class="kpi-main-circle">
+            <div class="kpi-main-label">Total Scans</div>
+            <div class="kpi-main-value" id="kpiTotalBig">0</div>
+          </div>
+          <div class="kpi-grid">
+            <div class="kpi-item">
+              <div class="kpi-label">Approved</div>
+              <div class="kpi-value" id="kpiYes">0</div>
+              <div class="kpi-percent" id="kpiYesPct">0%</div>
+            </div>
+            <div class="kpi-item">
+              <div class="kpi-label">Rejected</div>
+              <div class="kpi-value" id="kpiNo">0</div>
+              <div class="kpi-percent" id="kpiNoPct">0%</div>
+            </div>
+            <div class="kpi-item">
+              <div class="kpi-label">Pending</div>
+              <div class="kpi-value" id="kpiPending">0</div>
+              <div class="kpi-percent" id="kpiPendingPct">0%</div>
+            </div>
+            <div class="kpi-item">
+              <div class="kpi-label">Total Farmers</div>
+              <div class="kpi-value" id="kpiTotalFarmers">0</div>
+              <div class="kpi-percent" id="kpiUniqueFarmers">Unique: 0</div>
+            </div>
+            <div class="kpi-item">
+              <div class="kpi-label">Retailers</div>
+              <div class="kpi-value" id="kpiActiveRetailers">0</div>
+              <div class="kpi-percent">of 1,903 total</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status Chart -->
+      <div class="card" style="grid-column: span 4">
+        <h3>Order Approval Status</h3>
+        <canvas id="statusChart" height="280"></canvas>
+      </div>
+
+      <!-- Trend Chart -->
+      <div class="card" style="grid-column: span 8">
+        <h3>Time Trend (Scans per Day)</h3>
+        <canvas id="trendChart" height="280"></canvas>
+      </div>
+
+      <!-- Top States Table -->
+      <div class="card" style="grid-column: span 6">
+        <h3>States by Scans</h3>
+        <div id="statesTable" style="overflow-y:auto;max-height:380px;margin-top:12px"></div>
+      </div>
+
+      <!-- Retailer Performance -->
+      <div class="card" style="grid-column: span 6">
+        <h3>Retailer Performance</h3>
+        <canvas id="retailerChart" height="240"></canvas>
+      </div>
+
+      <!-- District Scans -->
+      <div class="card" style="grid-column: span 6">
+        <h3>District-wise Scans</h3>
+        <canvas id="districtChart" height="180"></canvas>
+      </div>
+
+      <!-- Product Basket -->
+      <div class="card" style="grid-column: span 6">
+        <h3>Product Basket</h3>
+        <canvas id="productChart" height="180"></canvas>
+      </div>
+
+      <!-- India Map - Now at bottom and full width -->
+      <div class="card" style="grid-column: span 12">
+        <h3>India - State-wise Distribution</h3>
+        <div id="indiaMapContainer">
+          <div id="indiaMap"></div>
+          <div class="legend">
+            <div class="legend-title">Approval Levels</div>
+            <div class="legend-item"><div class="legend-color" style="background:#10b981;border-color:#10b981"></div><span>Elite (1000+)</span></div>
+            <div class="legend-item"><div class="legend-color" style="background:#22c55e;border-color:#22c55e"></div><span>High (500-999)</span></div>
+            <div class="legend-item"><div class="legend-color" style="background:#84cc16;border-color:#84cc16"></div><span>Medium (250-499)</span></div>
+            <div class="legend-item"><div class="legend-color" style="background:#eab308;border-color:#eab308"></div><span>Growing (100-249)</span></div>
+            <div class="legend-item"><div class="legend-color" style="background:#f97316;border-color:#f97316"></div><span>Emerging (1-99)</span></div>
+          </div>
+        </div>
+      </div>
     </section>
   </main>
 
-  <div class="footer">© 2025 Coromandel CPC</div>
+  <div class="footer">
+    © 2025 Coromandel CPC
+  </div>
+</div>
+
+<!-- Login Overlay -->
+<div class="overlay" id="loginOverlay">
+  <form class="login" id="loginForm">
+    <h2>🔐 Secure Access</h2>
+    <p>Please authenticate to view the campaign dashboard.</p>
+    <div class="field">
+      <label>Username</label>
+      <input id="u" autocomplete="username" placeholder="Enter username" />
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input id="p" type="password" autocomplete="current-password" placeholder="Enter password" />
+    </div>
+    <button class="btn" type="submit" style="width:100%;margin-top:8px">Login</button>
+    <div class="err" id="err"></div>
+  </form>
 </div>
 
 <script>
   const CSV_URL = './data.csv';
-  let RAW = [];
-  let FILTERS = { dateFrom:'', dateTo:'', state:'', district:'', retailer:'', product:'', unit:'', qtyMin:0, status:'' };
 
-  const selState=document.getElementById('state');
-  const selDistrict=document.getElementById('district');
-  const selRetailer=document.getElementById('retailer');
-  const selProduct=document.getElementById('product');
-  const selUnit=document.getElementById('unit');
-  const selStatus=document.getElementById('status');
-  const inpQtyMin=document.getElementById('qtyMin');
-  const selDateRange=document.getElementById('dateRange');
+  // Login
+  const VALID_USER = 'digicides';
+  const VALID_PASS = 'coro@cpc';
+  const overlay = document.getElementById('loginOverlay');
+  const form = document.getElementById('loginForm');
+  const errEl = document.getElementById('err');
+  const LS_KEY = 'cpc_login_ok';
 
-  flatpickr("#dateRange",{mode:"range",dateFormat:"Y-m-d",onChange:(dates)=>{
-    if(dates.length===2){
-      FILTERS.dateFrom=dates[0].toISOString().slice(0,10);
-      FILTERS.dateTo=dates[1].toISOString().slice(0,10);
-      render();
+  function unlock(){ overlay.style.display='none'; }
+  if(localStorage.getItem(LS_KEY)==='1'){ unlock(); }
+  
+  form.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const u = document.getElementById('u').value.trim();
+    const p = document.getElementById('p').value;
+    if(u===VALID_USER && p===VALID_PASS){
+      localStorage.setItem(LS_KEY,'1');
+      unlock();
+    } else {
+      errEl.textContent = 'Invalid credentials. Please try again.';
     }
-  }});
+  });
 
-  function trim(s){return (s==null?'':String(s).trim());}
-  function uniqSorted(arr){return [...new Set(arr.filter(Boolean))].sort((a,b)=>a.localeCompare(b));}
-  function toDateKey(dt){if(!dt) return '';const d=new Date(dt.replace(/-/g,'/'));if(isNaN(d)) return '';return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+  // Logout
+  document.getElementById('logoutBtn').addEventListener('click', ()=>{
+    if(confirm('Are you sure you want to logout?')){
+      localStorage.removeItem(LS_KEY);
+      location.reload();
+    }
+  });
 
-  // Parse Products & Units
+  // Utilities
+  const trim = (s)=> (s==null?'' : String(s).trim());
+  const toDateKey = (dt)=>{
+    if(!dt) return '';
+    const d = new Date(dt.replace(/-/g,'/'));
+    if(isNaN(d)) return '';
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  };
+  function uniqSorted(arr){ return [...new Set(arr.filter(Boolean))].sort((a,b)=>a.localeCompare(b)); }
   function parseProducts(cartStr){
-    const products=new Map();const units=new Map();
-    const s=trim(cartStr);if(!s) return {products,units};
-    const parts=s.split(',');
+    const map = new Map();
+    const s = trim(cartStr);
+    if(!s) return map;
+    const parts = s.split(',');
     for(const raw of parts){
-      const m=raw.trim().match(/^(.+?)\s*-\s*qty\s*(\d+)(?:\s*-\s*(.+))?$/i);
+      const item = raw.trim();
+      const m = item.match(/^(.+?)\s*-\s*qty\s*(\d+)/i) || item.match(/^(.+?)\s*$/);
       if(m){
-        const name=trim(m[1]);const q=Number(m[2])||1;const unit=m[3]?trim(m[3]):null;
-        products.set(name,(products.get(name)||0)+q);
-        if(unit) units.set(unit,(units.get(unit)||0)+q);
+        const name = trim(m[1]).replace(/\s{2,}/g,' ');
+        const q = m[2] ? Number(m[2]) : 1;
+        map.set(name, (map.get(name)||0)+ (isFinite(q)? q : 1));
       }
     }
-    return {products,units};
+    return map;
   }
 
+  // State
+  let RAW = [];
+  let FILTERS = { dateFrom:'', dateTo:'', state:'', district:'', retailer:'', product:'', qtyMin:0, status:'' };
+
+  // DOM
+  const selDateFrom = document.getElementById('dateFrom');
+  const selDateTo = document.getElementById('dateTo');
+  const selState = document.getElementById('state');
+  const selDistrict = document.getElementById('district');
+  const selRetailer = document.getElementById('retailer');
+  const selProduct = document.getElementById('product');
+  const inpQtyMin = document.getElementById('qtyMin');
+  const selStatus = document.getElementById('status');
+  
+  document.getElementById('resetBtn').addEventListener('click', ()=>{
+    FILTERS = { dateFrom:'', dateTo:'', state:'', district:'', retailer:'', product:'', qtyMin:0, status:'' };
+    selDateFrom.value = selDateTo.value = '';
+    selState.value = selDistrict.value = selRetailer.value = selProduct.value = selStatus.value = '';
+    inpQtyMin.value = '';
+    render();
+  });
+
+  // Download CSV
+  document.getElementById('downloadBtn').addEventListener('click', ()=>{
+    const filtered = applyFilters(RAW);
+    if(filtered.length === 0){ alert('No data to download!'); return; }
+    const csv = Papa.unparse(filtered);
+    const blob = new Blob([csv], {type:'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'cpc_data_export_' + new Date().toISOString().slice(0,10) + '.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // Charts
+  const charts = {};
+  function makeChart(id, type, data, opts){
+    const ctx = document.getElementById(id).getContext('2d');
+    if(charts[id]){ 
+      charts[id].data = data; 
+      charts[id].options = opts; 
+      charts[id].update(); 
+      return charts[id]; 
+    }
+    charts[id] = new Chart(ctx, { type, data, options: opts });
+    return charts[id];
+  }
+  function palette(n){
+    const base = [ '#0ea5e9','#f97316','#10b981','#8b5cf6','#ec4899','#eab308','#3b82f6','#14b8a6','#f43f5e' ];
+    const arr = []; for(let i=0;i<n;i++) arr.push(base[i%base.length]);
+    return arr;
+  }
+
+  // Apply Filters
   function applyFilters(rows){
-    const f=FILTERS;
+    const f = FILTERS;
     return rows.filter(r=>{
-      if(f.dateFrom||f.dateTo){
-        const scanDate=toDateKey(trim(r['Scan Date']));
-        if(f.dateFrom && scanDate<f.dateFrom) return false;
-        if(f.dateTo && scanDate>f.dateTo) return false;
+      if(f.dateFrom || f.dateTo){
+        const scanDate = toDateKey(trim(r['Scan Date']));
+        if(f.dateFrom && scanDate < f.dateFrom) return false;
+        if(f.dateTo && scanDate > f.dateTo) return false;
       }
       if(f.state && trim(r.State)!==f.state) return false;
       if(f.district && trim(r.District)!==f.district) return false;
       if(f.retailer && trim(r['Retailer Name'])!==f.retailer) return false;
       if(f.status && trim((r['Submission Status']||'').toLowerCase())!==f.status.toLowerCase()) return false;
-
-      const {products,units}=parseProducts(r['Cart Items']);
-      if(f.product && !products.has(f.product)) return false;
-      if(f.qtyMin>0){
-        if(f.product){ if((products.get(f.product)||0)<f.qtyMin) return false; }
-        else { let ok=false;for(const v of products.values()){if(v>=f.qtyMin){ok=true;break;}}if(!ok) return false; }
+      if(f.product || (f.qtyMin||0)>0){
+        const map = parseProducts(r['Cart Items']);
+        if(f.product){
+          const has = map.has(f.product);
+          if(!has) return false;
+          if((f.qtyMin||0)>0 && (map.get(f.product)||0) < f.qtyMin) return false;
+        } else if((f.qtyMin||0)>0){
+          let ok=false; for(const v of map.values()){ if(v>=f.qtyMin){ ok=true; break; } }
+          if(!ok) return false;
+        }
       }
-      if(f.unit && !units.has(f.unit)) return false;
       return true;
     });
   }
 
+  function updateKpis(rows){
+    const total = rows.length;
+    const yes = rows.filter(r=>/^yes$/i.test(trim(r['Submission Status']))).length;
+    const pending = rows.filter(r=>/^pending$/i.test(trim(r['Submission Status']))).length;
+    const no = rows.filter(r=>/^no$/i.test(trim(r['Submission Status']))).length;
+    
+    // Calculate farmer metrics
+    const allPhones = rows.map(r=>trim(r['Phone Number'])).filter(p=>p);
+    const uniquePhones = new Set(allPhones);
+    const totalFarmers = allPhones.length;
+    const uniqueFarmers = uniquePhones.size;
+    
+    // Calculate retailer metrics
+    const activeRINs = new Set(rows.map(r=>trim(r['RIN'])).filter(rin=>rin));
+    const activeRetailers = activeRINs.size;
+    const totalRetailers = 1256; // Static number
+    
+    document.getElementById('kpiTotalBig').textContent = total.toLocaleString();
+    document.getElementById('kpiYes').textContent = yes.toLocaleString();
+    document.getElementById('kpiNo').textContent = no.toLocaleString();
+    document.getElementById('kpiPending').textContent = pending.toLocaleString();
+    document.getElementById('kpiTotalFarmers').textContent = totalFarmers.toLocaleString();
+    document.getElementById('kpiUniqueFarmers').textContent = `Unique: ${uniqueFarmers.toLocaleString()}`;
+    document.getElementById('kpiActiveRetailers').textContent = activeRetailers.toLocaleString();
+    
+    // Calculate percentages
+    const yesPct = total > 0 ? ((yes / total) * 100).toFixed(1) : '0.0';
+    const noPct = total > 0 ? ((no / total) * 100).toFixed(1) : '0.0';
+    const pendingPct = total > 0 ? ((pending / total) * 100).toFixed(1) : '0.0';
+    
+    document.getElementById('kpiYesPct').textContent = `${yesPct}% of total`;
+    document.getElementById('kpiNoPct').textContent = `${noPct}% of total`;
+    document.getElementById('kpiPendingPct').textContent = `${pendingPct}% of total`;
+  }
+
+  function buildCounts(rows, key){
+    const m = new Map();
+    for(const r of rows){
+      const k = trim(r[key]); if(!k) continue;
+      m.set(k, (m.get(k)||0)+1);
+    }
+    return [...m.entries()].sort((a,b)=>b[1]-a[1]);
+  }
+
+  function renderStatesTable(rows){
+    const states = buildCounts(rows, 'State').slice(0, 10);
+    let html = '<div style="font-size:13px">';
+    states.forEach((s, i)=>{
+      const bar = Math.round((s[1] / (states[0][1] || 1)) * 100);
+      html += `<div style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+          <span style="font-weight:600;color:var(--text)">${i+1}. ${s[0]}</span>
+          <span style="color:var(--acc1);font-weight:700">${s[1]}</span>
+        </div>
+        <div style="width:100%;height:8px;background:rgba(14,165,233,.12);border-radius:4px;overflow:hidden">
+          <div style="width:${bar}%;height:100%;background:linear-gradient(90deg,var(--acc1),var(--acc3));border-radius:4px"></div>
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+    document.getElementById('statesTable').innerHTML = html;
+  }
+
+  function renderCharts(rows){
+    // Status
+    const sYes = rows.filter(r=>/^yes$/i.test(trim(r['Submission Status']))).length;
+    const sNo = rows.filter(r=>/^no$/i.test(trim(r['Submission Status']))).length;
+    const sPending = rows.filter(r=>/^pending$/i.test(trim(r['Submission Status']))).length;
+    makeChart('statusChart','doughnut',{
+      labels:['Approved','Rejected','Pending'],
+      datasets:[{ 
+        data:[sYes,sNo,sPending], 
+        backgroundColor:['#10b981','#f97316','#8b5cf6'], 
+        borderWidth: 3,
+        borderColor: '#fff',
+        hoverOffset: 8
+      }]
+    },{
+      plugins:{ 
+        legend:{ 
+          display: true,
+          position: 'bottom',
+          labels:{ 
+            color: '#0f172a', 
+            padding: 18, 
+            font:{ size: 13, weight: '700' },
+            usePointStyle: true,
+            pointStyle: 'circle',
+            generateLabels: function(chart) {
+              const data = chart.data;
+              if (data.labels.length && data.datasets.length) {
+                return data.labels.map((label, i) => {
+                  const value = data.datasets[0].data[i];
+                  const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                  const percent = ((value / total) * 100).toFixed(1);
+                  return {
+                    text: `${label}: ${value.toLocaleString()} (${percent}%)`,
+                    fillStyle: data.datasets[0].backgroundColor[i],
+                    hidden: false,
+                    index: i
+                  };
+                });
+              }
+              return [];
+            }
+          } 
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const label = context.label || '';
+              const value = context.parsed || 0;
+              const total = context.dataset.data.reduce((a, b) => a + b, 0);
+              const percent = ((value / total) * 100).toFixed(1);
+              return `${label}: ${value.toLocaleString()} (${percent}%)`;
+            }
+          }
+        }
+      },
+      cutout:'60%'
+    });
+
+    // Trend
+    const trendMap = new Map();
+    for(const r of rows){ const k = toDateKey(trim(r['Scan Date'])); if(k) trendMap.set(k,(trendMap.get(k)||0)+1); }
+    const trend = [...trendMap.entries()].sort((a,b)=>a[0].localeCompare(b[0]));
+    makeChart('trendChart','line',{
+      labels: trend.map(x=>x[0]),
+      datasets:[{ 
+        data: trend.map(x=>x[1]), 
+        borderColor:'#0ea5e9',
+        backgroundColor:'rgba(14,165,233,.15)',
+        borderWidth:3, 
+        tension:.4,
+        fill:true,
+        pointRadius:4,
+        pointHoverRadius:6,
+        pointBackgroundColor:'#0ea5e9',
+        pointBorderColor:'#fff',
+        pointBorderWidth:2
+      }]
+    },{ 
+      scales:{ 
+        x:{ ticks:{ color:'#64748b', maxRotation:45, font:{weight:'500'} }, grid:{display:false} }, 
+        y:{ ticks:{ color:'#64748b', font:{weight:'500'} }, grid:{ color:'#e2e8f0' } } 
+      }, 
+      plugins:{ legend:{ display:false } } 
+    });
+
+    // Retailer - Changed to vertical grouped bar chart
+    const retailers = buildCounts(rows,'Retailer Name').slice(0,8);
+    const retailerApproved = retailers.map(r => {
+      return rows.filter(row => trim(row['Retailer Name']) === r[0] && /^yes$/i.test(trim(row['Submission Status']))).length;
+    });
+    const retailerPending = retailers.map(r => {
+      return rows.filter(row => trim(row['Retailer Name']) === r[0] && /^pending$/i.test(trim(row['Submission Status']))).length;
+    });
+    const retailerRejected = retailers.map(r => {
+      return rows.filter(row => trim(row['Retailer Name']) === r[0] && /^no$/i.test(trim(row['Submission Status']))).length;
+    });
+    
+    makeChart('retailerChart','bar',{
+      labels: retailers.map(x=>x[0]),
+      datasets:[
+        { 
+          label: 'Approved',
+          data: retailerApproved, 
+          backgroundColor: '#10b981',
+          borderWidth: 0,
+          borderRadius: 8,
+          barThickness: 20
+        },
+        { 
+          label: 'Pending',
+          data: retailerPending, 
+          backgroundColor: '#8b5cf6',
+          borderWidth: 0,
+          borderRadius: 8,
+          barThickness: 20
+        },
+        { 
+          label: 'Rejected',
+          data: retailerRejected, 
+          backgroundColor: '#f97316',
+          borderWidth: 0,
+          borderRadius: 8,
+          barThickness: 20
+        }
+      ]
+    },{ 
+      plugins: { 
+        legend: { 
+          display: true,
+          position: 'top',
+          labels: { 
+            color: '#0f172a', 
+            padding: 15, 
+            font: { size: 12, weight: '600' },
+            usePointStyle: true,
+            pointStyle: 'circle'
+          } 
+        } 
+      }, 
+      scales: { 
+        x: { 
+          ticks: { 
+            color: '#0f172a', 
+            maxRotation: 45, 
+            minRotation: 25,
+            font: { size: 11, weight: '600' } 
+          }, 
+          grid: { display: false } 
+        }, 
+        y: { 
+          ticks: { 
+            color: '#64748b', 
+            font: { weight: '500' } 
+          }, 
+          grid: { color: '#e2e8f0' } 
+        } 
+      } 
+    });
+
+    // District
+    const districts = buildCounts(rows,'District').slice(0,10);
+    makeChart('districtChart','bar',{
+      labels: districts.map(x=>x[0]),
+      datasets:[{ data: districts.map(x=>x[1]), backgroundColor: palette(districts.length), borderWidth:0, borderRadius:6 }]
+    },{ 
+      indexAxis:'y', 
+      plugins:{ legend:{ display:false } }, 
+      scales:{ x:{ ticks:{ color:'#64748b', font:{weight:'500'} }, grid:{color:'#e2e8f0'} }, y:{ ticks:{ color:'#0f172a',font:{size:11,weight:'600'} }, grid:{display:false} } } 
+    });
+
+    // Product
+    const pMap = new Map();
+    for(const r of rows){
+      const m = parseProducts(r['Cart Items']);
+      for(const [name,qty] of m){ pMap.set(name,(pMap.get(name)||0)+qty); }
+    }
+    const pArr = [...pMap.entries()].sort((a,b)=>b[1]-a[1]).slice(0,16);
+    makeChart('productChart','bar',{
+      labels: pArr.map(x=>x[0]),
+      datasets:[{ 
+        data: pArr.map(x=>x[1]), 
+        backgroundColor: palette(pArr.length), 
+        borderWidth:0,
+        borderRadius:8
+      }]
+    },{ 
+      plugins:{ legend:{ display:false } }, 
+      scales:{ 
+        x:{ ticks:{ color:'#0f172a', maxRotation:45, minRotation:20, font:{size:11,weight:'600'} }, grid:{display:false} }, 
+        y:{ ticks:{ color:'#64748b', font:{weight:'500'} }, grid:{color:'#e2e8f0'} } 
+      } 
+    });
+  }
+
+  // India Map with Leaflet and GeoJSON
+  let indiaMap = null;
+  let mapLayer = null;
+
+  // State coordinates (centroids for markers)
+  const stateCoordinates = {
+    'Andhra Pradesh': [15.9129, 79.7400],
+    'Arunachal Pradesh': [28.2180, 94.7278],
+    'Assam': [26.2006, 92.9376],
+    'Bihar': [25.0961, 85.3131],
+    'Chhattisgarh': [21.2787, 81.8661],
+    'Goa': [15.2993, 74.1240],
+    'Gujarat': [22.2587, 71.1924],
+    'Haryana': [29.0588, 76.0856],
+    'Himachal Pradesh': [31.1048, 77.1734],
+    'Jharkhand': [23.6102, 85.2799],
+    'Karnataka': [15.3173, 75.7139],
+    'Kerala': [10.8505, 76.2711],
+    'Madhya Pradesh': [22.9734, 78.6569],
+    'Maharashtra': [19.7515, 75.7139],
+    'Manipur': [24.6637, 93.9063],
+    'Meghalaya': [25.4670, 91.3662],
+    'Mizoram': [23.1645, 92.9376],
+    'Nagaland': [26.1584, 94.5624],
+    'Odisha': [20.9517, 85.0985],
+    'Punjab': [31.1471, 75.3412],
+    'Rajasthan': [27.0238, 74.2179],
+    'Sikkim': [27.5330, 88.5122],
+    'Tamil Nadu': [11.1271, 78.6569],
+    'Telangana': [18.1124, 79.0193],
+    'Tripura': [23.9408, 91.9882],
+    'Uttar Pradesh': [26.8467, 80.9462],
+    'Uttarakhand': [30.0668, 79.0193],
+    'West Bengal': [22.9868, 87.8550],
+    'Andaman and Nicobar Islands': [11.7401, 92.6586],
+    'Chandigarh': [30.7333, 76.7794],
+    'Dadra and Nagar Haveli': [20.1809, 73.0169],
+    'Daman and Diu': [20.4283, 72.8397],
+    'Lakshadweep': [10.5667, 72.6417],
+    'Delhi': [28.7041, 77.1025],
+    'Puducherry': [11.9416, 79.8083],
+    'Jammu and Kashmir': [33.7782, 76.5762],
+    'Ladakh': [34.1526, 77.5771]
+  };
+
+  function getMarkerLevel(approved) {
+    if (approved >= 1000) return 1;
+    if (approved >= 500) return 2;
+    if (approved >= 250) return 3;
+    if (approved >= 100) return 4;
+    return 5;
+  }
+
+  function getMarkerIcon(state, approved) {
+    const level = getMarkerLevel(approved);
+    const shortName = state.length > 12 ? state.substring(0, 10) + '.' : state;
+    
+    return L.divIcon({
+      className: 'state-marker-pin',
+      html: `
+        <div class="marker-ripple"></div>
+        <div class="state-marker-inner state-marker-level-${level}">
+          <div class="state-marker-name">${shortName}</div>
+          <div class="state-marker-count">
+            <span>✓</span>
+            <span>${approved.toLocaleString()}</span>
+          </div>
+        </div>
+      `,
+      iconSize: [null, null],
+      iconAnchor: [30, 30]
+    });
+  }
+
+  function getColorByIntensity(intensity) {
+    if (intensity > 0.75) return '#15803d';
+    if (intensity > 0.5) return '#22c55e';
+    if (intensity > 0.25) return '#86efac';
+    if (intensity > 0) return '#dcfce7';
+    return '#f1f5f9';
+  }
+
+  function getApprovalRate(approved, total) {
+    if (total === 0) return 0;
+    return (approved / total * 100).toFixed(1);
+  }
+
+  function initMap() {
+    if (indiaMap) return;
+    
+    indiaMap = L.map('indiaMap', {
+      center: [22.5, 82.5],
+      zoom: 5,
+      minZoom: 4,
+      maxZoom: 8,
+      zoomControl: true
+    });
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors',
+      maxZoom: 19
+    }).addTo(indiaMap);
+  }
+
+  function renderIndiaMap(rows) {
+    if (!indiaMap) {
+      initMap();
+    }
+
+    if (mapLayer) {
+      indiaMap.removeLayer(mapLayer);
+    }
+
+    // Count scans and approvals by state
+    const stateData = new Map();
+    for (const r of rows) {
+      const st = trim(r.State);
+      if (!st) continue;
+      
+      if (!stateData.has(st)) {
+        stateData.set(st, { total: 0, approved: 0, rejected: 0, pending: 0 });
+      }
+      
+      const data = stateData.get(st);
+      data.total++;
+      
+      const status = trim(r['Submission Status']).toLowerCase();
+      if (status === 'yes') data.approved++;
+      else if (status === 'no') data.rejected++;
+      else if (status === 'pending') data.pending++;
+    }
+    
+    mapLayer = L.layerGroup();
+
+    // Add creative markers for each state with data
+    for (const [state, coords] of Object.entries(stateCoordinates)) {
+      const data = stateData.get(state);
+      if (!data || data.approved === 0) continue;
+
+      const approvalRate = getApprovalRate(data.approved, data.total);
+      
+      // Create marker with custom icon
+      const marker = L.marker(coords, {
+        icon: getMarkerIcon(state, data.approved)
+      });
+
+      // Enhanced popup with detailed statistics
+      const popupContent = `
+        <div class="map-popup-state">📍 ${state}</div>
+        <div class="map-popup-row">
+          <span class="map-popup-label">✅ Approved</span>
+          <span class="map-popup-value map-popup-success">${data.approved.toLocaleString()}</span>
+        </div>
+        <div class="map-popup-row">
+          <span class="map-popup-label">⏳ Pending</span>
+          <span class="map-popup-value map-popup-pending">${data.pending.toLocaleString()}</span>
+        </div>
+        <div class="map-popup-row">
+          <span class="map-popup-label">❌ Rejected</span>
+          <span class="map-popup-value map-popup-rejected">${data.rejected.toLocaleString()}</span>
+        </div>
+        <div class="map-popup-row" style="border-top:3px solid var(--ring);margin-top:10px;padding-top:10px">
+          <span class="map-popup-label">📊 Total Scans</span>
+          <span class="map-popup-value">${data.total.toLocaleString()}</span>
+        </div>
+        <div class="map-popup-row">
+          <span class="map-popup-label">🎯 Approval Rate</span>
+          <span class="map-popup-value map-popup-success">${approvalRate}%</span>
+        </div>
+      `;
+
+      marker.bindPopup(popupContent, {
+        closeButton: true,
+        maxWidth: 320,
+        className: 'custom-popup'
+      });
+
+      marker.on('click', () => {
+        FILTERS.state = state;
+        selState.value = state;
+        render();
+      });
+
+      marker.addTo(mapLayer);
+    }
+
+    mapLayer.addTo(indiaMap);
+
+    setTimeout(() => {
+      indiaMap.fitBounds([
+        [8, 68],
+        [37, 97]
+      ]);
+    }, 100);
+  }
+
   function populateFilters(rows){
-    const states=uniqSorted(rows.map(r=>trim(r.State)));
-    const statuses=['','Yes','No','Pending'];
+    const states = uniqSorted(rows.map(r=>trim(r.State)));
+    const dists  = uniqSorted(rows.map(r=>trim(r.District)));
+    const rets   = uniqSorted(rows.map(r=>trim(r['Retailer Name'])));
+    const products = uniqSorted(rows.flatMap(r=>[...parseProducts(r['Cart Items']).keys()]));
+    const statuses = ['','Yes','No','Pending'];
 
-    function fill(sel,items){sel.innerHTML='';const opt0=document.createElement('option');opt0.value='';opt0.textContent='All';sel.appendChild(opt0);for(const v of items){const o=document.createElement('option');o.value=v;o.textContent=v;sel.appendChild(o);}}
+    function fill(sel, items){ 
+      sel.innerHTML = ''; 
+      const opt0 = document.createElement('option'); 
+      opt0.value=''; 
+      opt0.textContent='All'; 
+      sel.appendChild(opt0); 
+      for(const v of items){ 
+        const o=document.createElement('option'); 
+        o.value=v; 
+        o.textContent=v; 
+        sel.appendChild(o);
+      } 
+    }
+    fill(selState, states); 
+    fill(selDistrict, dists); 
+    fill(selRetailer, rets); 
+    fill(selProduct, products);
+    fill(selStatus, statuses);
+  }
 
-    fill(selState,states);fill(selStatus,statuses);
-
-    selState.onchange=()=>{FILTERS.state=selState.value;const dists=uniqSorted(rows.filter(r=>trim(r.State)===FILTERS.state).map(r=>trim(r.District)));fill(selDistrict,dists);FILTERS.district='';selDistrict.value='';render();};
-    selDistrict.onchange=()=>{FILTERS.district=selDistrict.value;const rets=uniqSorted(rows.filter(r=>trim(r.District)===FILTERS.district).map(r=>trim(r['Retailer Name'])));fill(selRetailer,rets);FILTERS.retailer='';selRetailer.value='';render();};
-    selProduct.onchange=()=>{FILTERS.product=selProduct.value;const units=new Set();rows.forEach(r=>{const {units:u}=parseProducts(r['Cart Items']);for(const k of u.keys()) units.add(k);});fill(selUnit,[...units]);FILTERS.unit='';selUnit.value='';render();};
-
-    selUnit.onchange=()=>{FILTERS.unit=selUnit.value;render();};
-    selRetailer.onchange=()=>{FILTERS.retailer=selRetailer.value;render();};
-    selStatus.onchange=()=>{FILTERS.status=selStatus.value;render();};
-
-    const products=uniqSorted(rows.flatMap(r=>[...parseProducts(r['Cart Items']).products.keys()]));
-    fill(selProduct,products);
+  function attachFilterHandlers(){
+    selDateFrom.onchange = ()=>{ FILTERS.dateFrom = selDateFrom.value; render(); };
+    selDateTo.onchange = ()=>{ FILTERS.dateTo = selDateTo.value; render(); };
+    selState.onchange = ()=>{ FILTERS.state = selState.value; render(); };
+    selDistrict.onchange = ()=>{ FILTERS.district = selDistrict.value; render(); };
+    selRetailer.onchange = ()=>{ FILTERS.retailer = selRetailer.value; render(); };
+    selProduct.onchange = ()=>{ FILTERS.product = selProduct.value; render(); };
+    selStatus.onchange = ()=>{ FILTERS.status = selStatus.value; render(); };
+    let to=null; 
+    inpQtyMin.oninput = ()=>{ 
+      clearTimeout(to); 
+      to=setTimeout(()=>{ FILTERS.qtyMin = Number(inpQtyMin.value||0); render(); }, 300); 
+    };
   }
 
   function render(){
-    const rows=applyFilters(RAW);
-    console.log("Filtered rows:",rows.length); // You can call updateKpis, charts here
+    const rows = applyFilters(RAW);
+    updateKpis(rows);
+    renderStatesTable(rows);
+    renderIndiaMap(rows);
+    requestAnimationFrame(()=> renderCharts(rows));
   }
 
-  Papa.parse(CSV_URL,{
-    download:true,header:true,skipEmptyLines:true,
-    complete:(res)=>{RAW=res.data;populateFilters(RAW);render();}
+  // Load CSV
+  function normalizeRow(r){
+    const obj = {
+      'User ID': r['User ID']||r['UserID']||r['id']||'',
+      'Phone Number': r['Phone Number']||r['Phone']||r['phone']||'',
+      'First Name': r['First Name']||r['FirstName']||'',
+      'Last Name': r['Last Name']||r['LastName']||'',
+      'District': r['District']||'',
+      'State': r['State']||'',
+      'Language': r['Language']||'',
+      'Pin Code': r['Pin Code']||r['Pincode']||'',
+      'QR Code': r['QR Code']||'',
+      'Land Acreage': r['Land Acreage']||r['Land']||'',
+      'Crop Name': r['Crop Name']||'',
+      'Scan Date': r['Scan Date']||r['Date']||'',
+      'RIN': r['RIN']||'',
+      'Retailer Name': r['Retailer Name']||r['Retailer']||'',
+      'Cart Items': r['Cart Items']||'',
+      'Coupon Code': r['Coupon Code']||'',
+      'Submission Status': r['Submission Status']||r['Approved Status']||''
+    };
+    return obj;
+  }
+
+  Papa.parse(CSV_URL, {
+    download: true,
+    header: true,
+    skipEmptyLines: true,
+    dynamicTyping: false,
+    complete: (res)=>{
+      RAW = res.data.map(normalizeRow);
+      populateFilters(RAW);
+      attachFilterHandlers();
+      render();
+    },
+    error: (err)=>{
+      console.error('CSV load error', err);
+      alert('Failed to load data.csv. Ensure the file exists at '+CSV_URL);
+    }
   });
 </script>
 </body>
 </html>
+
+
+
+
+
+
