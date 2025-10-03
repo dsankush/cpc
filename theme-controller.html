@@ -1,0 +1,2353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎨 Dashboard Theme Controller</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg: #0f0f23;
+      --surface: #1a1a2e;
+      --surface-light: #25254a;
+      --primary: #8b5cf6;
+      --secondary: #ec4899;
+      --accent: #10b981;
+      --text: #ffffff;
+      --text-muted: #94a3b8;
+      --border: #ffffff15;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #0f0f23 100%);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 1800px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 2px solid var(--border);
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .logo {
+      font-size: 3rem;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .header-title h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.25rem;
+    }
+
+    .header-title p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
+    }
+
+    .btn-secondary {
+      background: var(--surface-light);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--surface);
+      border-color: var(--primary);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+    }
+
+    .btn-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    /* Main Grid */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 320px 1fr 450px;
+      gap: 2rem;
+    }
+
+    /* Panel Base */
+    .panel {
+      background: var(--surface);
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      padding: 2rem;
+    }
+
+    .panel-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Left Panel - Presets */
+    .presets-grid {
+      display: grid;
+      gap: 1rem;
+      max-height: calc(100vh - 250px);
+      overflow-y: auto;
+      padding-right: 0.5rem;
+    }
+
+    .preset-card {
+      background: var(--surface-light);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .preset-card:hover {
+      border-color: var(--primary);
+      transform: translateX(5px);
+    }
+
+    .preset-card.active {
+      border-color: var(--secondary);
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(236, 72, 153, 0.15));
+    }
+
+    .preset-card.active::before {
+      content: '✓';
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: var(--secondary);
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+
+    .preset-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .preset-name {
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .preset-colors {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .preset-color {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      border: 2px solid var(--border);
+    }
+
+    .preset-desc {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .custom-theme-section {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .saved-themes {
+      display: grid;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .saved-theme-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .saved-theme-name {
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .saved-theme-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0.25rem;
+      font-size: 1.1rem;
+      transition: all 0.2s ease;
+    }
+
+    .icon-btn:hover {
+      color: var(--primary);
+      transform: scale(1.1);
+    }
+
+    /* Center Panel - Controls */
+    .controls-section {
+      margin-bottom: 2rem;
+    }
+
+    .section-header {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--secondary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .control-group {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .control-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .control-label {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .color-input-wrapper {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    input[type="color"] {
+      width: 60px;
+      height: 40px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      background: transparent;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select {
+      flex: 1;
+      padding: 0.75rem;
+      background: var(--surface-light);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    select {
+      font-family: 'Outfit', sans-serif;
+      cursor: pointer;
+    }
+
+    /* Right Panel - Preview */
+    .preview-panel {
+      position: sticky;
+      top: 2rem;
+      max-height: calc(100vh - 4rem);
+      overflow-y: auto;
+    }
+
+    .preview-container {
+      background: var(--preview-bg, #f8fafc);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .preview-card {
+      background: var(--preview-card, white);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--preview-border, #e5e7eb);
+    }
+
+    .preview-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--preview-ring, #e5e7eb);
+    }
+
+    .preview-logo {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--preview-acc1, #6366f1), var(--preview-acc4, #ec4899));
+    }
+
+    .preview-title {
+      font-family: var(--preview-font-headings, 'Space Grotesk'), sans-serif;
+      font-weight: 900;
+      font-size: 1.2rem;
+      background: linear-gradient(135deg, var(--preview-acc1, #6366f1), var(--preview-acc4, #ec4899));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .preview-kpis {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .preview-kpi {
+      text-align: center;
+      padding: 1rem;
+      background: var(--preview-bg, #f8fafc);
+      border-radius: 8px;
+    }
+
+    .preview-kpi-value {
+      font-size: 2rem;
+      font-weight: 700;
+      font-family: var(--preview-font-numbers, 'Space Grotesk'), sans-serif;
+      margin-bottom: 0.25rem;
+    }
+
+    .preview-kpi-label {
+      color: var(--preview-muted, #64748b);
+      font-size: 0.9rem;
+      font-family: var(--preview-font-body, 'Outfit'), sans-serif;
+    }
+
+    .preview-button {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-family: var(--preview-font-body, 'Outfit'), sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 0.5rem 0.5rem 0.5rem 0;
+      transition: all 0.3s ease;
+    }
+
+    .preview-button-primary {
+      background: linear-gradient(135deg, var(--preview-acc1, #6366f1), var(--preview-acc5, #8b5cf6));
+      color: white;
+    }
+
+    .preview-button-secondary {
+      background: var(--preview-acc3, #10b981);
+      color: white;
+    }
+
+    .preview-filters {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .preview-filter select {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 8px;
+      border: 1px solid var(--preview-border, #d1d5db);
+      background: var(--preview-card, white);
+      color: var(--preview-text, #1e293b);
+      font-family: var(--preview-font-body, 'Outfit'), sans-serif;
+    }
+
+    .color-palette-preview {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .color-swatch {
+      height: 60px;
+      border-radius: 8px;
+      display: flex;
+      align-items: flex-end;
+      padding: 0.5rem;
+      font-size: 0.7rem;
+      color: white;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+
+    /* Export Code Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(5px);
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--surface);
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      padding: 2rem;
+      max-width: 900px;
+      width: 90%;
+      max-height: 85vh;
+      overflow-y: auto;
+      animation: modalSlideIn 0.3s ease;
+    }
+
+    @keyframes modalSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.3s ease;
+    }
+
+    .close-btn:hover {
+      color: var(--primary);
+      transform: rotate(90deg);
+    }
+
+    .code-block {
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      overflow-x: auto;
+      border: 1px solid var(--border);
+    }
+
+    .code-block pre {
+      margin: 0;
+      color: var(--accent);
+    }
+
+    .copy-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      margin-top: 1rem;
+      margin-right: 0.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .copy-btn:hover {
+      background: var(--secondary);
+      transform: translateY(-2px);
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .tab {
+      padding: 0.75rem 1.5rem;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s ease;
+    }
+
+    .tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Save Theme Form */
+    .save-theme-form {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .save-theme-form input {
+      flex: 1;
+    }
+
+    /* Notification */
+    .notification {
+      position: fixed;
+      top: 2rem;
+      right: 2rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.5rem;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      z-index: 2000;
+      animation: slideInRight 0.3s ease;
+      max-width: 400px;
+    }
+
+    @keyframes slideInRight {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .notification.success {
+      border-left: 4px solid var(--accent);
+    }
+
+    .notification.error {
+      border-left: 4px solid #ef4444;
+    }
+
+    /* Responsive */
+    @media (max-width: 1600px) {
+      .main-grid {
+        grid-template-columns: 280px 1fr 400px;
+      }
+    }
+
+    @media (max-width: 1400px) {
+      .main-grid {
+        grid-template-columns: 280px 1fr;
+      }
+      .preview-panel {
+        display: none;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+      .container {
+        padding: 1rem;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--primary);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--secondary);
+    }
+
+    /* Stats */
+    .stats-bar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 2rem;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .stat-label {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-top: 0.25rem;
+    }
+
+    /* Access Control Overlay */
+    .access-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #0f0f23 100%);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(10px);
+    }
+
+    .access-overlay.hidden {
+      display: none;
+    }
+
+    .access-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 3rem;
+      max-width: 450px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      animation: slideUp 0.4s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .access-icon {
+      font-size: 4rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .access-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .access-subtitle {
+      text-align: center;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+    }
+
+    .access-input {
+      width: 100%;
+      padding: 1rem 1.5rem;
+      background: var(--surface-light);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .access-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+    }
+
+    .access-input.error {
+      border-color: #ef4444;
+      animation: shake 0.3s ease;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
+    }
+
+    .access-btn {
+      width: 100%;
+      padding: 1rem;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .access-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
+    }
+
+    .access-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .access-hint {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: var(--surface-light);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+
+    .access-error {
+      color: #ef4444;
+      text-align: center;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .access-error.show {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  
+  <!-- Access Control Overlay -->
+  <div id="accessOverlay" class="access-overlay">
+    <div class="access-card">
+      <div class="access-icon">🔐</div>
+      <h2 class="access-title">Theme Controller Access</h2>
+      <p class="access-subtitle">Enter the secret key to continue</p>
+      
+      <input 
+        type="password" 
+        id="accessKey" 
+        class="access-input" 
+        placeholder="Enter secret key..."
+        autocomplete="off"
+        onkeypress="if(event.key==='Enter') checkAccess()"
+      >
+      
+      <button class="access-btn" onclick="checkAccess()">
+        🔓 Unlock Theme Controller
+      </button>
+      
+      <div id="accessError" class="access-error">
+        ❌ Invalid access key. Please try again.
+      </div>
+      
+      <div class="access-hint">
+        💡 <strong>Hint:</strong> Default key is <code>theme2025</code><br>
+        <small>(Change this in the code for production)</small>
+      </div>
+    </div>
+  </div>
+  
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-left">
+        <div class="logo">🎨</div>
+        <div class="header-title">
+          <h1>Dashboard Theme Controller</h1>
+          <p>Customize your dashboard's look and feel in real-time</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-secondary" onclick="importFromDashboard()">
+          📥 Import Current
+        </button>
+        <button class="btn btn-secondary" onclick="resetToDefaults()">
+          🔄 Reset
+        </button>
+        <button class="btn btn-success" id="liveUpdateBtn" onclick="toggleLiveUpdate()">
+          <span id="liveUpdateIcon">⚡</span> <span id="liveUpdateText">Enable Live Update</span>
+        </button>
+        <button class="btn btn-primary" onclick="applyToDashboard()">
+          ✨ Apply Now
+        </button>
+        <button class="btn btn-secondary" onclick="downloadUpdatedDashboard()">
+          💾 Download HTML
+        </button>
+        <button class="btn btn-secondary" onclick="window.open('index.html', '_blank')">
+          🚀 View Dashboard
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+      <div class="stat-item">
+        <div class="stat-value" id="statPresets">12</div>
+        <div class="stat-label">Presets</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="statSaved">0</div>
+        <div class="stat-label">Saved Themes</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="statVariables">20+</div>
+        <div class="stat-label">Variables</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="liveStatus" style="color: var(--text-muted);">OFF</div>
+        <div class="stat-label">Live Update</div>
+      </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="main-grid">
+      
+      <!-- Left Panel - Presets & Saved Themes -->
+      <div class="panel">
+        <div class="panel-title">✨ Theme Presets</div>
+        <div class="presets-grid" id="presetsGrid">
+          
+          <div class="preset-card active" onclick="applyPreset('current')">
+            <div class="preset-header">
+              <div class="preset-name">✅ Current (Light)</div>
+              <div class="preset-colors">
+                <div class="preset-color" style="background: #f8fafc;"></div>
+                <div class="preset-color" style="background: #6366f1;"></div>
+                <div class="preset-color" style="background: #ec4899;"></div>
+              </div>
+            </div>
+            <div class="preset-desc">Current dashboard theme (default)</div>
+          </div>
+
+          <div class="preset-card" onclick="applyPreset('dark')">
+            <div class="preset-header">
+              <div class="preset-name">🌙 Dark Professional</div>
+              <div class="preset-colors">
+                <div class="preset-color" style="background: #0f172a;"></div>
+                <div class="preset-color" style="background: #3b82f6;"></div>
+                <div class="preset-color" style="background: #06b6d4;"></div>
+              </div>
+            </div>
+            <div class="preset-desc">Sleek dark theme with blue accents</div>
+          </div>
+
+          <div class="preset-card" onclick="applyPreset('midnight')">
+            <div class="preset-header">
+              <div class="preset-name">🌌 Midnight Purple</div>
+              <div class="preset-colors">
+                <div class="preset-color" style="background: #1e1b4b;"></div>
+                <div class="preset-color" style="background: #8b5cf6;"></div>
+                <div class="preset-color" style="background: #c084fc;"></div>
+              </div>
+            </div>
+            <div class="preset-desc">Deep purple theme for late nights</div>
+          </div>
+
+          <div class="preset-card" onclick="applyPreset('ocean')">
+            <div class="preset-header">
+              <div class="preset-name">🌊 Ocean Breeze</div>
+              <div class="preset-colors">
+                <div class="preset-color" style="background: #ecfeff;"></div>
+                <div class="preset-color" style="background: #06b6d4;"></div>
+                <div class="preset-color" style="background: #0891b2;"></div>
+              </div>
+            </div>
+            <div class="preset-desc">Cool cyan and teal palette</div>
+          </div>
+
+          <div class="preset-card" onclick="applyPreset('forest')">
+            <div class="preset-header">
+              <div class="preset-name">🌲 Forest Green</div>
+              <div class="preset-colors">
+                <div class="preset-color" style="background: #f0fdf4;"></div>
+                <div class="preset-color" style="background: #10b981;"></div>
+                <div class="preset-color" style="background: #059669;"></div>
+              </div>
+            </div>
+            <div class="preset-desc">Natural green theme</div>
+          </div>
+
+          <div class="preset-card" onclick="applyPreset('sunset')">
+            <div class="preset-header">
+              <div class="preset-name">🌅 Sunset Glow</div>
+              <div class="preset-colors">
+                <div class="preset-color" style="background: #fff7ed;"></div>
+                <div class="preset-color" style="background: #f97316;"></div>
+                <div class="preset-color" style="background: #ea580c;"></div>
+              </div>
+            </div>
+            <div class="preset-desc">Warm orange and amber tones</div>
+          </div>
+
+          <div class="preset-card" onclick="applyPreset('rose')">
+            <div class="preset-header">
+              <div class="preset-name">🌹 Rose Garden</div>
+              <div class="preset-colors">
+                <div class="preset-color" style="background: #fff1f2;"></div>
+                <div class="preset-color" style="background: #f43f5e;"></div>
+                <div class="preset-color" style="background: #be123c;"></div>
+              </div>
+            </div>
+            <div class="preset-desc">Elegant pink and rose palette</div>
+          </div>
+
+          <div class="preset-card" onclick="applyPreset('emerald')">
+            <div class="preset-header">
+              <div class="preset-name">💎 Emerald Luxury</div>
+              <div class="preset-colors">
+                <div class="preset-color" style="background: #ecfdf5;"></div>
+                <div class="preset-color" style="background: #10b981;"></div>
+                <div class="preset-color" style="background: #047857;"></div>
+              </div>
+            </div>
+            <div class="preset-desc">Rich emerald green theme</div>
+          </div>
+
+          <div class="preset-card" onclick="applyPreset('monochrome')">
+            <div class="preset-header">
+              <div class="preset-name">⚫ Monochrome</div>
+              <div class="preset-colors">
+                <div class="preset-color" style="background: #ffffff;"></div>
+                <div class="preset-color" style="background: #6b7280;"></div>
+                <div class="preset-color" style="background: #1f2937;"></div>
+              </div>
+            </div>
+            <div class="preset-desc">Clean black and white</div>
+          </div>
+
+          <div class="preset-card" onclick="applyPreset('lavender')">
+            <div class="preset-header">
+              <div class="preset-name">💜 Lavender Dream</div>
+              <div class="preset-colors">
+                <div class="preset-color" style="background: #faf5ff;"></div>
+                <div class="preset-color" style="background: #a855f7;"></div>
+                <div class="preset-color" style="background: #7c3aed;"></div>
+              </div>
+            </div>
+            <div class="preset-desc">Soft purple lavender tones</div>
+          </div>
+
+          <div class="preset-card" onclick="applyPreset('amber')">
+            <div class="preset-header">
+              <div class="preset-name">🔥 Amber Fire</div>
+              <div class="preset-colors">
+                <div class="preset-color" style="background: #fffbeb;"></div>
+                <div class="preset-color" style="background: #f59e0b;"></div>
+                <div class="preset-color" style="background: #d97706;"></div>
+              </div>
+            </div>
+            <div class="preset-desc">Warm amber and gold</div>
+          </div>
+
+          <div class="preset-card" onclick="applyPreset('corporate')">
+            <div class="preset-header">
+              <div class="preset-name">💼 Corporate Blue</div>
+              <div class="preset-colors">
+                <div class="preset-color" style="background: #eff6ff;"></div>
+                <div class="preset-color" style="background: #2563eb;"></div>
+                <div class="preset-color" style="background: #1e40af;"></div>
+              </div>
+            </div>
+            <div class="preset-desc">Professional corporate blue</div>
+          </div>
+
+        </div>
+
+        <!-- Saved Themes -->
+        <div class="custom-theme-section">
+          <div class="section-header" style="font-size: 1rem; margin-bottom: 0.75rem;">
+            💾 Saved Themes
+          </div>
+          <div class="saved-themes" id="savedThemes">
+            <div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 1rem;">
+              No saved themes yet
+            </div>
+          </div>
+          <div class="save-theme-form">
+            <input type="text" id="themeNameInput" placeholder="Theme name..." style="font-family: 'Outfit', sans-serif;">
+            <button class="btn btn-primary" onclick="saveCurrentTheme()" style="padding: 0.75rem 1rem;">
+              💾 Save
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Center Panel - Controls -->
+      <div class="panel">
+        <div class="panel-title">⚙️ Customize Theme</div>
+        
+        <!-- Tabs -->
+        <div class="tabs">
+          <button class="tab active" onclick="switchTab('colors')">🎨 Colors</button>
+          <button class="tab" onclick="switchTab('typography')">🔤 Typography</button>
+          <button class="tab" onclick="switchTab('advanced')">⚡ Advanced</button>
+        </div>
+
+        <!-- Colors Tab -->
+        <div id="tab-colors" class="tab-content active">
+          
+          <div class="controls-section">
+            <div class="section-header">🎨 Background Colors</div>
+            <div class="control-group">
+              
+              <div class="control-item">
+                <label class="control-label">Main Background</label>
+                <div class="color-input-wrapper">
+                  <input type="color" id="bg" value="#f8fafc" onchange="updatePreview()">
+                  <input type="text" id="bgText" value="#f8fafc" oninput="syncColorInput('bg', this.value)">
+                </div>
+              </div>
+
+              <div class="control-item">
+                <label class="control-label">Panel Background</label>
+                <div class="color-input-wrapper">
+                  <input type="color" id="panel" value="#ffffff" onchange="updatePreview()">
+                  <input type="text" id="panelText" value="#ffffff" oninput="syncColorInput('panel', this.value)">
+                </div>
+              </div>
+
+              <div class="control-item">
+                <label class="control-label">Card Background</label>
+                <div class="color-input-wrapper">
+                  <input type="color" id="card" value="#ffffff" onchange="updatePreview()">
+                  <input type="text" id="cardText" value="#ffffff" oninput="syncColorInput('card', this.value)">
+                </div>
+              </div>
+
+              <div class="control-item">
+                <label class="control-label">Card Hover</label>
+                <div class="color-input-wrapper">
+                  <input type="color" id="cardHover" value="#f8f9ff" onchange="updatePreview()">
+                  <input type="text" id="cardHoverText" value="#f8f9ff" oninput="syncColorInput('cardHover', this.value)">
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="controls-section">
+            <div class="section-header">🌈 Accent Colors</div>
+            <div class="control-group">
+              
+              <div class="control-item">
+                <label class="control-label">Accent 1 (Primary)</label>
+                <div class="color-input-wrapper">
+                  <input type="color" id="acc1" value="#6366f1" onchange="updatePreview()">
+                  <input type="text" id="acc1Text" value="#6366f1" oninput="syncColorInput('acc1', this.value)">
+                </div>
+              </div>
+
+              <div class="control-item">
+                <label class="control-label">Accent 2 (Warning)</label>
+                <div class="color-input-wrapper">
+                  <input type="color" id="acc2" value="#f59e0b" onchange="updatePreview()">
+                  <input type="text" id="acc2Text" value="#f59e0b" oninput="syncColorInput('acc2', this.value)">
+                </div>
+              </div>
+
+              <div class="control-item">
+                <label class="control-label">Accent 3 (Success)</label>
+                <div class="color-input-wrapper">
+                  <input type="color" id="acc3" value="#10b981" onchange="updatePreview()">
+                  <input type="text" id="acc3Text" value="#10b981" oninput="syncColorInput('acc3', this.value)">
+                </div>
+              </div>
+
+              <div class="control-item">
+                <label class="control-label">Accent 4 (Pink)</label>
+                <div class="color-input-wrapper">
+                  <input type="color" id="acc4" value="#ec4899" onchange="updatePreview()">
+                  <input type="text" id="acc4Text" value="#ec4899" oninput="syncColorInput('acc4', this.value)">
+                </div>
+              </div>
+
+              <div class="control-item">
+                <label class="control-label">Accent 5 (Purple)</label>
+                <div class="color-input-wrapper">
+                  <input type="color" id="acc5" value="#8b5cf6" onchange="updatePreview()">
+                  <input type="text" id="acc5Text" value="#8b5cf6" oninput="syncColorInput('acc5', this.value)">
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="controls-section">
+            <div class="section-header">✍️ Text & Border Colors</div>
+            <div class="control-group">
+              
+              <div class="control-item">
+                <label class="control-label">Primary Text</label>
+                <div class="color-input-wrapper">
+                  <input type="color" id="text" value="#1f2937" onchange="updatePreview()">
+                  <input type="text" id="textText" value="#1f2937" oninput="syncColorInput('text', this.value)">
+                </div>
+              </div>
+
+              <div class="control-item">
+                <label class="control-label">Muted Text</label>
+                <div class="color-input-wrapper">
+                  <input type="color" id="muted" value="#6b7280" onchange="updatePreview()">
+                  <input type="text" id="mutedText" value="#6b7280" oninput="syncColorInput('muted', this.value)">
+                </div>
+              </div>
+
+              <div class="control-item">
+                <label class="control-label">Border Color</label>
+                <div class="color-input-wrapper">
+                  <input type="color" id="border" value="#d1d5db" onchange="updatePreview()">
+                  <input type="text" id="borderText" value="#d1d5db" oninput="syncColorInput('border', this.value)">
+                </div>
+              </div>
+
+              <div class="control-item">
+                <label class="control-label">Ring Color</label>
+                <div class="color-input-wrapper">
+                  <input type="color" id="ring" value="#e5e7eb" onchange="updatePreview()">
+                  <input type="text" id="ringText" value="#e5e7eb" oninput="syncColorInput('ring', this.value)">
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Typography Tab -->
+        <div id="tab-typography" class="tab-content">
+          
+          <div class="controls-section">
+            <div class="section-header">🔤 Font Families</div>
+            <div class="control-group">
+              
+              <div class="control-item">
+                <label class="control-label">Body Font</label>
+                <select id="fontBody" onchange="updatePreview()">
+                  <option value="'Outfit', sans-serif">Outfit (Current)</option>
+                  <option value="'Inter', sans-serif">Inter</option>
+                  <option value="'Poppins', sans-serif">Poppins</option>
+                  <option value="'DM Sans', sans-serif">DM Sans</option>
+                  <option value="'Manrope', sans-serif">Manrope</option>
+                  <option value="'Space Grotesk', sans-serif">Space Grotesk</option>
+                </select>
+              </div>
+
+              <div class="control-item">
+                <label class="control-label">Numbers/Headings Font</label>
+                <select id="fontHeadings" onchange="updatePreview()">
+                  <option value="'Space Grotesk', sans-serif">Space Grotesk (Current)</option>
+                  <option value="'Outfit', sans-serif">Outfit</option>
+                  <option value="'Inter', sans-serif">Inter</option>
+                  <option value="'Poppins', sans-serif">Poppins</option>
+                  <option value="'JetBrains Mono', monospace">JetBrains Mono</option>
+                </select>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="controls-section">
+            <div class="section-header">📐 Typography Preview</div>
+            <div style="background: var(--surface-light); border-radius: 12px; padding: 1.5rem;">
+              <h2 style="font-family: var(--preview-font-headings, 'Space Grotesk'); margin-bottom: 1rem;">
+                Sample Heading Text
+              </h2>
+              <p style="font-family: var(--preview-font-body, 'Outfit'); color: var(--text-muted); margin-bottom: 1rem;">
+                This is how your body text will appear across the dashboard. It should be readable and professional.
+              </p>
+              <div style="font-family: var(--preview-font-headings, 'Space Grotesk'); font-size: 2.5rem; font-weight: 700; color: var(--primary);">
+                12,345
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Advanced Tab -->
+        <div id="tab-advanced" class="tab-content">
+          
+          <div class="controls-section">
+            <div class="section-header">⚡ Shadow Colors</div>
+            <div class="control-group">
+              
+              <div class="control-item">
+                <label class="control-label">Shadow (RGBA)</label>
+                <input type="text" id="shadow" value="rgba(99,102,241,.08)" oninput="updatePreview()" style="font-family: 'JetBrains Mono', monospace;">
+              </div>
+
+              <div class="control-item">
+                <label class="control-label">Shadow Large (RGBA)</label>
+                <input type="text" id="shadowLg" value="rgba(99,102,241,.15)" oninput="updatePreview()" style="font-family: 'JetBrains Mono', monospace;">
+              </div>
+
+            </div>
+          </div>
+
+          <div class="controls-section">
+            <div class="section-header">🔧 Custom CSS Variables</div>
+            <p style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.9rem;">
+              Add any custom CSS variables below (one per line, format: --variable-name: value;)
+            </p>
+            <textarea id="customCss" rows="6" style="width: 100%; padding: 1rem; background: var(--surface-light); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;" placeholder="--custom-var: #000000;&#10;--another-var: 1.5rem;"></textarea>
+          </div>
+
+          <div class="controls-section">
+            <div class="section-header">📊 Quick Actions</div>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+              <button class="btn btn-secondary" onclick="randomizeColors()">
+                🎲 Randomize Colors
+              </button>
+              <button class="btn btn-secondary" onclick="invertColors()">
+                🔄 Invert Light/Dark
+              </button>
+              <button class="btn btn-secondary" onclick="generateMonochrome()">
+                ⚫ Generate Monochrome
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Right Panel - Preview -->
+      <div class="panel preview-panel">
+        <div class="panel-title">👁️ Live Preview</div>
+        <div id="previewContainer" class="preview-container">
+          
+          <div class="preview-card">
+            <div class="preview-header">
+              <div class="preview-logo"></div>
+              <div class="preview-title">Dashboard Preview</div>
+            </div>
+            
+            <div class="preview-kpis">
+              <div class="preview-kpi">
+                <div class="preview-kpi-value" style="color: var(--preview-acc1, #6366f1);">1,234</div>
+                <div class="preview-kpi-label">Total Scans</div>
+              </div>
+              <div class="preview-kpi">
+                <div class="preview-kpi-value" style="color: var(--preview-acc3, #10b981);">89%</div>
+                <div class="preview-kpi-label">Approval Rate</div>
+              </div>
+              <div class="preview-kpi">
+                <div class="preview-kpi-value" style="color: var(--preview-acc2, #f59e0b);">567</div>
+                <div class="preview-kpi-label">Retailers</div>
+              </div>
+              <div class="preview-kpi">
+                <div class="preview-kpi-value" style="color: var(--preview-acc4, #ec4899);">890</div>
+                <div class="preview-kpi-label">Farmers</div>
+              </div>
+            </div>
+
+            <div class="preview-filters">
+              <select class="preview-filter">
+                <option>Select State</option>
+                <option>West Bengal</option>
+                <option>Maharashtra</option>
+              </select>
+              <select class="preview-filter">
+                <option>Select District</option>
+                <option>District 1</option>
+              </select>
+            </div>
+
+            <div style="margin-top: 1rem;">
+              <button class="preview-button preview-button-primary">Apply Filters</button>
+              <button class="preview-button preview-button-secondary">Download CSV</button>
+            </div>
+          </div>
+
+          <div class="preview-card">
+            <h4 style="margin-bottom: 0.75rem; font-family: var(--preview-font-headings, 'Space Grotesk'); color: var(--preview-text, #1f2937);">
+              Color Palette
+            </h4>
+            <div class="color-palette-preview">
+              <div class="color-swatch" style="background: var(--preview-acc1, #6366f1);">ACC1</div>
+              <div class="color-swatch" style="background: var(--preview-acc2, #f59e0b);">ACC2</div>
+              <div class="color-swatch" style="background: var(--preview-acc3, #10b981);">ACC3</div>
+              <div class="color-swatch" style="background: var(--preview-acc4, #ec4899);">ACC4</div>
+              <div class="color-swatch" style="background: var(--preview-acc5, #8b5cf6);">ACC5</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Export Modal -->
+  <div id="exportModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">💾 Export Theme</div>
+        <button class="close-btn" onclick="closeModal()">✕</button>
+      </div>
+      
+      <div class="tabs">
+        <button class="tab active" onclick="switchExportTab('css')">CSS Variables</button>
+        <button class="tab" onclick="switchExportTab('json')">JSON Config</button>
+        <button class="tab" onclick="switchExportTab('instructions')">📋 Instructions</button>
+      </div>
+
+      <div id="export-css" class="tab-content active">
+        <p style="color: var(--text-muted); margin-bottom: 1rem;">
+          Copy these CSS variables and paste them into the <code>:root</code> section of your dashboard's CSS.
+        </p>
+        <div class="code-block">
+          <pre id="cssOutput"></pre>
+        </div>
+        <button class="copy-btn" onclick="copyToClipboard('cssOutput')">📋 Copy CSS</button>
+      </div>
+
+      <div id="export-json" class="tab-content">
+        <p style="color: var(--text-muted); margin-bottom: 1rem;">
+          Download this JSON configuration for programmatic theme management.
+        </p>
+        <div class="code-block">
+          <pre id="jsonOutput"></pre>
+        </div>
+        <button class="copy-btn" onclick="copyToClipboard('jsonOutput')">📋 Copy JSON</button>
+        <button class="copy-btn" onclick="downloadJSON()">💾 Download JSON</button>
+      </div>
+
+      <div id="export-instructions" class="tab-content">
+        <div style="color: var(--text-muted); line-height: 1.8;">
+          <h3 style="color: var(--text); margin-bottom: 1rem;">📝 How to Apply Your Theme</h3>
+          
+          <h4 style="color: var(--secondary); margin-top: 1.5rem; margin-bottom: 0.5rem;">Method 1: Direct Apply (Recommended)</h4>
+          <ol style="margin-left: 1.5rem;">
+            <li>Click the "✨ Apply to Dashboard" button in the header</li>
+            <li>The theme will be automatically applied to your dashboard</li>
+            <li>Refresh your dashboard to see the changes</li>
+          </ol>
+
+          <h4 style="color: var(--secondary); margin-top: 1.5rem; margin-bottom: 0.5rem;">Method 2: Manual CSS Update</h4>
+          <ol style="margin-left: 1.5rem;">
+            <li>Open your <code>index.html</code> file</li>
+            <li>Find the <code>&lt;style&gt;</code> section</li>
+            <li>Locate the <code>:root { ... }</code> block (around line 18-34)</li>
+            <li>Replace the CSS variables with the ones from the "CSS Variables" tab</li>
+            <li>Save and refresh your browser</li>
+          </ol>
+
+          <h4 style="color: var(--secondary); margin-top: 1.5rem; margin-bottom: 0.5rem;">Font Setup</h4>
+          <p>The dashboard already includes all necessary fonts. No additional setup required!</p>
+
+          <div style="background: var(--surface-light); border-radius: 8px; padding: 1rem; margin-top: 1rem;">
+            <strong style="color: var(--primary);">💡 Pro Tip:</strong> Save your favorite themes using the "💾 Save" button for quick access later!
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Theme Configuration
+    let currentTheme = {
+      bg: '#f8fafc',
+      panel: '#ffffff',
+      card: '#ffffff',
+      cardHover: '#f8f9ff',
+      muted: '#6b7280',
+      text: '#1f2937',
+      acc1: '#6366f1',
+      acc2: '#f59e0b',
+      acc3: '#10b981',
+      acc4: '#ec4899',
+      acc5: '#8b5cf6',
+      ring: '#e5e7eb',
+      border: '#d1d5db',
+      shadow: 'rgba(99,102,241,.08)',
+      shadowLg: 'rgba(99,102,241,.15)',
+      fontBody: "'Outfit', sans-serif",
+      fontHeadings: "'Space Grotesk', sans-serif"
+    };
+
+    // Presets (matching dashboard variables)
+    const presets = {
+      current: {
+        bg: '#f8fafc',
+        panel: '#ffffff',
+        card: '#ffffff',
+        cardHover: '#f8f9ff',
+        muted: '#6b7280',
+        text: '#1f2937',
+        acc1: '#6366f1',
+        acc2: '#f59e0b',
+        acc3: '#10b981',
+        acc4: '#ec4899',
+        acc5: '#8b5cf6',
+        ring: '#e5e7eb',
+        border: '#d1d5db',
+        shadow: 'rgba(99,102,241,.08)',
+        shadowLg: 'rgba(99,102,241,.15)',
+        fontBody: "'Outfit', sans-serif",
+        fontHeadings: "'Space Grotesk', sans-serif"
+      },
+      dark: {
+        bg: '#0f172a',
+        panel: '#1e293b',
+        card: '#1e293b',
+        cardHover: '#334155',
+        muted: '#94a3b8',
+        text: '#f1f5f9',
+        acc1: '#3b82f6',
+        acc2: '#f59e0b',
+        acc3: '#10b981',
+        acc4: '#06b6d4',
+        acc5: '#8b5cf6',
+        ring: '#334155',
+        border: '#475569',
+        shadow: 'rgba(59,130,246,.15)',
+        shadowLg: 'rgba(59,130,246,.25)',
+        fontBody: "'Outfit', sans-serif",
+        fontHeadings: "'Space Grotesk', sans-serif"
+      },
+      midnight: {
+        bg: '#1e1b4b',
+        panel: '#312e81',
+        card: '#312e81',
+        cardHover: '#4c1d95',
+        muted: '#a5b4fc',
+        text: '#e0e7ff',
+        acc1: '#8b5cf6',
+        acc2: '#c084fc',
+        acc3: '#a78bfa',
+        acc4: '#ec4899',
+        acc5: '#d946ef',
+        ring: '#4c1d95',
+        border: '#6366f1',
+        shadow: 'rgba(139,92,246,.2)',
+        shadowLg: 'rgba(139,92,246,.3)',
+        fontBody: "'Space Grotesk', sans-serif",
+        fontHeadings: "'Space Grotesk', sans-serif"
+      },
+      ocean: {
+        bg: '#ecfeff',
+        panel: '#ffffff',
+        card: '#ffffff',
+        cardHover: '#cffafe',
+        muted: '#0e7490',
+        text: '#164e63',
+        acc1: '#06b6d4',
+        acc2: '#0891b2',
+        acc3: '#14b8a6',
+        acc4: '#22d3ee',
+        acc5: '#0284c7',
+        ring: '#cffafe',
+        border: '#a5f3fc',
+        shadow: 'rgba(6,182,212,.1)',
+        shadowLg: 'rgba(6,182,212,.2)',
+        fontBody: "'Outfit', sans-serif",
+        fontHeadings: "'Space Grotesk', sans-serif"
+      },
+      forest: {
+        bg: '#f0fdf4',
+        panel: '#ffffff',
+        card: '#ffffff',
+        cardHover: '#dcfce7',
+        muted: '#047857',
+        text: '#064e3b',
+        acc1: '#10b981',
+        acc2: '#059669',
+        acc3: '#34d399',
+        acc4: '#14b8a6',
+        acc5: '#0d9488',
+        ring: '#dcfce7',
+        border: '#bbf7d0',
+        shadow: 'rgba(16,185,129,.1)',
+        shadowLg: 'rgba(16,185,129,.2)',
+        fontBody: "'Outfit', sans-serif",
+        fontHeadings: "'Space Grotesk', sans-serif"
+      },
+      sunset: {
+        bg: '#fff7ed',
+        panel: '#ffffff',
+        card: '#ffffff',
+        cardHover: '#ffedd5',
+        muted: '#c2410c',
+        text: '#7c2d12',
+        acc1: '#f97316',
+        acc2: '#ea580c',
+        acc3: '#fb923c',
+        acc4: '#fdba74',
+        acc5: '#dc2626',
+        ring: '#ffedd5',
+        border: '#fed7aa',
+        shadow: 'rgba(249,115,22,.1)',
+        shadowLg: 'rgba(249,115,22,.2)',
+        fontBody: "'Outfit', sans-serif",
+        fontHeadings: "'Space Grotesk', sans-serif"
+      },
+      rose: {
+        bg: '#fff1f2',
+        panel: '#ffffff',
+        card: '#ffffff',
+        cardHover: '#ffe4e6',
+        muted: '#9f1239',
+        text: '#881337',
+        acc1: '#f43f5e',
+        acc2: '#e11d48',
+        acc3: '#fb7185',
+        acc4: '#ec4899',
+        acc5: '#be123c',
+        ring: '#ffe4e6',
+        border: '#fecdd3',
+        shadow: 'rgba(244,63,94,.1)',
+        shadowLg: 'rgba(244,63,94,.2)',
+        fontBody: "'Outfit', sans-serif",
+        fontHeadings: "'Space Grotesk', sans-serif"
+      },
+      emerald: {
+        bg: '#ecfdf5',
+        panel: '#ffffff',
+        card: '#ffffff',
+        cardHover: '#d1fae5',
+        muted: '#047857',
+        text: '#065f46',
+        acc1: '#10b981',
+        acc2: '#059669',
+        acc3: '#34d399',
+        acc4: '#6ee7b7',
+        acc5: '#047857',
+        ring: '#d1fae5',
+        border: '#a7f3d0',
+        shadow: 'rgba(16,185,129,.1)',
+        shadowLg: 'rgba(16,185,129,.2)',
+        fontBody: "'Outfit', sans-serif",
+        fontHeadings: "'Space Grotesk', sans-serif"
+      },
+      monochrome: {
+        bg: '#ffffff',
+        panel: '#f9fafb',
+        card: '#f9fafb',
+        cardHover: '#f3f4f6',
+        muted: '#6b7280',
+        text: '#1f2937',
+        acc1: '#4b5563',
+        acc2: '#6b7280',
+        acc3: '#9ca3af',
+        acc4: '#374151',
+        acc5: '#1f2937',
+        ring: '#e5e7eb',
+        border: '#d1d5db',
+        shadow: 'rgba(0,0,0,.05)',
+        shadowLg: 'rgba(0,0,0,.1)',
+        fontBody: "'Outfit', sans-serif",
+        fontHeadings: "'Space Grotesk', sans-serif"
+      },
+      lavender: {
+        bg: '#faf5ff',
+        panel: '#ffffff',
+        card: '#ffffff',
+        cardHover: '#f3e8ff',
+        muted: '#7e22ce',
+        text: '#581c87',
+        acc1: '#a855f7',
+        acc2: '#9333ea',
+        acc3: '#c084fc',
+        acc4: '#d8b4fe',
+        acc5: '#7c3aed',
+        ring: '#f3e8ff',
+        border: '#e9d5ff',
+        shadow: 'rgba(168,85,247,.1)',
+        shadowLg: 'rgba(168,85,247,.2)',
+        fontBody: "'Outfit', sans-serif",
+        fontHeadings: "'Space Grotesk', sans-serif"
+      },
+      amber: {
+        bg: '#fffbeb',
+        panel: '#ffffff',
+        card: '#ffffff',
+        cardHover: '#fef3c7',
+        muted: '#b45309',
+        text: '#78350f',
+        acc1: '#f59e0b',
+        acc2: '#d97706',
+        acc3: '#fbbf24',
+        acc4: '#fcd34d',
+        acc5: '#b45309',
+        ring: '#fef3c7',
+        border: '#fde68a',
+        shadow: 'rgba(245,158,11,.1)',
+        shadowLg: 'rgba(245,158,11,.2)',
+        fontBody: "'Outfit', sans-serif",
+        fontHeadings: "'Space Grotesk', sans-serif"
+      },
+      corporate: {
+        bg: '#eff6ff',
+        panel: '#ffffff',
+        card: '#ffffff',
+        cardHover: '#dbeafe',
+        muted: '#1e40af',
+        text: '#1e3a8a',
+        acc1: '#2563eb',
+        acc2: '#1d4ed8',
+        acc3: '#3b82f6',
+        acc4: '#60a5fa',
+        acc5: '#1e40af',
+        ring: '#dbeafe',
+        border: '#bfdbfe',
+        shadow: 'rgba(37,99,235,.1)',
+        shadowLg: 'rgba(37,99,235,.2)',
+        fontBody: "'Outfit', sans-serif",
+        fontHeadings: "'Space Grotesk', sans-serif"
+      }
+    };
+
+    // Initialize
+    function init() {
+      loadSavedThemes();
+      updatePreview();
+      updateStats();
+    }
+
+    // Load saved themes from localStorage
+    function loadSavedThemes() {
+      const saved = localStorage.getItem('savedThemes');
+      if (saved) {
+        const themes = JSON.parse(saved);
+        renderSavedThemes(themes);
+      }
+    }
+
+    // Render saved themes
+    function renderSavedThemes(themes) {
+      const container = document.getElementById('savedThemes');
+      if (!themes || Object.keys(themes).length === 0) {
+        container.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 1rem;">No saved themes yet</div>';
+        return;
+      }
+
+      container.innerHTML = '';
+      Object.keys(themes).forEach(name => {
+        const item = document.createElement('div');
+        item.className = 'saved-theme-item';
+        item.innerHTML = `
+          <div class="saved-theme-name">${name}</div>
+          <div class="saved-theme-actions">
+            <button class="icon-btn" onclick="loadSavedTheme('${name}')" title="Load">📂</button>
+            <button class="icon-btn" onclick="deleteSavedTheme('${name}')" title="Delete">🗑️</button>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    // Update stats
+    function updateStats() {
+      const saved = localStorage.getItem('savedThemes');
+      const count = saved ? Object.keys(JSON.parse(saved)).length : 0;
+      document.getElementById('statSaved').textContent = count;
+      document.getElementById('statPresets').textContent = Object.keys(presets).length;
+    }
+
+    // Sync color input
+    function syncColorInput(colorPickerId, hexValue) {
+      if (/^#[0-9A-F]{6}$/i.test(hexValue)) {
+        document.getElementById(colorPickerId).value = hexValue;
+        updatePreview();
+      }
+    }
+
+    // Update preview
+    function updatePreview() {
+      // Get all values
+      currentTheme = {
+        bg: document.getElementById('bg').value,
+        panel: document.getElementById('panel').value,
+        card: document.getElementById('card').value,
+        cardHover: document.getElementById('cardHover').value,
+        muted: document.getElementById('muted').value,
+        text: document.getElementById('text').value,
+        acc1: document.getElementById('acc1').value,
+        acc2: document.getElementById('acc2').value,
+        acc3: document.getElementById('acc3').value,
+        acc4: document.getElementById('acc4').value,
+        acc5: document.getElementById('acc5').value,
+        ring: document.getElementById('ring').value,
+        border: document.getElementById('border').value,
+        shadow: document.getElementById('shadow').value,
+        shadowLg: document.getElementById('shadowLg').value,
+        fontBody: document.getElementById('fontBody').value,
+        fontHeadings: document.getElementById('fontHeadings').value
+      };
+
+      // Update text inputs
+      document.getElementById('bgText').value = currentTheme.bg;
+      document.getElementById('panelText').value = currentTheme.panel;
+      document.getElementById('cardText').value = currentTheme.card;
+      document.getElementById('cardHoverText').value = currentTheme.cardHover;
+      document.getElementById('mutedText').value = currentTheme.muted;
+      document.getElementById('textText').value = currentTheme.text;
+      document.getElementById('acc1Text').value = currentTheme.acc1;
+      document.getElementById('acc2Text').value = currentTheme.acc2;
+      document.getElementById('acc3Text').value = currentTheme.acc3;
+      document.getElementById('acc4Text').value = currentTheme.acc4;
+      document.getElementById('acc5Text').value = currentTheme.acc5;
+      document.getElementById('ringText').value = currentTheme.ring;
+      document.getElementById('borderText').value = currentTheme.border;
+
+      // Apply to preview
+      const preview = document.getElementById('previewContainer');
+      preview.style.setProperty('--preview-bg', currentTheme.bg);
+      preview.style.setProperty('--preview-panel', currentTheme.panel);
+      preview.style.setProperty('--preview-card', currentTheme.card);
+      preview.style.setProperty('--preview-muted', currentTheme.muted);
+      preview.style.setProperty('--preview-text', currentTheme.text);
+      preview.style.setProperty('--preview-acc1', currentTheme.acc1);
+      preview.style.setProperty('--preview-acc2', currentTheme.acc2);
+      preview.style.setProperty('--preview-acc3', currentTheme.acc3);
+      preview.style.setProperty('--preview-acc4', currentTheme.acc4);
+      preview.style.setProperty('--preview-acc5', currentTheme.acc5);
+      preview.style.setProperty('--preview-ring', currentTheme.ring);
+      preview.style.setProperty('--preview-border', currentTheme.border);
+      preview.style.setProperty('--preview-font-body', currentTheme.fontBody);
+      preview.style.setProperty('--preview-font-headings', currentTheme.fontHeadings);
+      
+      // If live update is enabled, apply to dashboard in real-time
+      if (liveUpdateEnabled) {
+        applyToDashboard();
+      }
+    }
+
+    // Apply preset
+    function applyPreset(presetName) {
+      const preset = presets[presetName];
+      if (!preset) return;
+
+      // Update all controls
+      Object.keys(preset).forEach(key => {
+        const el = document.getElementById(key);
+        if (el) {
+          el.value = preset[key];
+        }
+      });
+
+      updatePreview();
+
+      // Visual feedback
+      document.querySelectorAll('.preset-card').forEach(card => {
+        card.classList.remove('active');
+      });
+      event.target.closest('.preset-card').classList.add('active');
+    }
+
+    // Save current theme
+    function saveCurrentTheme() {
+      const name = document.getElementById('themeNameInput').value.trim();
+      if (!name) {
+        showNotification('Please enter a theme name', 'error');
+        return;
+      }
+
+      const saved = localStorage.getItem('savedThemes');
+      const themes = saved ? JSON.parse(saved) : {};
+      themes[name] = currentTheme;
+      localStorage.setItem('savedThemes', JSON.stringify(themes));
+
+      document.getElementById('themeNameInput').value = '';
+      loadSavedThemes();
+      updateStats();
+      showNotification(`Theme "${name}" saved successfully!`, 'success');
+    }
+
+    // Load saved theme
+    function loadSavedTheme(name) {
+      const saved = localStorage.getItem('savedThemes');
+      if (!saved) return;
+
+      const themes = JSON.parse(saved);
+      const theme = themes[name];
+      if (!theme) return;
+
+      // Apply theme
+      Object.keys(theme).forEach(key => {
+        const el = document.getElementById(key);
+        if (el) {
+          el.value = theme[key];
+        }
+      });
+
+      updatePreview();
+      showNotification(`Theme "${name}" loaded!`, 'success');
+    }
+
+    // Delete saved theme
+    function deleteSavedTheme(name) {
+      if (!confirm(`Delete theme "${name}"?`)) return;
+
+      const saved = localStorage.getItem('savedThemes');
+      if (!saved) return;
+
+      const themes = JSON.parse(saved);
+      delete themes[name];
+      localStorage.setItem('savedThemes', JSON.stringify(themes));
+
+      loadSavedThemes();
+      updateStats();
+      showNotification(`Theme "${name}" deleted`, 'success');
+    }
+
+    // Import from dashboard
+    function importFromDashboard() {
+      // For now, just load the current preset
+      // In a real implementation, this could read from the actual dashboard file
+      applyPreset('current');
+      showNotification('Current dashboard theme imported!', 'success');
+    }
+
+    // Live update mode
+    let liveUpdateEnabled = false;
+
+    // Toggle live update
+    function toggleLiveUpdate() {
+      liveUpdateEnabled = !liveUpdateEnabled;
+      
+      const btn = document.getElementById('liveUpdateBtn');
+      const icon = document.getElementById('liveUpdateIcon');
+      const text = document.getElementById('liveUpdateText');
+      const status = document.getElementById('liveStatus');
+      
+      if (liveUpdateEnabled) {
+        btn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+        icon.textContent = '🔴';
+        text.textContent = 'Live Update ON';
+        status.textContent = 'ON';
+        status.style.color = 'var(--accent)';
+        
+        // Apply current theme immediately
+        applyToDashboard();
+        showNotification('Live Update enabled! Changes will auto-apply to your dashboard.', 'success');
+      } else {
+        btn.style.background = '';
+        icon.textContent = '⚡';
+        text.textContent = 'Enable Live Update';
+        status.textContent = 'OFF';
+        status.style.color = 'var(--text-muted)';
+        
+        // Remove active theme from localStorage
+        localStorage.removeItem('dashboardThemeActive');
+        showNotification('Live Update disabled', 'success');
+      }
+    }
+
+    // Apply to dashboard
+    function applyToDashboard() {
+      // Save to localStorage for dashboard to pick up
+      localStorage.setItem('dashboardThemeActive', JSON.stringify(currentTheme));
+      
+      if (!liveUpdateEnabled) {
+        showNotification('✅ Theme applied! Refresh your dashboard to see changes.', 'success');
+      }
+    }
+
+    // Download updated index.html
+    function downloadUpdatedDashboard() {
+      fetch('index.html')
+        .then(response => response.text())
+        .then(html => {
+          // Replace the :root CSS variables
+          const cssVars = `    :root{
+      --bg:${currentTheme.bg};
+      --panel:${currentTheme.panel};
+      --card:${currentTheme.card};
+      --card-hover:${currentTheme.cardHover};
+      --muted:${currentTheme.muted};
+      --text:${currentTheme.text};
+      --acc1:${currentTheme.acc1};
+      --acc2:${currentTheme.acc2};
+      --acc3:${currentTheme.acc3};
+      --acc4:${currentTheme.acc4};
+      --acc5:${currentTheme.acc5};
+      --ring:${currentTheme.ring};
+      --border:${currentTheme.border};
+      --shadow:${currentTheme.shadow};
+      --shadow-lg:${currentTheme.shadowLg};
+    }`;
+          
+          // Find and replace the :root block
+          const regex = /:root\{[^}]+\}/;
+          const updatedHtml = html.replace(regex, cssVars);
+          
+          // Download the file
+          const blob = new Blob([updatedHtml], { type: 'text/html' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'index.html';
+          a.click();
+          URL.revokeObjectURL(url);
+          
+          showNotification('📥 index.html downloaded with your theme!', 'success');
+        })
+        .catch(err => {
+          showNotification('❌ Could not download file: ' + err.message, 'error');
+        });
+    }
+
+    // Reset to defaults
+    function resetToDefaults() {
+      applyPreset('current');
+      document.getElementById('customCss').value = '';
+      showNotification('Reset to default theme', 'success');
+    }
+
+    // Switch tab
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      document.getElementById('tab-' + tabName).classList.add('active');
+    }
+
+    // Generate CSS
+    function generateCSS() {
+      const customCss = document.getElementById('customCss').value.trim();
+      
+      return `:root {
+  /* Background Colors */
+  --bg: ${currentTheme.bg};
+  --panel: ${currentTheme.panel};
+  --card: ${currentTheme.card};
+  --card-hover: ${currentTheme.cardHover};
+  
+  /* Text Colors */
+  --muted: ${currentTheme.muted};
+  --text: ${currentTheme.text};
+  
+  /* Accent Colors */
+  --acc1: ${currentTheme.acc1};
+  --acc2: ${currentTheme.acc2};
+  --acc3: ${currentTheme.acc3};
+  --acc4: ${currentTheme.acc4};
+  --acc5: ${currentTheme.acc5};
+  
+  /* Borders & Shadows */
+  --ring: ${currentTheme.ring};
+  --border: ${currentTheme.border};
+  --shadow: ${currentTheme.shadow};
+  --shadow-lg: ${currentTheme.shadowLg};
+  ${customCss ? '\n  /* Custom Variables */\n  ' + customCss : ''}
+}
+
+/* Fonts */
+body {
+  font-family: ${currentTheme.fontBody};
+}
+
+.title, .kpi-value, .preview-kpi-value {
+  font-family: ${currentTheme.fontHeadings};
+}`;
+    }
+
+    // Export theme
+    function exportTheme() {
+      // Generate CSS
+      const css = generateCSS();
+      document.getElementById('cssOutput').textContent = css;
+
+      // Generate JSON
+      const json = JSON.stringify(currentTheme, null, 2);
+      document.getElementById('jsonOutput').textContent = json;
+
+      // Show modal
+      document.getElementById('exportModal').classList.add('active');
+    }
+
+    // Close modal
+    function closeModal() {
+      document.getElementById('exportModal').classList.remove('active');
+    }
+
+    // Switch export tab
+    function switchExportTab(tabName) {
+      document.querySelectorAll('#exportModal .tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.querySelectorAll('#exportModal .tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      document.getElementById('export-' + tabName).classList.add('active');
+    }
+
+    // Copy to clipboard
+    function copyToClipboard(elementId) {
+      const text = document.getElementById(elementId).textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = event.target;
+        const originalText = btn.textContent;
+        btn.textContent = '✅ Copied!';
+        setTimeout(() => {
+          btn.textContent = originalText;
+        }, 2000);
+      });
+    }
+
+    // Download JSON
+    function downloadJSON() {
+      const json = JSON.stringify(currentTheme, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'dashboard-theme.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // Show notification
+    function showNotification(message, type = 'success') {
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      notification.innerHTML = `
+        <div style="font-size: 1.5rem;">${type === 'success' ? '✅' : '❌'}</div>
+        <div>${message}</div>
+      `;
+      document.body.appendChild(notification);
+
+      setTimeout(() => {
+        notification.style.animation = 'slideInRight 0.3s ease reverse';
+        setTimeout(() => {
+          notification.remove();
+        }, 300);
+      }, 3000);
+    }
+
+    // Randomize colors
+    function randomizeColors() {
+      const randomColor = () => '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+      
+      document.getElementById('acc1').value = randomColor();
+      document.getElementById('acc2').value = randomColor();
+      document.getElementById('acc3').value = randomColor();
+      document.getElementById('acc4').value = randomColor();
+      document.getElementById('acc5').value = randomColor();
+      
+      updatePreview();
+      showNotification('Colors randomized!', 'success');
+    }
+
+    // Invert colors
+    function invertColors() {
+      const isLight = currentTheme.bg.toLowerCase() === '#f8fafc' || currentTheme.bg.toLowerCase() === '#ffffff';
+      
+      if (isLight) {
+        applyPreset('dark');
+      } else {
+        applyPreset('current');
+      }
+      
+      showNotification('Theme inverted!', 'success');
+    }
+
+    // Generate monochrome
+    function generateMonochrome() {
+      applyPreset('monochrome');
+      showNotification('Monochrome theme applied!', 'success');
+    }
+
+    // Close modal on outside click
+    document.getElementById('exportModal').addEventListener('click', (e) => {
+      if (e.target.id === 'exportModal') {
+        closeModal();
+      }
+    });
+
+    // ========================================
+    // ACCESS CONTROL CONFIGURATION
+    // ========================================
+    // IMPORTANT: Change these values for production!
+    // 
+    // 1. Change SECRET_KEY to your own secure password
+    // 2. Update the same key in index.html (hidden button onclick)
+    // 3. Update the hint text in the access overlay (line ~929)
+    //
+    // Example:
+    //   const SECRET_KEY = 'MySecureKey2025!@#';
+    //
+    // Then in index.html, update line ~524:
+    //   window.location.href='theme-controller.html?key=MySecureKey2025!@#'
+    // ========================================
+    
+    const SECRET_KEY = 'theme2025'; // 🔒 CHANGE THIS TO YOUR SECRET KEY!
+    const ACCESS_TOKEN_KEY = 'themeControllerAccess';
+    const ACCESS_DURATION = 24 * 60 * 60 * 1000; // 24 hours (adjust as needed)
+
+    // Check access on page load
+    function initAccessControl() {
+      // Check URL parameter for automatic access
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlKey = urlParams.get('key');
+      
+      if (urlKey === SECRET_KEY) {
+        grantAccess();
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+        return;
+      }
+
+      // Check stored access token
+      const storedAccess = localStorage.getItem(ACCESS_TOKEN_KEY);
+      if (storedAccess) {
+        const accessData = JSON.parse(storedAccess);
+        const now = new Date().getTime();
+        
+        if (now - accessData.timestamp < ACCESS_DURATION) {
+          // Access still valid
+          grantAccess();
+          return;
+        } else {
+          // Access expired
+          localStorage.removeItem(ACCESS_TOKEN_KEY);
+        }
+      }
+
+      // Show access overlay
+      document.getElementById('accessOverlay').classList.remove('hidden');
+      document.getElementById('accessKey').focus();
+    }
+
+    // Check access key
+    function checkAccess() {
+      const input = document.getElementById('accessKey');
+      const errorDiv = document.getElementById('accessError');
+      const key = input.value.trim();
+
+      if (key === SECRET_KEY) {
+        // Store access token
+        const accessData = {
+          timestamp: new Date().getTime()
+        };
+        localStorage.setItem(ACCESS_TOKEN_KEY, JSON.stringify(accessData));
+        
+        // Grant access
+        grantAccess();
+        showNotification('🔓 Access granted! Welcome to Theme Controller', 'success');
+      } else {
+        // Show error
+        input.classList.add('error');
+        errorDiv.classList.add('show');
+        
+        setTimeout(() => {
+          input.classList.remove('error');
+          errorDiv.classList.remove('show');
+        }, 2000);
+        
+        input.value = '';
+        input.focus();
+      }
+    }
+
+    // Grant access
+    function grantAccess() {
+      document.getElementById('accessOverlay').classList.add('hidden');
+      init();
+    }
+
+    // Logout function (optional - can be called from console or button)
+    function logoutThemeController() {
+      localStorage.removeItem(ACCESS_TOKEN_KEY);
+      location.reload();
+    }
+
+    // Initialize access control on load
+    initAccessControl();
+  </script>
+
+</body>
+</html>
