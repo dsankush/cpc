@@ -1594,7 +1594,7 @@
       const ptCanvas = document.getElementById('ptStatusChart');
       if(ptCanvas){
         const parent = ptCanvas.parentElement;
-        parent.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:240px;color:#6b7280;font-size:14px;"><div style="text-align:center;"><div style="font-size:3rem;margin-bottom:1rem;">📊</div><div style="font-weight:600;">No PT data available</div><div style="font-size:12px;margin-top:0.5rem;">Please ensure your CSV has a "PT" column with data</div></div></div>';
+        parent.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:240px;color:#6b7280;font-size:14px;"><div style="text-align:center;"><div style="font-size:3rem;margin-bottom:1rem;">📊</div><div style="font-weight:600;">No PT data available</div><div style="font-size:12px;margin-top:0.5rem;">PT Data is not available for Direct Landing Page Data</div></div></div>';
       }
     } else {
       makeChart('ptStatusChart','bar',{
@@ -2078,5 +2078,6 @@
 
 </body>
 </html>
+
 
 
