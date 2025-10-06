@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -222,7 +221,7 @@
       -webkit-background-clip:text;-webkit-text-fill-color:transparent;
       background-clip:text;
     }
-    .kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:18px}
+    .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px}
     .kpi-item{
       background:white;
       border:2px solid var(--ring);
@@ -575,12 +574,23 @@
       </div>
 
       <div class="group">
-        <label for="qtyMin">🔢 Quantity (≥)</label>
-        <input id="qtyMin" type="number" min="0" step="1" placeholder="0" />
-      </div>
-      <div class="group">
         <label for="status">✅ Status</label>
         <select id="status"></select>
+      </div>
+
+      <div class="group">
+        <label for="source">📱 Source</label>
+        <select id="source"></select>
+      </div>
+
+      <div class="group">
+        <label for="pt">👥 PT</label>
+        <select id="pt"></select>
+      </div>
+
+      <div class="group">
+        <label for="zone">🌐 Zone</label>
+        <select id="zone"></select>
       </div>
       <div class="group" style="display:flex;align-items:flex-end">
         <button class="btn" id="resetBtn" style="width:100%">🔄 Reset</button>
@@ -622,6 +632,16 @@
               <div class="kpi-value" id="kpiActiveRetailers">0</div>
               <div class="kpi-percent" id="kpiTotalRetailers">of 0 total</div>
             </div>
+            <div class="kpi-item">
+              <div class="kpi-label">📞 Missed Calls</div>
+              <div class="kpi-value" id="kpiMissedCalls">0</div>
+              <div class="kpi-percent" id="kpiMissedCallsTotal">of 0 total</div>
+            </div>
+            <div class="kpi-item">
+              <div class="kpi-label">📞 Unique Missed Calls</div>
+              <div class="kpi-value" id="kpiUniqueMissedCalls">0</div>
+              <div class="kpi-percent" id="kpiUniqueMissedCallsTotal">of 0 total</div>
+            </div>
           </div>
         </div>
       </div>
@@ -660,6 +680,18 @@
       <div class="card" style="grid-column: span 6">
         <h3>📦 Product Basket</h3>
         <canvas id="productChart" height="180"></canvas>
+      </div>
+
+      <!-- NEW: Submission Status by PT (Top 10) -->
+      <div class="card" style="grid-column: span 6">
+        <h3>📊 Submission Status by PT (Top 10)</h3>
+        <canvas id="ptStatusChart" height="240"></canvas>
+      </div>
+
+      <!-- NEW: Participation Share by Source -->
+      <div class="card" style="grid-column: span 6">
+        <h3>📱 Participation Share by Source</h3>
+        <canvas id="sourceChart" height="240"></canvas>
       </div>
 
       <!-- India Map with Stats Card -->
@@ -709,7 +741,7 @@
   </main>
 
   <div class="footer">
-    © 2025 Coromandel CPC
+    ✨ © 2025 Coromandel CPC — Empowering Agriculture through Innovation ✨
   </div>
 </div>
 
@@ -848,7 +880,7 @@
 
   // State
   let RAW = [];
-  let FILTERS = { dateFrom:'', dateTo:'', state:'', district:'', retailer:'', product:'', unit:'', qtyMin:0, status:'' };
+  let FILTERS = { dateFrom:'', dateTo:'', state:'', district:'', retailer:'', product:'', unit:'', status:'', source:'', pt:'', zone:'' };
 
   // DOM
   const selDateFrom = document.getElementById('dateFrom');
@@ -859,8 +891,10 @@
   const selRetailer = document.getElementById('retailer');
   const selProduct = document.getElementById('product');
   const selUnit = document.getElementById('unit');
-  const inpQtyMin = document.getElementById('qtyMin');
   const selStatus = document.getElementById('status');
+  const selSource = document.getElementById('source');
+  const selPT = document.getElementById('pt');
+  const selZone = document.getElementById('zone');
   
   flatpickr("#dateRange",{
     mode:"range",
@@ -877,11 +911,11 @@
   });
 
   document.getElementById('resetBtn').addEventListener('click', ()=>{
-    FILTERS = { dateFrom:'', dateTo:'', state:'', district:'', retailer:'', product:'', unit:'', qtyMin:0, status:'' };
+    FILTERS = { dateFrom:'', dateTo:'', state:'', district:'', retailer:'', product:'', unit:'', status:'', source:'', pt:'', zone:'' };
     selDateFrom.value = selDateTo.value = '';
     selDateRange._flatpickr && selDateRange._flatpickr.clear();
     selState.value = selDistrict.value = selRetailer.value = selProduct.value = selUnit.value = selStatus.value = '';
-    inpQtyMin.value = '';
+    selSource.value = selPT.value = selZone.value = '';
     populateFilters(RAW);
     render();
   });
@@ -932,16 +966,13 @@
       if(f.district && trim(r.District)!==f.district) return false;
       if(f.retailer && trim(r['Retailer Name'])!==f.retailer) return false;
       if(f.status && trim((r['Submission Status']||'').toLowerCase())!==f.status.toLowerCase()) return false;
+      if(f.source && trim(r.Source||'')!==f.source) return false;
+      if(f.pt && trim(r.PT||'')!==f.pt) return false;
+      if(f.zone && trim(r.Zone||'')!==f.zone) return false;
 
-      if(f.product || (f.qtyMin||0)>0){
+      if(f.product){
         const m = parseProducts(r['Cart Items']);
-        if(f.product){
-          if(!m.has(f.product)) return false;
-          if((f.qtyMin||0)>0 && (m.get(f.product)||0) < f.qtyMin) return false;
-        } else if((f.qtyMin||0)>0){
-          let ok=false; for(const v of m.values()){ if(v>=f.qtyMin){ ok=true; break; } }
-          if(!ok) return false;
-        }
+        if(!m.has(f.product)) return false;
       }
 
       if(f.unit){
@@ -989,6 +1020,33 @@
       }
     }
     
+    // Hardcoded Missed Calls Data (affected by state filter)
+    const MISSED_CALLS_DATA = {
+      'Andhra Pradesh': { total: 9848, unique: 7808 },
+      'Karnataka': { total: 4701, unique: 3692 },
+      'Maharashtra': { total: 6485, unique: 4999 },
+      'Telangana': { total: 6649, unique: 5241 },
+      'West Bengal': { total: 5, unique: 5 }
+    };
+    
+    let missedCallsTotal = 27688;
+    let missedCallsUnique = 21741;
+    let missedCallsDisplay = 0;
+    let missedCallsUniqueDisplay = 0;
+    
+    if(FILTERS.state && MISSED_CALLS_DATA[FILTERS.state]){
+      missedCallsTotal = MISSED_CALLS_DATA[FILTERS.state].total;
+      missedCallsUnique = MISSED_CALLS_DATA[FILTERS.state].unique;
+      // For display, show the filtered value (could be from data if available)
+      // For now, display the hardcoded value when state is selected
+      missedCallsDisplay = missedCallsTotal;
+      missedCallsUniqueDisplay = missedCallsUnique;
+    } else {
+      // Show grand total when no state filter
+      missedCallsDisplay = missedCallsTotal;
+      missedCallsUniqueDisplay = missedCallsUnique;
+    }
+    
     document.getElementById('kpiTotalBig').textContent = total.toLocaleString();
     document.getElementById('kpiYes').textContent = yes.toLocaleString();
     document.getElementById('kpiNo').textContent = no.toLocaleString();
@@ -997,6 +1055,10 @@
     document.getElementById('kpiUniqueFarmers').textContent = `Unique: ${uniqueFarmers.toLocaleString()}`;
     document.getElementById('kpiActiveRetailers').textContent = activeRetailers.toLocaleString();
     document.getElementById('kpiTotalRetailers').textContent = `of ${totalRetailers.toLocaleString()} total`;
+    document.getElementById('kpiMissedCalls').textContent = missedCallsDisplay.toLocaleString();
+    document.getElementById('kpiMissedCallsTotal').textContent = `of ${missedCallsTotal.toLocaleString()} total`;
+    document.getElementById('kpiUniqueMissedCalls').textContent = missedCallsUniqueDisplay.toLocaleString();
+    document.getElementById('kpiUniqueMissedCallsTotal').textContent = `of ${missedCallsUnique.toLocaleString()} total`;
     
     const yesPct = total > 0 ? ((yes / total) * 100).toFixed(1) : '0.0';
     const noPct = total > 0 ? ((no / total) * 100).toFixed(1) : '0.0';
@@ -1265,15 +1327,172 @@
             maxRotation:45, 
             minRotation:20, 
             font:{size:10,weight:'700',family:'Outfit'} 
-          }, 
-          grid:{display:false} 
-        }, 
+      }, 
+      grid:{display:false} 
+    }, 
+    y:{ 
+      ticks:{ color:'#6b7280', font:{weight:'700',family:'Space Grotesk'} }, 
+      grid:{color:'#e5e7eb'} 
+    } 
+  } 
+});
+
+    // NEW: Submission Status by PT (Top 10)
+    const ptStats = {};
+    for(const r of rows){
+      const pt = trim(r.PT||'');
+      if(!pt) continue;
+      if(!ptStats[pt]) ptStats[pt] = {yes:0, no:0, pending:0};
+      const status = trim((r['Submission Status']||'').toLowerCase());
+      if(status==='yes') ptStats[pt].yes++;
+      else if(status==='no') ptStats[pt].no++;
+      else if(status==='pending') ptStats[pt].pending++;
+    }
+    const topPTs = Object.entries(ptStats)
+      .map(([pt, stats]) => ({ pt, total: stats.yes + stats.no + stats.pending, ...stats }))
+      .sort((a,b) => b.total - a.total)
+      .slice(0, 10);
+    
+    console.log('📊 PT Status Chart Data:', { totalPTs: Object.keys(ptStats).length, topPTs: topPTs.length, sample: topPTs[0] });
+    
+    // Handle empty data for PT chart
+    if(topPTs.length === 0){
+      const ptCanvas = document.getElementById('ptStatusChart');
+      if(ptCanvas){
+        const parent = ptCanvas.parentElement;
+        parent.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:240px;color:#6b7280;font-size:14px;"><div style="text-align:center;"><div style="font-size:3rem;margin-bottom:1rem;">📊</div><div style="font-weight:600;">No PT data available</div><div style="font-size:12px;margin-top:0.5rem;">Please ensure your CSV has a "PT" column with data</div></div></div>';
+      }
+    } else {
+      makeChart('ptStatusChart','bar',{
+      labels: topPTs.map(p => p.pt),
+      datasets:[
+        { 
+          label: 'Yes', 
+          data: topPTs.map(p => p.yes), 
+          backgroundColor:'#10b981',
+          borderColor:'#059669',
+          borderWidth:2
+        },
+        { 
+          label: 'Pending', 
+          data: topPTs.map(p => p.pending), 
+          backgroundColor:'#f59e0b',
+          borderColor:'#d97706',
+          borderWidth:2
+        },
+        { 
+          label: 'No', 
+          data: topPTs.map(p => p.no), 
+          backgroundColor:'#ef4444',
+          borderColor:'#dc2626',
+          borderWidth:2
+        }
+      ]
+    },{
+      scales:{
+        x:{ 
+          ticks:{ color:'#6b7280', font:{weight:'600',size:11,family:'Outfit'}, maxRotation:45 }, 
+          grid:{display:false},
+          stacked:true
+        },
         y:{ 
           ticks:{ color:'#6b7280', font:{weight:'700',family:'Space Grotesk'} }, 
-          grid:{color:'#e5e7eb'} 
-        } 
-      } 
+          grid:{color:'#e5e7eb'},
+          stacked:true
+        }
+      },
+      plugins:{
+        legend:{ 
+          display:true,
+          position:'top',
+          labels:{ color:'#1f2937', font:{size:12,weight:'700',family:'Outfit'}, padding:12 }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const label = context.dataset.label || '';
+              const value = context.parsed.y || 0;
+              return `${label}: ${value.toLocaleString()}`;
+            }
+          }
+        }
+      }
     });
+    }
+
+    // NEW: Participation Share by Source
+    const sourceStats = {};
+    for(const r of rows){
+      const src = trim(r.Source||'');
+      if(!src) continue;
+      sourceStats[src] = (sourceStats[src]||0) + 1;
+    }
+    const sourceData = Object.entries(sourceStats).sort((a,b) => b[1] - a[1]);
+    
+    console.log('📱 Source Chart Data:', { totalSources: Object.keys(sourceStats).length, sourceData: sourceData });
+    
+    // Handle empty data for Source chart
+    if(sourceData.length === 0){
+      const sourceCanvas = document.getElementById('sourceChart');
+      if(sourceCanvas){
+        const parent = sourceCanvas.parentElement;
+        parent.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:240px;color:#6b7280;font-size:14px;"><div style="text-align:center;"><div style="font-size:3rem;margin-bottom:1rem;">📱</div><div style="font-weight:600;">No Source data available</div><div style="font-size:12px;margin-top:0.5rem;">Please ensure your CSV has a "Source" column with data</div></div></div>';
+      }
+    } else {
+      makeChart('sourceChart','doughnut',{
+      labels: sourceData.map(s => s[0]),
+      datasets:[{ 
+        data: sourceData.map(s => s[1]), 
+        backgroundColor:['#6366f1','#ec4899','#10b981','#f59e0b','#8b5cf6'],
+        borderWidth: 4,
+        borderColor: '#fff',
+        hoverOffset: 10
+      }]
+    },{
+      plugins:{
+        legend:{ 
+          display:true,
+          position:'bottom',
+          labels:{ 
+            color:'#1f2937', 
+            padding:15, 
+            font:{size:13,weight:'800',family:'Outfit'},
+            usePointStyle:true,
+            pointStyle:'circle',
+            generateLabels: function(chart) {
+              const data = chart.data;
+              if (data.labels.length && data.datasets.length) {
+                return data.labels.map((label, i) => {
+                  const value = data.datasets[0].data[i];
+                  const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                  const percent = ((value / total) * 100).toFixed(1);
+                  return {
+                    text: `${label}: ${value.toLocaleString()} (${percent}%)`,
+                    fillStyle: data.datasets[0].backgroundColor[i],
+                    hidden: false,
+                    index: i
+                  };
+                });
+              }
+              return [];
+            }
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const label = context.label || '';
+              const value = context.parsed || 0;
+              const total = context.dataset.data.reduce((a, b) => a + b, 0);
+              const percent = ((value / total) * 100).toFixed(1);
+              return `${label}: ${value.toLocaleString()} (${percent}%)`;
+            }
+          }
+        }
+      },
+      cutout:'65%'
+    });
+    }
   }
 
   // India Map
@@ -1403,6 +1622,9 @@
     const products = uniqSorted(rows.flatMap(r=>[...parseProducts(r['Cart Items']).keys()]));
     const unitsAll = uniqSorted(rows.flatMap(r=>parseCartItems(r['Cart Items']).map(it=>it.unit).filter(Boolean)));
     const statuses = ['','Yes','No','Pending'];
+    const sources = uniqSorted(rows.map(r=>trim(r.Source||'')).filter(Boolean));
+    const pts = uniqSorted(rows.map(r=>trim(r.PT||'')).filter(Boolean));
+    const zones = uniqSorted(rows.map(r=>trim(r.Zone||'')).filter(Boolean));
 
     function fill(sel, items){ 
       sel.innerHTML = ''; 
@@ -1417,6 +1639,9 @@
     fill(selProduct, products);
     fill(selUnit, unitsAll);
     fill(selStatus, statuses);
+    fill(selSource, sources);
+    fill(selPT, pts);
+    fill(selZone, zones);
   }
 
   function attachFilterHandlers(){
@@ -1481,12 +1706,9 @@
 
     selUnit.onchange = ()=>{ FILTERS.unit = selUnit.value; render(); };
     selStatus.onchange = ()=>{ FILTERS.status = selStatus.value; render(); };
-
-    let to=null; 
-    inpQtyMin.oninput = ()=>{ 
-      clearTimeout(to); 
-      to=setTimeout(()=>{ FILTERS.qtyMin = Number(inpQtyMin.value||0); render(); }, 300); 
-    };
+    selSource.onchange = ()=>{ FILTERS.source = selSource.value; render(); };
+    selPT.onchange = ()=>{ FILTERS.pt = selPT.value; render(); };
+    selZone.onchange = ()=>{ FILTERS.zone = selZone.value; render(); };
   }
 
   function render(){
@@ -1515,7 +1737,10 @@
       'Retailer Name': r['Retailer Name']||r['Retailer']||'',
       'Cart Items': r['Cart Items']||'',
       'Coupon Code': r['Coupon Code']||'',
-      'Submission Status': r['Submission Status']||r['Approved Status']||''
+      'Submission Status': r['Submission Status']||r['Approved Status']||'',
+      'Source': r['Source']||'',
+      'PT': r['PT']||'',
+      'Zone': r['Zone']||''
     };
   }
 
@@ -1526,6 +1751,32 @@
     dynamicTyping: false,
     complete: (res)=>{
       RAW = res.data.map(normalizeRow);
+      
+      // Debug: Check if new columns exist
+      if(RAW.length > 0){
+        const firstRow = RAW[0];
+        console.log('✅ CSV Columns Found:', Object.keys(firstRow));
+        console.log('📊 New Columns Check:', {
+          hasSource: 'Source' in firstRow,
+          hasPT: 'PT' in firstRow,
+          hasZone: 'Zone' in firstRow,
+          sampleSource: firstRow.Source || '(empty)',
+          samplePT: firstRow.PT || '(empty)',
+          sampleZone: firstRow.Zone || '(empty)'
+        });
+        
+        // Count rows with data
+        const withSource = RAW.filter(r => r.Source && trim(r.Source)).length;
+        const withPT = RAW.filter(r => r.PT && trim(r.PT)).length;
+        const withZone = RAW.filter(r => r.Zone && trim(r.Zone)).length;
+        console.log('📈 Data availability:', {
+          totalRows: RAW.length,
+          rowsWithSource: withSource + ' (' + ((withSource/RAW.length)*100).toFixed(1) + '%)',
+          rowsWithPT: withPT + ' (' + ((withPT/RAW.length)*100).toFixed(1) + '%)',
+          rowsWithZone: withZone + ' (' + ((withZone/RAW.length)*100).toFixed(1) + '%)'
+        });
+      }
+      
       populateFilters(RAW);
       attachFilterHandlers();
       render();
@@ -1593,5 +1844,3 @@
 
 </body>
 </html>
-
-
