@@ -124,46 +124,106 @@
     /* Layout */
     .main{display:flex;flex-direction:column;gap:28px;padding:32px 40px;max-width:100%;margin:0}
     
-    /* Filters */
+    /* Filters - Modern Advanced Design */
     .filters-horizontal{
-      background:white;
-      border:2px solid var(--ring);
-      border-radius:16px;
-      padding:24px;
-      box-shadow:0 4px 16px var(--shadow);
+      background:linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(249,250,251,0.98) 100%);
+      backdrop-filter:blur(20px);
+      border:2px solid rgba(255,255,255,0.8);
+      border-radius:24px;
+      padding:32px;
       display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
-      gap:16px;
+      grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+      gap:24px;
       align-items:end;
-      transition:all .3s ease;
+      box-shadow:0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.9);
+      position:relative;
+      overflow:hidden;
+      transition:all .4s cubic-bezier(0.4,0,0.2,1);
+    }
+    .filters-horizontal::before{
+      content:'';
+      position:absolute;
+      top:0;left:0;right:0;
+      height:3px;
+      background:linear-gradient(90deg, #6366f1, #ec4899, #10b981, #f59e0b, #6366f1);
+      background-size:200% 100%;
+      animation:shimmer 3s linear infinite;
+    }
+    @keyframes shimmer{
+      0%{background-position:200% 0}
+      100%{background-position:-200% 0}
     }
     .filters-horizontal:hover{
-      box-shadow:0 8px 24px var(--shadow-lg);
+      box-shadow:0 12px 48px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,1);
+      transform:translateY(-2px);
     }
-    .filters-horizontal .group{display:flex;flex-direction:column;gap:8px}
+    .filters-horizontal .group{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      position:relative;
+    }
     .filters-horizontal label{
-      font-size:11px;color:var(--muted);font-weight:700;
-      text-transform:uppercase;letter-spacing:.8px;
+      font-size:11px;
+      color:#64748b;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      display:flex;
+      align-items:center;
+      gap:6px;
+      transition:all .3s ease;
+    }
+    .filters-horizontal .group:hover label{
+      color:#6366f1;
+      transform:translateX(2px);
     }
     .filters-horizontal select,.filters-horizontal input{
-      width:100%;padding:12px 14px;
-      border-radius:10px;
-      border:2px solid var(--ring);
-      background:white;
-      color:var(--text);
+      width:100%;
+      padding:14px 16px;
+      border-radius:14px;
+      border:2px solid #e2e8f0;
+      background:linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      font-size:14px;
+      color:#1e293b;
+      font-weight:600;
+      font-family:'Outfit',sans-serif;
       outline:none;
-      font-size:13px;
-      font-weight:500;
-      transition:all .2s ease;
+      cursor:pointer;
+      transition:all .3s cubic-bezier(0.4,0,0.2,1);
+      box-shadow:0 2px 8px rgba(0,0,0,0.03);
+      position:relative;
     }
     .filters-horizontal select:hover,.filters-horizontal input:hover{
-      border-color:var(--acc1);
+      border-color:#a5b4fc;
+      background:linear-gradient(135deg, #ffffff 0%, #eef2ff 100%);
+      box-shadow:0 4px 12px rgba(99,102,241,0.15);
+      transform:translateY(-1px);
     }
     .filters-horizontal select:focus,.filters-horizontal input:focus{
-      border-color:var(--acc1);
-      box-shadow:0 0 0 4px rgba(99,102,241,.1);
+      border-color:#6366f1;
+      background:#ffffff;
+      box-shadow:0 0 0 4px rgba(99,102,241,.15), 0 4px 16px rgba(99,102,241,0.2);
+      transform:translateY(-2px);
     }
-    .filters-horizontal .btn{padding:12px 24px;font-size:13px;white-space:nowrap}
+    .filters-horizontal .btn{
+      padding:14px 28px;
+      font-size:14px;
+      font-weight:700;
+      white-space:nowrap;
+      background:linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      border:none;
+      box-shadow:0 4px 16px rgba(99,102,241,0.3);
+      transition:all .3s cubic-bezier(0.4,0,0.2,1);
+    }
+    .filters-horizontal .btn:hover{
+      background:linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      box-shadow:0 6px 24px rgba(99,102,241,0.4);
+      transform:translateY(-2px) scale(1.02);
+    }
+    .filters-horizontal .btn:active{
+      transform:translateY(0) scale(0.98);
+    }
 
     /* Content Grid */
     .content{display:grid;grid-template-columns:repeat(12,1fr);gap:24px}
@@ -200,68 +260,197 @@
       letter-spacing:1.2px;
     }
     
-    /* KPI Cards */
-    .kpi-hero{display:grid;grid-template-columns:220px 1fr;gap:40px;align-items:center}
+    /* KPI Cards - Modern Advanced Design */
+    .kpi-hero{
+      display:grid;
+      grid-template-columns:280px 1fr;
+      gap:24px;
+      align-items:stretch;
+    }
+    
+    /* Main Circle - Enhanced with 3D effect */
     .kpi-main-circle{
-      width:220px;height:220px;border-radius:50%;
-      display:flex;flex-direction:column;align-items:center;justify-content:center;
-      background:linear-gradient(135deg,rgba(99,102,241,.12),rgba(236,72,153,.12));
-      border:4px solid var(--acc1);
-      box-shadow:0 8px 32px rgba(99,102,241,.25);
+      width:280px;
+      height:280px;
+      border-radius:50%;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      background:linear-gradient(135deg,#6366f1,#ec4899,#8b5cf6);
       position:relative;
+      overflow:hidden;
+      box-shadow:0 20px 60px rgba(99,102,241,.3),
+                 0 0 0 8px rgba(255,255,255,.5),
+                 inset 0 0 60px rgba(255,255,255,.3);
+      animation:pulse-glow 4s ease-in-out infinite;
+    }
+    @keyframes pulse-glow{
+      0%,100%{box-shadow:0 20px 60px rgba(99,102,241,.3),0 0 0 8px rgba(255,255,255,.5),inset 0 0 60px rgba(255,255,255,.3)}
+      50%{box-shadow:0 25px 70px rgba(99,102,241,.4),0 0 0 12px rgba(255,255,255,.6),inset 0 0 80px rgba(255,255,255,.4)}
+    }
+    .kpi-main-circle::before{
+      content:'';
+      position:absolute;
+      top:-50%;left:-50%;
+      width:200%;height:200%;
+      background:linear-gradient(45deg,transparent,rgba(255,255,255,.3),transparent);
+      transform:rotate(45deg);
+      animation:shine 6s linear infinite;
+    }
+    @keyframes shine{
+      0%{transform:rotate(45deg) translateY(-100%)}
+      100%{transform:rotate(45deg) translateY(100%)}
     }
     .kpi-main-label{
-      font-size:13px;color:var(--muted);font-weight:800;
-      text-transform:uppercase;letter-spacing:1.2px;margin-bottom:10px;
+      font-size:12px;
+      color:rgba(255,255,255,.85);
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:2px;
+      margin-bottom:12px;
+      z-index:2;
+      text-shadow:0 2px 8px rgba(0,0,0,.2);
     }
     .kpi-main-value{
-      font-size:64px;font-weight:900;line-height:1;
+      font-size:72px;
+      font-weight:900;
+      line-height:1;
       font-family:'Space Grotesk',sans-serif;
-      background:linear-gradient(135deg,var(--acc1),var(--acc4));
-      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-      background-clip:text;
+      color:white;
+      z-index:2;
+      text-shadow:0 4px 12px rgba(0,0,0,.2);
+      animation:countUp 1s ease-out;
     }
-    .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px}
+    @keyframes countUp{
+      0%{transform:scale(0.5);opacity:0}
+      100%{transform:scale(1);opacity:1}
+    }
+    
+    /* KPI Grid - Modern Cards with Glassmorphism */
+    .kpi-grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:16px;
+      align-items:stretch;
+    }
     .kpi-item{
-      background:white;
-      border:2px solid var(--ring);
-      border-radius:14px;
-      padding:24px;
+      background:linear-gradient(135deg,rgba(255,255,255,.95),rgba(255,255,255,.85));
+      backdrop-filter:blur(20px);
+      border:1px solid rgba(255,255,255,.6);
+      border-radius:20px;
+      padding:24px 20px;
       text-align:center;
-      transition:all .3s ease;
+      transition:all .4s cubic-bezier(0.4,0,0.2,1);
       position:relative;
+      overflow:hidden;
+      box-shadow:0 4px 24px rgba(0,0,0,.06),
+                 inset 0 1px 0 rgba(255,255,255,.9);
     }
     .kpi-item::before{
-      content:'';position:absolute;top:0;left:0;right:0;height:3px;
-      background:var(--kpi-color);
-      border-radius:14px 14px 0 0;
-      opacity:0;transition:opacity .3s;
+      content:'';
+      position:absolute;
+      top:0;left:0;right:0;
+      height:4px;
+      background:linear-gradient(90deg,var(--kpi-color),var(--kpi-color-light));
+      border-radius:20px 20px 0 0;
+      transform:scaleX(0);
+      transform-origin:left;
+      transition:transform .6s cubic-bezier(0.4,0,0.2,1);
+    }
+    .kpi-item::after{
+      content:'';
+      position:absolute;
+      top:50%;left:50%;
+      width:100%;height:100%;
+      background:radial-gradient(circle,var(--kpi-color)05,transparent 70%);
+      transform:translate(-50%,-50%) scale(0);
+      transition:transform .6s cubic-bezier(0.4,0,0.2,1);
+      border-radius:50%;
     }
     .kpi-item:hover{
-      transform:translateY(-4px);
-      box-shadow:0 8px 24px var(--shadow-lg);
-      border-color:var(--kpi-color);
+      transform:translateY(-8px) scale(1.02);
+      box-shadow:0 20px 40px rgba(0,0,0,.12),
+                 0 0 0 1px var(--kpi-color)30,
+                 inset 0 1px 0 rgba(255,255,255,1);
+      border-color:var(--kpi-color)50;
     }
-    .kpi-item:hover::before{opacity:1}
+    .kpi-item:hover::before{transform:scaleX(1)}
+    .kpi-item:hover::after{transform:translate(-50%,-50%) scale(1.5)}
+    
     .kpi-label{
-      font-size:11px;color:var(--muted);text-transform:uppercase;
-      letter-spacing:1px;font-weight:800;margin-bottom:14px;
+      font-size:11px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:1.2px;
+      font-weight:800;
+      margin-bottom:16px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+    }
+    .kpi-label-icon{
+      font-size:14px;
+      filter:grayscale(1);
+      transition:filter .3s ease;
+    }
+    .kpi-item:hover .kpi-label-icon{
+      filter:grayscale(0);
     }
     .kpi-value{
-      font-size:40px;font-weight:900;margin-bottom:10px;
+      font-size:44px;
+      font-weight:900;
+      margin-bottom:8px;
       font-family:'Space Grotesk',sans-serif;
+      line-height:1;
+      position:relative;
+      z-index:1;
     }
-    .kpi-item:nth-child(1){--kpi-color:#10b981}
+    .kpi-percent{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:700;
+      position:relative;
+      z-index:1;
+    }
+    .kpi-progress{
+      width:100%;
+      height:4px;
+      background:rgba(0,0,0,.06);
+      border-radius:4px;
+      overflow:hidden;
+      margin-top:12px;
+      position:relative;
+    }
+    .kpi-progress-bar{
+      height:100%;
+      background:linear-gradient(90deg,var(--kpi-color),var(--kpi-color-light));
+      border-radius:4px;
+      transition:width 1s cubic-bezier(0.4,0,0.2,1);
+      box-shadow:0 0 12px var(--kpi-color)60;
+      animation:progressFlow 2s ease-in-out infinite;
+    }
+    @keyframes progressFlow{
+      0%,100%{filter:brightness(1)}
+      50%{filter:brightness(1.2)}
+    }
+    
+    /* Color scheme for each KPI */
+    .kpi-item:nth-child(1){--kpi-color:#10b981;--kpi-color-light:#34d399}
     .kpi-item:nth-child(1) .kpi-value{color:#10b981}
-    .kpi-item:nth-child(2){--kpi-color:#f59e0b}
-    .kpi-item:nth-child(2) .kpi-value{color:#f59e0b}
-    .kpi-item:nth-child(3){--kpi-color:#8b5cf6}
-    .kpi-item:nth-child(3) .kpi-value{color:#8b5cf6}
-    .kpi-item:nth-child(4){--kpi-color:#3b82f6}
+    .kpi-item:nth-child(2){--kpi-color:#ef4444;--kpi-color-light:#f87171}
+    .kpi-item:nth-child(2) .kpi-value{color:#ef4444}
+    .kpi-item:nth-child(3){--kpi-color:#f59e0b;--kpi-color-light:#fbbf24}
+    .kpi-item:nth-child(3) .kpi-value{color:#f59e0b}
+    .kpi-item:nth-child(4){--kpi-color:#3b82f6;--kpi-color-light:#60a5fa}
     .kpi-item:nth-child(4) .kpi-value{color:#3b82f6}
-    .kpi-item:nth-child(5){--kpi-color:#ec4899}
+    .kpi-item:nth-child(5){--kpi-color:#ec4899;--kpi-color-light:#f472b6}
     .kpi-item:nth-child(5) .kpi-value{color:#ec4899}
-    .kpi-percent{font-size:13px;color:var(--muted);font-weight:700}
+    .kpi-item:nth-child(6){--kpi-color:#8b5cf6;--kpi-color-light:#a78bfa}
+    .kpi-item:nth-child(6) .kpi-value{color:#8b5cf6}
+    .kpi-item:nth-child(7){--kpi-color:#06b6d4;--kpi-color-light:#22d3ee}
+    .kpi-item:nth-child(7) .kpi-value{color:#06b6d4}
 
     /* India Map */
     #indiaMapContainer{
@@ -608,39 +797,60 @@
           </div>
           <div class="kpi-grid">
             <div class="kpi-item">
-              <div class="kpi-label">✅ Approved</div>
+              <div class="kpi-label"><span class="kpi-label-icon">✅</span> Approved</div>
               <div class="kpi-value" id="kpiYes">0</div>
               <div class="kpi-percent" id="kpiYesPct">0%</div>
+              <div class="kpi-progress">
+                <div class="kpi-progress-bar" id="kpiYesProgress" style="width:0%"></div>
+              </div>
             </div>
             <div class="kpi-item">
-              <div class="kpi-label">❌ Rejected</div>
+              <div class="kpi-label"><span class="kpi-label-icon">❌</span> Rejected</div>
               <div class="kpi-value" id="kpiNo">0</div>
               <div class="kpi-percent" id="kpiNoPct">0%</div>
+              <div class="kpi-progress">
+                <div class="kpi-progress-bar" id="kpiNoProgress" style="width:0%"></div>
+              </div>
             </div>
             <div class="kpi-item">
-              <div class="kpi-label">⏳ Pending</div>
+              <div class="kpi-label"><span class="kpi-label-icon">⏳</span> Pending</div>
               <div class="kpi-value" id="kpiPending">0</div>
               <div class="kpi-percent" id="kpiPendingPct">0%</div>
+              <div class="kpi-progress">
+                <div class="kpi-progress-bar" id="kpiPendingProgress" style="width:0%"></div>
+              </div>
             </div>
             <div class="kpi-item">
-              <div class="kpi-label">👨‍🌾 Total Farmers</div>
+              <div class="kpi-label"><span class="kpi-label-icon">👨‍🌾</span> Total Farmers</div>
               <div class="kpi-value" id="kpiTotalFarmers">0</div>
               <div class="kpi-percent" id="kpiUniqueFarmers">Unique: 0</div>
+              <div class="kpi-progress">
+                <div class="kpi-progress-bar" id="kpiFarmersProgress" style="width:0%"></div>
+              </div>
             </div>
             <div class="kpi-item">
-              <div class="kpi-label">🏪 Retailers</div>
+              <div class="kpi-label"><span class="kpi-label-icon">🏪</span> Retailers</div>
               <div class="kpi-value" id="kpiActiveRetailers">0</div>
               <div class="kpi-percent" id="kpiTotalRetailers">of 0 total</div>
+              <div class="kpi-progress">
+                <div class="kpi-progress-bar" id="kpiRetailersProgress" style="width:0%"></div>
+              </div>
             </div>
             <div class="kpi-item">
-              <div class="kpi-label">📞 Missed Calls</div>
+              <div class="kpi-label"><span class="kpi-label-icon">📞</span> Missed Calls</div>
               <div class="kpi-value" id="kpiMissedCalls">0</div>
-              <div class="kpi-percent" id="kpiMissedCallsTotal">of 0 total</div>
+              <div class="kpi-percent" id="kpiMissedCallsTotal">All States</div>
+              <div class="kpi-progress">
+                <div class="kpi-progress-bar" id="kpiMissedCallsProgress" style="width:0%"></div>
+              </div>
             </div>
             <div class="kpi-item">
-              <div class="kpi-label">📞 Unique Missed Calls</div>
+              <div class="kpi-label"><span class="kpi-label-icon">📱</span> Unique Calls</div>
               <div class="kpi-value" id="kpiUniqueMissedCalls">0</div>
-              <div class="kpi-percent" id="kpiUniqueMissedCallsTotal">of 0 total</div>
+              <div class="kpi-percent" id="kpiUniqueMissedCallsTotal">All States</div>
+              <div class="kpi-progress">
+                <div class="kpi-progress-bar" id="kpiUniqueMissedCallsProgress" style="width:0%"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -682,16 +892,16 @@
         <canvas id="productChart" height="180"></canvas>
       </div>
 
-      <!-- NEW: Submission Status by PT (Top 10) -->
-      <div class="card" style="grid-column: span 6">
-        <h3>📊 Submission Status by PT (Top 10)</h3>
-        <canvas id="ptStatusChart" height="240"></canvas>
+      <!-- NEW: Participation Share by Source (LEFT) -->
+      <div class="card" style="grid-column: span 4">
+        <h3>📱 Participation Share by Source</h3>
+        <canvas id="sourceChart" height="280"></canvas>
       </div>
 
-      <!-- NEW: Participation Share by Source -->
-      <div class="card" style="grid-column: span 6">
-        <h3>📱 Participation Share by Source</h3>
-        <canvas id="sourceChart" height="240"></canvas>
+      <!-- NEW: Submission Status by PT (Top 10) (RIGHT) -->
+      <div class="card" style="grid-column: span 8">
+        <h3>📊 Submission Status by PT (Top 10)</h3>
+        <canvas id="ptStatusChart" height="280"></canvas>
       </div>
 
       <!-- India Map with Stats Card -->
@@ -741,7 +951,7 @@
   </main>
 
   <div class="footer">
-    ✨ © 2025 Coromandel CPC — Empowering Agriculture through Innovation ✨
+    © 2025 Coromandel CPC
   </div>
 </div>
 
@@ -1056,9 +1266,9 @@
     document.getElementById('kpiActiveRetailers').textContent = activeRetailers.toLocaleString();
     document.getElementById('kpiTotalRetailers').textContent = `of ${totalRetailers.toLocaleString()} total`;
     document.getElementById('kpiMissedCalls').textContent = missedCallsDisplay.toLocaleString();
-    document.getElementById('kpiMissedCallsTotal').textContent = `of ${missedCallsTotal.toLocaleString()} total`;
+    document.getElementById('kpiMissedCallsTotal').textContent = FILTERS.state ? FILTERS.state : 'All States';
     document.getElementById('kpiUniqueMissedCalls').textContent = missedCallsUniqueDisplay.toLocaleString();
-    document.getElementById('kpiUniqueMissedCallsTotal').textContent = `of ${missedCallsUnique.toLocaleString()} total`;
+    document.getElementById('kpiUniqueMissedCallsTotal').textContent = FILTERS.state ? FILTERS.state : 'All States';
     
     const yesPct = total > 0 ? ((yes / total) * 100).toFixed(1) : '0.0';
     const noPct = total > 0 ? ((no / total) * 100).toFixed(1) : '0.0';
@@ -1067,6 +1277,24 @@
     document.getElementById('kpiYesPct').textContent = `${yesPct}% of total`;
     document.getElementById('kpiNoPct').textContent = `${noPct}% of total`;
     document.getElementById('kpiPendingPct').textContent = `${pendingPct}% of total`;
+    
+    // Update animated progress bars
+    setTimeout(() => {
+      document.getElementById('kpiYesProgress').style.width = `${yesPct}%`;
+      document.getElementById('kpiNoProgress').style.width = `${noPct}%`;
+      document.getElementById('kpiPendingProgress').style.width = `${pendingPct}%`;
+      
+      // Calculate progress for other KPIs
+      const farmersProgress = totalFarmers > 0 ? Math.min((uniqueFarmers / totalFarmers) * 100, 100) : 0;
+      const retailersProgress = totalRetailers > 0 ? Math.min((activeRetailers / totalRetailers) * 100, 100) : 0;
+      const missedCallsProgress = missedCallsTotal > 0 ? Math.min((missedCallsDisplay / missedCallsTotal) * 100, 100) : 0;
+      const uniqueCallsProgress = missedCallsUnique > 0 ? Math.min((missedCallsUniqueDisplay / missedCallsUnique) * 100, 100) : 0;
+      
+      document.getElementById('kpiFarmersProgress').style.width = `${farmersProgress.toFixed(1)}%`;
+      document.getElementById('kpiRetailersProgress').style.width = `${retailersProgress.toFixed(1)}%`;
+      document.getElementById('kpiMissedCallsProgress').style.width = `${missedCallsProgress.toFixed(1)}%`;
+      document.getElementById('kpiUniqueMissedCallsProgress').style.width = `${uniqueCallsProgress.toFixed(1)}%`;
+    }, 100);
   }
 
   function buildCounts(rows, key){
@@ -1341,7 +1569,8 @@
     const ptStats = {};
     for(const r of rows){
       const pt = trim(r.PT||'');
-      if(!pt) continue;
+      // Skip empty PT and exclude "Direct Landing Page" (it's a Source, not PT)
+      if(!pt || pt.toLowerCase() === 'direct landing page') continue;
       if(!ptStats[pt]) ptStats[pt] = {yes:0, no:0, pending:0};
       const status = trim((r['Submission Status']||'').toLowerCase());
       if(status==='yes') ptStats[pt].yes++;
@@ -1353,7 +1582,12 @@
       .sort((a,b) => b.total - a.total)
       .slice(0, 10);
     
-    console.log('📊 PT Status Chart Data:', { totalPTs: Object.keys(ptStats).length, topPTs: topPTs.length, sample: topPTs[0] });
+    console.log('📊 PT Status Chart Data:', { 
+      totalPTs: Object.keys(ptStats).length, 
+      topPTs: topPTs.length, 
+      sample: topPTs[0],
+      note: 'Excluding "Direct Landing Page" - it is a Source, not a PT'
+    });
     
     // Handle empty data for PT chart
     if(topPTs.length === 0){
@@ -1367,55 +1601,55 @@
       labels: topPTs.map(p => p.pt),
       datasets:[
         { 
-          label: 'Yes', 
+          label: 'Approved', 
           data: topPTs.map(p => p.yes), 
           backgroundColor:'#10b981',
-          borderColor:'#059669',
-          borderWidth:2
+          borderRadius: 10,
+          barThickness: 22
         },
         { 
           label: 'Pending', 
           data: topPTs.map(p => p.pending), 
-          backgroundColor:'#f59e0b',
-          borderColor:'#d97706',
-          borderWidth:2
+          backgroundColor:'#8b5cf6',
+          borderRadius: 10,
+          barThickness: 22
         },
         { 
-          label: 'No', 
+          label: 'Rejected', 
           data: topPTs.map(p => p.no), 
-          backgroundColor:'#ef4444',
-          borderColor:'#dc2626',
-          borderWidth:2
+          backgroundColor:'#f59e0b',
+          borderRadius: 10,
+          barThickness: 22
         }
       ]
-    },{
-      scales:{
-        x:{ 
-          ticks:{ color:'#6b7280', font:{weight:'600',size:11,family:'Outfit'}, maxRotation:45 }, 
-          grid:{display:false},
-          stacked:true
-        },
-        y:{ 
-          ticks:{ color:'#6b7280', font:{weight:'700',family:'Space Grotesk'} }, 
-          grid:{color:'#e5e7eb'},
-          stacked:true
-        }
-      },
-      plugins:{
-        legend:{ 
-          display:true,
-          position:'top',
-          labels:{ color:'#1f2937', font:{size:12,weight:'700',family:'Outfit'}, padding:12 }
-        },
-        tooltip: {
-          callbacks: {
-            label: function(context) {
-              const label = context.dataset.label || '';
-              const value = context.parsed.y || 0;
-              return `${label}: ${value.toLocaleString()}`;
-            }
-          }
-        }
+    },{ 
+      plugins: { 
+        legend: { 
+          display: true, 
+          position: 'top', 
+          labels: { 
+            color: '#1f2937', 
+            padding: 14, 
+            font: { size: 12, weight: '700', family: 'Outfit' }, 
+            usePointStyle: true, 
+            pointStyle: 'circle' 
+          } 
+        } 
+      }, 
+      scales: { 
+        x: { 
+          ticks: { 
+            color: '#1f2937', 
+            maxRotation: 45, 
+            minRotation: 25, 
+            font: { size: 11, weight: '700', family: 'Outfit' } 
+          }, 
+          grid: { display: false } 
+        }, 
+        y: { 
+          ticks: { color: '#6b7280', font: { weight: '700', family: 'Space Grotesk' } }, 
+          grid: { color: '#e5e7eb' } 
+        } 
       }
     });
     }
