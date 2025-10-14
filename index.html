@@ -899,13 +899,13 @@
       </div>
 
       <!-- NEW: Participation Share by Source (LEFT) -->
-      <div class="card" style="grid-column: span 4">
+      <div class="card" style="grid-column: span 4" data-chart="sourceChart">
         <h3>📱 Participation Share by Source</h3>
         <canvas id="sourceChart" height="280"></canvas>
       </div>
 
       <!-- NEW: Submission Status by PT (Top 10) (RIGHT) -->
-      <div class="card" style="grid-column: span 8">
+      <div class="card" style="grid-column: span 8" data-chart="ptStatusChart">
         <h3>📊 Submission Status by PT (Top 10)</h3>
         <canvas id="ptStatusChart" height="280"></canvas>
       </div>
@@ -1618,14 +1618,72 @@
       note: 'Excluding "Direct Landing Page" - it is a Source, not a PT'
     });
     
-    // Handle empty data for PT chart
+    // Handle empty data for PT chart - ensure canvas exists
+    const ptCanvasElement = document.getElementById('ptStatusChart');
     if(topPTs.length === 0){
-      const ptCanvas = document.getElementById('ptStatusChart');
-      if(ptCanvas){
-        const parent = ptCanvas.parentElement;
-        parent.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:240px;color:#6b7280;font-size:14px;"><div style="text-align:center;"><div style="font-size:3rem;margin-bottom:1rem;">📊</div><div style="font-weight:600;">No PT data available</div><div style="font-size:12px;margin-top:0.5rem;">Please ensure your CSV has a "PT" column with data</div></div></div>';
+      // Clear existing chart if it exists
+      if(charts['ptStatusChart']){
+        charts['ptStatusChart'].destroy();
+        delete charts['ptStatusChart'];
+      }
+      
+      // Ensure canvas element exists (recreate if destroyed)
+      if(!ptCanvasElement){
+        const parent = document.querySelector('[data-chart="ptStatusChart"]');
+        if(parent){
+          parent.innerHTML = '<h3>📊 Submission Status by PT (Top 10)</h3><canvas id="ptStatusChart" height="280"></canvas>';
+        }
+      }
+      
+      // Create empty chart with message
+      const ctx = document.getElementById('ptStatusChart');
+      if(ctx){
+        const emptyCtx = ctx.getContext('2d');
+        if(charts['ptStatusChart']) charts['ptStatusChart'].destroy();
+        charts['ptStatusChart'] = new Chart(emptyCtx, {
+          type: 'bar',
+          data: {
+            labels: [],
+            datasets: []
+          },
+          options: {
+            plugins: {
+              legend: { display: false },
+              tooltip: { enabled: false }
+            },
+            scales: {
+              x: { display: false },
+              y: { display: false }
+            }
+          },
+          plugins: [{
+            id: 'emptyMessage',
+            afterDraw: (chart) => {
+              const ctx = chart.ctx;
+              const width = chart.width;
+              const height = chart.height;
+              ctx.save();
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.font = '14px Outfit';
+              ctx.fillStyle = '#6b7280';
+              ctx.fillText('📊 No PT data available with current filters', width / 2, height / 2 - 10);
+              ctx.font = '12px Outfit';
+              ctx.fillText('Try adjusting your filters', width / 2, height / 2 + 15);
+              ctx.restore();
+            }
+          }]
+        });
       }
     } else {
+      // Ensure canvas exists before rendering chart
+      if(!ptCanvasElement){
+        const parent = document.querySelector('[data-chart="ptStatusChart"]');
+        if(parent){
+          parent.innerHTML = '<h3>📊 Submission Status by PT (Top 10)</h3><canvas id="ptStatusChart" height="280"></canvas>';
+        }
+      }
+      
       makeChart('ptStatusChart','bar',{
       labels: topPTs.map(p => p.pt),
       datasets:[
@@ -1694,14 +1752,67 @@
     
     console.log('📱 Source Chart Data:', { totalSources: Object.keys(sourceStats).length, sourceData: sourceData });
     
-    // Handle empty data for Source chart
+    // Handle empty data for Source chart - ensure canvas exists
+    const sourceCanvasElement = document.getElementById('sourceChart');
     if(sourceData.length === 0){
-      const sourceCanvas = document.getElementById('sourceChart');
-      if(sourceCanvas){
-        const parent = sourceCanvas.parentElement;
-        parent.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:240px;color:#6b7280;font-size:14px;"><div style="text-align:center;"><div style="font-size:3rem;margin-bottom:1rem;">📱</div><div style="font-weight:600;">No Source data available</div><div style="font-size:12px;margin-top:0.5rem;">Please ensure your CSV has a "Source" column with data</div></div></div>';
+      // Clear existing chart if it exists
+      if(charts['sourceChart']){
+        charts['sourceChart'].destroy();
+        delete charts['sourceChart'];
+      }
+      
+      // Ensure canvas element exists (recreate if destroyed)
+      if(!sourceCanvasElement){
+        const parent = document.querySelector('[data-chart="sourceChart"]');
+        if(parent){
+          parent.innerHTML = '<h3>📱 Participation Share by Source</h3><canvas id="sourceChart" height="280"></canvas>';
+        }
+      }
+      
+      // Create empty chart with message
+      const ctx = document.getElementById('sourceChart');
+      if(ctx){
+        const emptyCtx = ctx.getContext('2d');
+        if(charts['sourceChart']) charts['sourceChart'].destroy();
+        charts['sourceChart'] = new Chart(emptyCtx, {
+          type: 'doughnut',
+          data: {
+            labels: [],
+            datasets: []
+          },
+          options: {
+            plugins: {
+              legend: { display: false },
+              tooltip: { enabled: false }
+            }
+          },
+          plugins: [{
+            id: 'emptyMessage',
+            afterDraw: (chart) => {
+              const ctx = chart.ctx;
+              const width = chart.width;
+              const height = chart.height;
+              ctx.save();
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.font = '14px Outfit';
+              ctx.fillStyle = '#6b7280';
+              ctx.fillText('📱 No Source data with current filters', width / 2, height / 2 - 10);
+              ctx.font = '12px Outfit';
+              ctx.fillText('Try adjusting your filters', width / 2, height / 2 + 15);
+              ctx.restore();
+            }
+          }]
+        });
       }
     } else {
+      // Ensure canvas exists before rendering chart
+      if(!sourceCanvasElement){
+        const parent = document.querySelector('[data-chart="sourceChart"]');
+        if(parent){
+          parent.innerHTML = '<h3>📱 Participation Share by Source</h3><canvas id="sourceChart" height="280"></canvas>';
+        }
+      }
       makeChart('sourceChart','doughnut',{
       labels: sourceData.map(s => s[0]),
       datasets:[{ 
@@ -1909,7 +2020,10 @@
     const ptsFromRef = filteredRefData.map(r=>trim(r.Name||'')).filter(Boolean);
     const pts = uniqSorted([...ptsFromData, ...ptsFromRef]);
     
-    const zones = uniqSorted(filteredRows.map(r=>trim(r.Zone||'')).filter(Boolean));
+    // Combine Zone values from both filtered datasets (data.csv has "Zone", reference.csv has "ZONE")
+    const zonesFromData = filteredRows.map(r=>trim(r.Zone||'')).filter(Boolean);
+    const zonesFromRef = filteredRefData.map(r=>trim(r.ZONE||'')).filter(Boolean);
+    const zones = uniqSorted([...zonesFromData, ...zonesFromRef]);
     
     // HQ filter is unique to reference.csv
     const hqs = uniqSorted(filteredRefData.map(r=>trim(r.HQ||'')).filter(Boolean));
