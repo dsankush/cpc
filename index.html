@@ -1059,6 +1059,70 @@
     if(isNaN(d)) return '';
     return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
   };
+  
+  // Parse date from reference.csv format (DD-MMM-YY or DD-MMM-YYYY)
+  const parseReferenceDate = (dateStr) => {
+    if(!dateStr) return '';
+    const s = trim(dateStr);
+    if(!s) return '';
+    
+    // Month mapping
+    const months = {
+      'jan': '01', 'january': '01',
+      'feb': '02', 'february': '02',
+      'mar': '03', 'march': '03',
+      'apr': '04', 'april': '04',
+      'may': '05',
+      'jun': '06', 'june': '06',
+      'jul': '07', 'july': '07',
+      'aug': '08', 'august': '08',
+      'sep': '09', 'sept': '09', 'september': '09',
+      'oct': '10', 'october': '10',
+      'nov': '11', 'november': '11',
+      'dec': '12', 'december': '12'
+    };
+    
+    // Try to parse DD-MMM-YY or D-MMM-YY format (e.g., "10-Sep-25" or "6-Oct-25")
+    const parts = s.split('-');
+    if(parts.length === 3){
+      const day = parts[0].trim().padStart(2, '0');
+      const monthStr = parts[1].trim().toLowerCase();
+      let year = parts[2].trim();
+      
+      // Convert 2-digit year to 4-digit (25 -> 2025)
+      if(year.length === 2){
+        const yearNum = parseInt(year);
+        year = yearNum < 50 ? '20' + year : '19' + year;
+      }
+      
+      const month = months[monthStr];
+      if(month){
+        return year + '-' + month + '-' + day;
+      }
+    }
+    
+    // Try space-separated format: "6 Oct 25" or "06 Oct 25"
+    const spaceParts = s.split(/[\s\/]+/);
+    if(spaceParts.length === 3){
+      const day = spaceParts[0].trim().padStart(2, '0');
+      const monthStr = spaceParts[1].trim().toLowerCase();
+      let year = spaceParts[2].trim();
+      
+      if(year.length === 2){
+        const yearNum = parseInt(year);
+        year = yearNum < 50 ? '20' + year : '19' + year;
+      }
+      
+      const month = months[monthStr];
+      if(month){
+        return year + '-' + month + '-' + day;
+      }
+    }
+    
+    // Fallback to standard date parsing
+    return toDateKey(s);
+  };
+  
   function uniqSorted(arr){ return [...new Set(arr.filter(Boolean))].sort((a,b)=>a.localeCompare(b)); }
 
   function parseProducts(cartStr){
@@ -1121,10 +1185,26 @@
     dateFormat:"Y-m-d",
     onChange:(dates)=>{
       if(dates.length===2){
-        FILTERS.dateFrom = dates[0].toISOString().slice(0,10);
-        FILTERS.dateTo   = dates[1].toISOString().slice(0,10);
+        // Fix timezone issue - use local date instead of UTC
+        const fromDate = dates[0];
+        const toDate = dates[1];
+        
+        FILTERS.dateFrom = fromDate.getFullYear() + '-' + 
+                          String(fromDate.getMonth() + 1).padStart(2, '0') + '-' + 
+                          String(fromDate.getDate()).padStart(2, '0');
+        FILTERS.dateTo = toDate.getFullYear() + '-' + 
+                        String(toDate.getMonth() + 1).padStart(2, '0') + '-' + 
+                        String(toDate.getDate()).padStart(2, '0');
+        
         selDateFrom.value = FILTERS.dateFrom;
         selDateTo.value   = FILTERS.dateTo;
+        
+        console.log('🗓️ Date Range Selected:', {
+          selectedFrom: FILTERS.dateFrom,
+          selectedTo: FILTERS.dateTo,
+          rawDates: dates.map(d => d.toString())
+        });
+        
         populateFilters(RAW, REFERENCE_DATA, true);
         render();
       }
@@ -1243,7 +1323,7 @@
     
     // Calculate Missed Calls from reference.csv (dynamic based on filters)
     // Check if any reference-related filters are applied
-    const hasReferenceFilters = FILTERS.state || FILTERS.zone || FILTERS.pt || FILTERS.hq;
+    const hasReferenceFilters = FILTERS.state || FILTERS.zone || FILTERS.pt || FILTERS.hq || FILTERS.dateFrom || FILTERS.dateTo;
     
     let missedCallsDisplay = 0;
     let missedCallsUniqueDisplay = 0;
@@ -1259,6 +1339,17 @@
     } else {
       // Filters applied - calculate from filtered PT data
       const filteredReferenceData = REFERENCE_DATA.filter(r => {
+        // Apply date range filter if present
+        if(FILTERS.dateFrom || FILTERS.dateTo){
+          const refDate = parseReferenceDate(trim(r['Date Processed'] || ''));
+          
+          // Exclude rows with invalid/missing dates when date filter is active
+          if(!refDate) return false;
+          
+          if(FILTERS.dateFrom && refDate < FILTERS.dateFrom) return false;
+          if(FILTERS.dateTo && refDate > FILTERS.dateTo) return false;
+        }
+        
         // Apply common filters: State, Zone, PT
         if(FILTERS.state && trim(r.State) !== FILTERS.state) return false;
         if(FILTERS.zone && trim(r.ZONE) !== FILTERS.zone) return false;
@@ -1269,9 +1360,61 @@
         return true;
       });
       
+      // Debug: Log filtered data when date filter is active
+      if(FILTERS.dateFrom || FILTERS.dateTo){
+        // Analyze all rows to see date parsing success/failure
+        const dateAnalysis = REFERENCE_DATA.map(r => {
+          const rawDate = trim(r['Date Processed'] || '');
+          const parsedDate = parseReferenceDate(rawDate);
+          const inRange = parsedDate && parsedDate >= FILTERS.dateFrom && parsedDate <= FILTERS.dateTo;
+          return { rawDate, parsedDate, inRange, total: Number(r['Total Missed Calls']||0), unique: Number(r['Total Unique Missed Calls']||0) };
+        });
+        
+        const totalParsed = dateAnalysis.filter(d => d.parsedDate).length;
+        const totalFailed = dateAnalysis.filter(d => !d.parsedDate && d.rawDate).length;
+        const inRangeRows = dateAnalysis.filter(d => d.inRange);
+        const inRangeTotal = inRangeRows.reduce((sum, r) => sum + r.total, 0);
+        const inRangeUnique = inRangeRows.reduce((sum, r) => sum + r.unique, 0);
+        
+        console.log('📅 Date Range Filter Applied to Missed Calls:', {
+          dateFrom: FILTERS.dateFrom,
+          dateTo: FILTERS.dateTo,
+          totalReferenceRows: REFERENCE_DATA.length,
+          datesParsedSuccessfully: totalParsed,
+          datesFailedToParse: totalFailed,
+          rowsInDateRange: inRangeRows.length,
+          calculatedTotalInRange: inRangeTotal,
+          calculatedUniqueInRange: inRangeUnique,
+          filteredRows: filteredReferenceData.length,
+          sampleParsedDates: dateAnalysis.slice(0, 10).map(d => ({
+            raw: d.rawDate,
+            parsed: d.parsedDate || 'FAILED',
+            inRange: d.inRange ? 'YES' : 'NO',
+            total: d.total,
+            unique: d.unique
+          })),
+          sampleFilteredRows: filteredReferenceData.slice(0, 5).map(r => ({
+            date: r['Date Processed'],
+            parsedDate: parseReferenceDate(r['Date Processed']),
+            name: r.Name,
+            total: r['Total Missed Calls'],
+            unique: r['Total Unique Missed Calls']
+          }))
+        });
+      }
+      
       for(const r of filteredReferenceData){
         missedCallsDisplay += Number(r['Total Missed Calls']) || 0;
         missedCallsUniqueDisplay += Number(r['Total Unique Missed Calls']) || 0;
+      }
+      
+      // Debug: Log calculated totals
+      if(FILTERS.dateFrom || FILTERS.dateTo){
+        console.log('📊 Missed Calls Calculation:', {
+          filteredRowCount: filteredReferenceData.length,
+          calculatedTotal: missedCallsDisplay,
+          calculatedUnique: missedCallsUniqueDisplay
+        });
       }
       
       // Grand totals for context (use Grand Total row if available, otherwise calculate)
@@ -1294,6 +1437,14 @@
     document.getElementById('kpiUniqueFarmers').textContent = `Unique: ${uniqueFarmers.toLocaleString()}`;
     document.getElementById('kpiActiveRetailers').textContent = activeRetailers.toLocaleString();
     document.getElementById('kpiTotalRetailers').textContent = `of ${totalRetailers.toLocaleString()} total`;
+    // Debug: Log the actual values being displayed
+    console.log('💡 Setting Missed Calls Display:', {
+      missedCallsDisplay: missedCallsDisplay,
+      formattedDisplay: missedCallsDisplay.toLocaleString(),
+      missedCallsUniqueDisplay: missedCallsUniqueDisplay,
+      formattedUnique: missedCallsUniqueDisplay.toLocaleString()
+    });
+    
     document.getElementById('kpiMissedCalls').textContent = missedCallsDisplay.toLocaleString();
     document.getElementById('kpiMissedCallsTotal').textContent = FILTERS.state ? FILTERS.state : 'All States';
     document.getElementById('kpiUniqueMissedCalls').textContent = missedCallsUniqueDisplay.toLocaleString();
@@ -1998,6 +2149,13 @@
     let filteredRefData = refData;
     if(preserveFilters && refData.length > 0){
       filteredRefData = refData.filter(r => {
+        // Apply date range filter if present
+        if(FILTERS.dateFrom || FILTERS.dateTo){
+          const refDate = parseReferenceDate(trim(r['Date Processed'] || ''));
+          if(FILTERS.dateFrom && refDate < FILTERS.dateFrom) return false;
+          if(FILTERS.dateTo && refDate > FILTERS.dateTo) return false;
+        }
+        
         if(FILTERS.state && trim(r.State) !== FILTERS.state) return false;
         if(FILTERS.zone && trim(r.ZONE) !== FILTERS.zone) return false;
         if(FILTERS.pt && trim(r.Name) !== FILTERS.pt) return false;
@@ -2086,12 +2244,14 @@
   function attachFilterHandlers(){
     // Date filters
     selDateFrom.onchange = ()=>{ 
-      FILTERS.dateFrom = selDateFrom.value; 
+      FILTERS.dateFrom = selDateFrom.value;
+      console.log('🗓️ Date From Changed:', FILTERS.dateFrom);
       populateFilters(RAW, REFERENCE_DATA, true);
       render(); 
     };
     selDateTo.onchange = ()=>{ 
-      FILTERS.dateTo = selDateTo.value; 
+      FILTERS.dateTo = selDateTo.value;
+      console.log('🗓️ Date To Changed:', FILTERS.dateTo);
       populateFilters(RAW, REFERENCE_DATA, true);
       render(); 
     };
@@ -2263,12 +2423,27 @@
       }
       
       if(REFERENCE_DATA.length > 0){
+        const firstRow = REFERENCE_DATA[0];
+        const hasDateColumn = 'Date Processed' in firstRow;
+        
         console.log('✅ reference.csv loaded:', {
           totalPTs: REFERENCE_DATA.length,
-          columns: Object.keys(REFERENCE_DATA[0]),
-          sample: REFERENCE_DATA[0],
-          hasGrandTotal: !!REFERENCE_GRAND_TOTAL
+          columns: Object.keys(firstRow),
+          sample: firstRow,
+          hasGrandTotal: !!REFERENCE_GRAND_TOTAL,
+          hasDateColumn: hasDateColumn
         });
+        
+        // Test date parsing if Date Processed column exists
+        if(hasDateColumn && firstRow['Date Processed']){
+          const sampleDate = firstRow['Date Processed'];
+          const parsedDate = parseReferenceDate(sampleDate);
+          console.log('📅 Date Parsing Test:', {
+            originalFormat: sampleDate,
+            parsedToYYYYMMDD: parsedDate,
+            willWorkWithFilters: !!parsedDate
+          });
+        }
         
         // Calculate totals from PT data (excluding Grand Total)
         let totalMissed = 0, totalUnique = 0;
@@ -2282,7 +2457,8 @@
           calculatedTotal: totalMissed.toLocaleString(),
           calculatedUnique: totalUnique.toLocaleString(),
           grandTotalRow: REFERENCE_GRAND_TOTAL ? `${REFERENCE_GRAND_TOTAL.total.toLocaleString()} total, ${REFERENCE_GRAND_TOTAL.unique.toLocaleString()} unique` : 'Not found',
-          states: [...new Set(REFERENCE_DATA.map(r=>r.State))].length
+          states: [...new Set(REFERENCE_DATA.map(r=>r.State))].length,
+          dateFilterSupport: hasDateColumn ? 'Enabled ✅' : 'Disabled (no Date Processed column)'
         });
       }
       
