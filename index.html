@@ -463,82 +463,261 @@
       background:#f8fafc;
       font-family:'Outfit',sans-serif;
     }
+    /* Enhanced Popup Design */
     .leaflet-popup-content-wrapper{
-      background:white;border-radius:14px;
-      box-shadow:0 12px 48px rgba(99,102,241,.3);
-      border:3px solid var(--acc1);
+      background:linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      border-radius:20px;
+      box-shadow:0 20px 60px rgba(0,0,0,.2), 0 0 0 1px rgba(255,255,255,.8);
+      border:none;
+      overflow:hidden;
     }
-    .leaflet-popup-content{margin:24px;font-size:14px;color:var(--text)}
-    .leaflet-popup-tip{background:white;border:3px solid var(--acc1)}
+    .leaflet-popup-content{
+      margin:0;
+      font-size:14px;
+      color:var(--text);
+      min-width:320px;
+    }
+    .leaflet-popup-tip{
+      background:white;
+      box-shadow:0 4px 12px rgba(0,0,0,.1);
+    }
+    .map-popup-header{
+      background:linear-gradient(135deg, #6366f1, #8b5cf6);
+      padding:20px 24px;
+      margin-bottom:0;
+    }
     .map-popup-state{
-      font-size:20px;font-weight:900;color:var(--acc1);
-      margin-bottom:16px;padding-bottom:12px;
-      border-bottom:2px solid var(--ring);
+      font-size:24px;
+      font-weight:900;
+      color:white;
+      margin:0;
       font-family:'Space Grotesk',sans-serif;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      text-shadow:0 2px 8px rgba(0,0,0,.2);
+    }
+    .map-popup-body{
+      padding:20px 24px;
     }
     .map-popup-row{
-      display:flex;justify-content:space-between;align-items:center;
-      margin:12px 0;padding:10px 0;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin:16px 0;
+      padding:14px 16px;
+      background:linear-gradient(135deg, rgba(255,255,255,.8), rgba(248,250,252,.6));
+      border-radius:12px;
+      border:2px solid rgba(226,232,240,.5);
+      transition:all .3s ease;
+    }
+    .map-popup-row:hover{
+      transform:translateX(4px);
+      border-color:rgba(99,102,241,.3);
+      box-shadow:0 4px 12px rgba(99,102,241,.1);
     }
     .map-popup-label{
-      font-size:12px;color:var(--muted);
-      text-transform:uppercase;letter-spacing:.6px;font-weight:700;
+      font-size:12px;
+      color:#64748b;
+      text-transform:uppercase;
+      letter-spacing:.8px;
+      font-weight:800;
+      display:flex;
+      align-items:center;
+      gap:6px;
     }
     .map-popup-value{
-      font-size:22px;font-weight:900;
+      font-size:26px;
+      font-weight:900;
       font-family:'Space Grotesk',sans-serif;
       color:var(--text);
     }
-    .map-popup-success{color:#10b981!important}
-    .map-popup-pending{color:#8b5cf6!important}
-    .map-popup-rejected{color:#f59e0b!important}
+    .map-popup-success{
+      color:#10b981!important;
+      background:linear-gradient(135deg, #10b981, #34d399);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      background-clip:text;
+    }
+    .map-popup-pending{
+      color:#8b5cf6!important;
+      background:linear-gradient(135deg, #8b5cf6, #a78bfa);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      background-clip:text;
+    }
+    .map-popup-rejected{
+      color:#ef4444!important;
+      background:linear-gradient(135deg, #ef4444, #f87171);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      background-clip:text;
+    }
+    .map-popup-highlight{
+      background:linear-gradient(135deg, rgba(99,102,241,.1), rgba(139,92,246,.1));
+      border-color:rgba(99,102,241,.4)!important;
+      padding:16px!important;
+    }
+    .map-popup-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 12px;
+      border-radius:10px;
+      font-size:13px;
+      font-weight:800;
+      background:rgba(255,255,255,.3);
+      backdrop-filter:blur(10px);
+      color:white;
+      margin-left:auto;
+    }
     
-    .state-marker-pin{position:relative;width:60px;height:60px;display:flex;align-items:center;justify-content:center}
+    /* Modern Map Markers - Circular Design */
+    .state-marker-pin{
+      position:relative;
+      width:auto;
+      height:auto;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
     .state-marker-inner{
-      position:relative;z-index:2;
-      background:white;
-      border-radius:12px;
-      padding:10px 14px;
-      box-shadow:0 8px 24px rgba(99,102,241,.25);
-      border:3px solid;
-      font-weight:900;font-size:15px;
+      position:relative;
+      z-index:2;
+      background:linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      border-radius:50%;
+      padding:18px;
+      box-shadow:0 10px 35px rgba(0,0,0,.18), 0 0 0 2px rgba(255,255,255,.95);
+      border:4px solid;
+      font-weight:900;
+      font-size:15px;
       font-family:'Space Grotesk',sans-serif;
-      text-align:center;min-width:85px;
-      transition:all .3s ease;cursor:pointer;
+      text-align:center;
+      width:100px;
+      height:100px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      transition:all .4s cubic-bezier(0.4,0,0.2,1);
+      cursor:pointer;
+      backdrop-filter:blur(10px);
     }
     .state-marker-inner:hover{
-      transform:translateY(-6px) scale(1.08);
-      box-shadow:0 16px 48px rgba(99,102,241,.4);
+      transform:translateY(-12px) scale(1.2);
+      box-shadow:0 25px 70px rgba(0,0,0,.3), 0 0 0 4px rgba(255,255,255,1);
+      z-index:1000;
     }
-    .state-marker-name{
-      font-size:10px;color:var(--muted);
-      text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px;
+    .state-marker-inner::before{
+      content:'';
+      position:absolute;
+      inset:-4px;
+      border-radius:50%;
+      padding:6px;
+      background:linear-gradient(135deg, var(--marker-color), var(--marker-color-light));
+      -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite:xor;
+      mask-composite:exclude;
+      opacity:0;
+      transition:opacity .3s ease;
+      animation:rotateBorder 3s linear infinite;
+    }
+    @keyframes rotateBorder{
+      0%{transform:rotate(0deg)}
+      100%{transform:rotate(360deg)}
+    }
+    .state-marker-inner:hover::before{
+      opacity:1;
+    }
+    .state-marker-abbr{
+      font-size:10px;
+      color:rgba(107,114,128,.75);
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.8px;
+      margin-bottom:4px;
       font-family:'Outfit',sans-serif;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:3px;
+    }
+    .state-marker-badge{
+      position:absolute;
+      top:-5px;
+      right:-5px;
+      padding:4px 8px;
+      border-radius:12px;
+      font-size:10px;
+      font-weight:900;
+      letter-spacing:.3px;
+      background:linear-gradient(135deg, var(--marker-color), var(--marker-color-light));
+      color:white;
+      box-shadow:0 3px 10px rgba(0,0,0,.25);
+      border:2px solid white;
+      z-index:10;
     }
     .state-marker-count{
-      font-size:19px;font-weight:900;
-      display:flex;align-items:center;justify-content:center;gap:5px;
+      font-size:22px;
+      font-weight:900;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:4px;
+      background:linear-gradient(135deg, var(--marker-color), var(--marker-color-light));
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      background-clip:text;
+      filter:drop-shadow(0 2px 4px rgba(0,0,0,.15));
+      line-height:1;
+    }
+    .state-marker-icon{
+      font-size:18px;
+      filter:drop-shadow(0 2px 4px rgba(0,0,0,.2));
+      margin-bottom:2px;
     }
     .marker-ripple{
-      position:absolute;width:100%;height:100%;border-radius:50%;
-      background:radial-gradient(circle, rgba(99,102,241,.3) 0%, rgba(99,102,241,0) 70%);
-      animation:rippleEffect 2.5s ease-in-out infinite;z-index:1;
+      position:absolute;
+      width:140px;
+      height:140px;
+      border-radius:50%;
+      background:radial-gradient(circle, var(--marker-color-alpha) 0%, transparent 70%);
+      animation:rippleEffect 3s ease-in-out infinite;
+      z-index:1;
+      pointer-events:none;
     }
     @keyframes rippleEffect{
-      0%{transform:scale(.8);opacity:.7}
-      50%{transform:scale(1.3);opacity:.3}
-      100%{transform:scale(.8);opacity:.7}
+      0%{transform:scale(.5);opacity:.9}
+      50%{transform:scale(1.3);opacity:.15}
+      100%{transform:scale(.5);opacity:.9}
     }
-    .state-marker-level-1{border-color:#10b981}
-    .state-marker-level-1 .state-marker-count{color:#10b981}
-    .state-marker-level-2{border-color:#22c55e}
-    .state-marker-level-2 .state-marker-count{color:#22c55e}
-    .state-marker-level-3{border-color:#84cc16}
-    .state-marker-level-3 .state-marker-count{color:#84cc16}
-    .state-marker-level-4{border-color:#eab308}
-    .state-marker-level-4 .state-marker-count{color:#eab308}
-    .state-marker-level-5{border-color:#f59e0b}
-    .state-marker-level-5 .state-marker-count{color:#f59e0b}
+    
+    /* Level Color Schemes - Enhanced with gradients */
+    .state-marker-level-1{
+      --marker-color:#10b981;
+      --marker-color-light:#34d399;
+      --marker-color-alpha:rgba(16,185,129,.3);
+    }
+    .state-marker-level-2{
+      --marker-color:#3b82f6;
+      --marker-color-light:#60a5fa;
+      --marker-color-alpha:rgba(59,130,246,.3);
+    }
+    .state-marker-level-3{
+      --marker-color:#8b5cf6;
+      --marker-color-light:#a78bfa;
+      --marker-color-alpha:rgba(139,92,246,.3);
+    }
+    .state-marker-level-4{
+      --marker-color:#f59e0b;
+      --marker-color-light:#fbbf24;
+      --marker-color-alpha:rgba(245,158,11,.3);
+    }
+    .state-marker-level-5{
+      --marker-color:#ef4444;
+      --marker-color-light:#f87171;
+      --marker-color-alpha:rgba(239,68,68,.3);
+    }
     
     /* Map Stats Card - NEW */
     .map-stats{
@@ -945,11 +1124,11 @@
           <!-- Legend -->
           <div class="legend">
             <div class="legend-title">Approval Levels</div>
-            <div class="legend-item"><div class="legend-color" style="background:#10b981"></div><span>Elite (1000+)</span></div>
-            <div class="legend-item"><div class="legend-color" style="background:#22c55e"></div><span>High (500-999)</span></div>
-            <div class="legend-item"><div class="legend-color" style="background:#84cc16"></div><span>Medium (250-499)</span></div>
-            <div class="legend-item"><div class="legend-color" style="background:#eab308"></div><span>Growing (100-249)</span></div>
-            <div class="legend-item"><div class="legend-color" style="background:#f59e0b"></div><span>Emerging (1-99)</span></div>
+            <div class="legend-item"><div class="legend-color" style="background:linear-gradient(135deg, #10b981, #34d399)"></div><span>🏆 Elite (1000+)</span></div>
+            <div class="legend-item"><div class="legend-color" style="background:linear-gradient(135deg, #3b82f6, #60a5fa)"></div><span>⭐ High (500-999)</span></div>
+            <div class="legend-item"><div class="legend-color" style="background:linear-gradient(135deg, #8b5cf6, #a78bfa)"></div><span>💎 Medium (250-499)</span></div>
+            <div class="legend-item"><div class="legend-color" style="background:linear-gradient(135deg, #f59e0b, #fbbf24)"></div><span>🎯 Growing (100-249)</span></div>
+            <div class="legend-item"><div class="legend-color" style="background:linear-gradient(135deg, #ef4444, #f87171)"></div><span>🌱 Emerging (1-99)</span></div>
           </div>
         </div>
       </div>
@@ -1948,9 +2127,9 @@
               ctx.textBaseline = 'middle';
               ctx.font = '14px Outfit';
               ctx.fillStyle = '#6b7280';
-              ctx.fillText('', width / 2, height / 2 - 10);
+              ctx.fillText('📱 No Source data with current filters', width / 2, height / 2 - 10);
               ctx.font = '12px Outfit';
-              ctx.fillText('', width / 2, height / 2 + 15);
+              ctx.fillText('Try adjusting your filters', width / 2, height / 2 + 15);
               ctx.restore();
             }
           }]
@@ -2042,32 +2221,84 @@
     'Jammu and Kashmir': [33.7782, 76.5762],'Ladakh': [34.1526, 77.5771]
   };
 
+  // State abbreviations for cleaner map display
+  const stateAbbreviations = {
+    'Andhra Pradesh': 'AP',
+    'Arunachal Pradesh': 'AR',
+    'Assam': 'AS',
+    'Bihar': 'BR',
+    'Chhattisgarh': 'CG',
+    'Goa': 'GA',
+    'Gujarat': 'GJ',
+    'Haryana': 'HR',
+    'Himachal Pradesh': 'HP',
+    'Jharkhand': 'JH',
+    'Karnataka': 'KA',
+    'Kerala': 'KL',
+    'Madhya Pradesh': 'MP',
+    'Maharashtra': 'MH',
+    'Manipur': 'MN',
+    'Meghalaya': 'ML',
+    'Mizoram': 'MZ',
+    'Nagaland': 'NL',
+    'Odisha': 'OR',
+    'Punjab': 'PB',
+    'Rajasthan': 'RJ',
+    'Sikkim': 'SK',
+    'Tamil Nadu': 'TN',
+    'Telangana': 'TS',
+    'Tripura': 'TR',
+    'Uttar Pradesh': 'UP',
+    'Uttarakhand': 'UK',
+    'West Bengal': 'WB',
+    'Delhi': 'DL',
+    'Puducherry': 'PY',
+    'Jammu and Kashmir': 'JK',
+    'Ladakh': 'LA'
+  };
+
   function getMarkerLevel(approved) {
-    if (approved >= 1000) return 1;
-    if (approved >= 500) return 2;
-    if (approved >= 250) return 3;
-    if (approved >= 100) return 4;
-    return 5;
+    if (approved >= 1000) return 1;      // Elite (Green)
+    if (approved >= 500) return 2;       // High (Blue)
+    if (approved >= 250) return 3;       // Medium (Purple)
+    if (approved >= 100) return 4;       // Growing (Orange)
+    return 5;                             // Emerging (Red)
   }
 
-  function getMarkerIcon(state, approved) {
+  function getLevelIcon(level) {
+    const icons = {
+      1: '🏆',  // Elite
+      2: '⭐',  // High
+      3: '💎',  // Medium
+      4: '🎯',  // Growing
+      5: '🌱'   // Emerging
+    };
+    return icons[level] || '📍';
+  }
+
+  function getMarkerIcon(state, approved, total) {
     const level = getMarkerLevel(approved);
-    const shortName = state.length > 12 ? state.substring(0, 10) + '.' : state;
+    const abbr = stateAbbreviations[state] || state.substring(0, 2).toUpperCase();
+    const icon = getLevelIcon(level);
+    const approvalRate = ((approved / total) * 100).toFixed(0);
     
     return L.divIcon({
       className: 'state-marker-pin',
       html: `
         <div class="marker-ripple"></div>
         <div class="state-marker-inner state-marker-level-${level}">
-          <div class="state-marker-name">${shortName}</div>
+          <div class="state-marker-abbr">
+            <span class="state-marker-icon">${icon}</span>
+            <span>${abbr}</span>
+            <span class="state-marker-badge">${approvalRate}%</span>
+          </div>
           <div class="state-marker-count">
-            <span>✓</span>
             <span>${approved.toLocaleString()}</span>
           </div>
         </div>
       `,
-      iconSize: [null, null],
-      iconAnchor: [30, 30]
+      iconSize: [100, 100],
+      iconAnchor: [50, 50]
     });
   }
 
@@ -2078,7 +2309,8 @@
 
   function initMap() {
     if (indiaMap) return;
-    indiaMap = L.map('indiaMap', { center: [22.5, 82.5], zoom: 5, minZoom: 4, maxZoom: 8, zoomControl: true });
+    // Increased zoom from 5 to 5.5 for better visibility and less overlap
+    indiaMap = L.map('indiaMap', { center: [22.5, 82.5], zoom: 5.5, minZoom: 4.5, maxZoom: 9, zoomControl: true });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 19 }).addTo(indiaMap);
   }
 
@@ -2113,15 +2345,41 @@
       totalRejected += data.rejected;
 
       const approvalRate = getApprovalRate(data.approved, data.total);
-      const marker = L.marker(coords, { icon: getMarkerIcon(state, data.approved) });
+      const marker = L.marker(coords, { icon: getMarkerIcon(state, data.approved, data.total) });
 
+      const abbr = stateAbbreviations[state] || state.substring(0, 2).toUpperCase();
+      const level = getMarkerLevel(data.approved);
+      const levelIcon = getLevelIcon(level);
+      
       const popupContent = `
-        <div class="map-popup-state">📍 ${state}</div>
-        <div class="map-popup-row"><span class="map-popup-label">✅ Approved</span><span class="map-popup-value map-popup-success">${data.approved.toLocaleString()}</span></div>
-        <div class="map-popup-row"><span class="map-popup-label">⏳ Pending</span><span class="map-popup-value map-popup-pending">${data.pending.toLocaleString()}</span></div>
-        <div class="map-popup-row"><span class="map-popup-label">❌ Rejected</span><span class="map-popup-value map-popup-rejected">${data.rejected.toLocaleString()}</span></div>
-        <div class="map-popup-row" style="border-top:2px solid var(--ring);margin-top:10px;padding-top:10px"><span class="map-popup-label">📊 Total Scans</span><span class="map-popup-value">${data.total.toLocaleString()}</span></div>
-        <div class="map-popup-row"><span class="map-popup-label">🎯 Approval Rate</span><span class="map-popup-value map-popup-success">${approvalRate}%</span></div>
+        <div class="map-popup-header">
+          <div class="map-popup-state">
+            ${levelIcon} ${state}
+            <span class="map-popup-badge">${abbr}</span>
+          </div>
+        </div>
+        <div class="map-popup-body">
+          <div class="map-popup-row">
+            <span class="map-popup-label">✅ Approved</span>
+            <span class="map-popup-value map-popup-success">${data.approved.toLocaleString()}</span>
+          </div>
+          <div class="map-popup-row">
+            <span class="map-popup-label">⏳ Pending</span>
+            <span class="map-popup-value map-popup-pending">${data.pending.toLocaleString()}</span>
+          </div>
+          <div class="map-popup-row">
+            <span class="map-popup-label">❌ Rejected</span>
+            <span class="map-popup-value map-popup-rejected">${data.rejected.toLocaleString()}</span>
+          </div>
+          <div class="map-popup-row map-popup-highlight">
+            <span class="map-popup-label">📊 Total Scans</span>
+            <span class="map-popup-value">${data.total.toLocaleString()}</span>
+          </div>
+          <div class="map-popup-row map-popup-highlight">
+            <span class="map-popup-label">🎯 Approval Rate</span>
+            <span class="map-popup-value map-popup-success">${approvalRate}%</span>
+          </div>
+        </div>
       `;
 
       marker.bindPopup(popupContent, { closeButton: true, maxWidth: 340 });
@@ -2137,7 +2395,10 @@
     document.getElementById('mapPending').textContent = totalPending.toLocaleString();
     document.getElementById('mapRejected').textContent = totalRejected.toLocaleString();
     
-    setTimeout(() => { indiaMap.fitBounds([[8, 68],[37, 97]]); }, 100);
+    // Adjusted bounds for better zoom and spacing
+    setTimeout(() => { 
+      indiaMap.fitBounds([[8, 68],[37, 97]], { padding: [30, 30] }); 
+    }, 100);
   }
 
   // Smart cascading filter population - updates all filters based on current selections
@@ -2528,4 +2789,3 @@
 
 </body>
 </html>
-
