@@ -727,7 +727,7 @@
     <!-- Horizontal Filters -->
     <div class="filters-horizontal">
       <div class="group">
-        <label for="dateRange">Date Range</label>
+        <label for="dateRange">📅 Date Range</label>
         <input id="dateRange" placeholder="Select range" />
       </div>
 
@@ -741,55 +741,61 @@
       </div>
 
       <div class="group">
-        <label for="state">State</label>
+        <label for="state">🌍 State</label>
         <select id="state"></select>
       </div>
       <div class="group">
-        <label for="district">District</label>
+        <label for="district">📍 District</label>
         <select id="district"></select>
       </div>
       <div class="group">
-        <label for="retailer">Retailer</label>
+        <label for="retailer">🏪 Retailer</label>
         <select id="retailer"></select>
       </div>
       <div class="group">
-        <label for="product">Product</label>
+        <label for="product">📦 Product</label>
         <select id="product"></select>
       </div>
 
       <div class="group">
-        <label for="unit">Quantity Unit</label>
+        <label for="unit">📏 Quantity Unit</label>
         <select id="unit"></select>
       </div>
 
       <div class="group">
-        <label for="status">Status</label>
+        <label for="status">✅ Status</label>
         <select id="status"></select>
       </div>
 
       <div class="group">
-        <label for="source">Source</label>
+        <label for="source">📱 Source</label>
         <select id="source"></select>
       </div>
 
       <div class="group">
-        <label for="pt">PT</label>
+        <label for="pt">👥 PT</label>
         <select id="pt"></select>
       </div>
 
       <div class="group">
-        <label for="zone">Zone</label>
+        <label for="zone">🌐 Zone</label>
         <select id="zone"></select>
       </div>
+
+      <div class="group">
+        <label for="hq">🏢 HQ</label>
+        <select id="hq"></select>
+      </div>
+
       <div class="group" style="display:flex;align-items:flex-end">
-        <button class="btn" id="resetBtn" style="width:100%">Reset</button>
+        <button class="btn" id="resetBtn" style="width:100%">🔄 Reset</button>
       </div>
     </div>
 
     <section class="content">
       <!-- Total Scans with Hero Design -->
       <div class="card" style="grid-column: span 12">
-        <h3>Campaign Performance Overview</h3>
+        <h3>📊 Campaign Performance Overview</h3>
         <div class="kpi-hero">
           <div class="kpi-main-circle">
             <div class="kpi-main-label">Total Scans</div>
@@ -858,55 +864,55 @@
 
       <!-- Status Chart -->
       <div class="card" style="grid-column: span 4">
-        <h3>Order Approval Status</h3>
+        <h3>📈 Order Approval Status</h3>
         <canvas id="statusChart" height="280"></canvas>
       </div>
 
       <!-- Trend Chart - ENHANCED -->
       <div class="card" style="grid-column: span 8">
-        <h3>Time Trend (Scans per Day)</h3>
+        <h3>📅 Time Trend (Scans per Day)</h3>
         <canvas id="trendChart" height="280"></canvas>
       </div>
 
       <!-- Top States Table -->
       <div class="card" style="grid-column: span 6">
-        <h3>States by Scans</h3>
+        <h3>🌍 States by Scans</h3>
         <div id="statesTable" style="overflow-y:auto;max-height:380px;margin-top:12px"></div>
       </div>
 
       <!-- Retailer Performance -->
       <div class="card" style="grid-column: span 6">
-        <h3>Retailer Performance</h3>
+        <h3>🏪 Retailer Performance</h3>
         <canvas id="retailerChart" height="240"></canvas>
       </div>
 
       <!-- District Scans -->
       <div class="card" style="grid-column: span 6">
-        <h3>District-wise Scans</h3>
+        <h3>📍 District-wise Scans</h3>
         <canvas id="districtChart" height="180"></canvas>
       </div>
 
       <!-- Product Basket -->
       <div class="card" style="grid-column: span 6">
-        <h3>Product Basket</h3>
+        <h3>📦 Product Basket</h3>
         <canvas id="productChart" height="180"></canvas>
       </div>
 
       <!-- NEW: Participation Share by Source (LEFT) -->
       <div class="card" style="grid-column: span 4">
-        <h3>Participation Share by Source</h3>
+        <h3>📱 Participation Share by Source</h3>
         <canvas id="sourceChart" height="280"></canvas>
       </div>
 
       <!-- NEW: Submission Status by PT (Top 10) (RIGHT) -->
       <div class="card" style="grid-column: span 8">
-        <h3>Submission Status by PT (Top 10)</h3>
+        <h3>📊 Submission Status by PT (Top 10)</h3>
         <canvas id="ptStatusChart" height="280"></canvas>
       </div>
 
       <!-- India Map with Stats Card -->
       <div class="card" style="grid-column: span 12">
-        <h3>India - State-wise Distribution</h3>
+        <h3>🗺️ India - State-wise Distribution</h3>
         <div id="indiaMapContainer">
           <div id="indiaMap"></div>
           
@@ -975,10 +981,11 @@
 
 <script>
   const CSV_URL = './data.csv';
+  const REFERENCE_CSV_URL = './reference.csv';
 
   // Login
   const USERS = {
-    'digicides': { password: 'coro@cpc', role: 'user' },
+    'digicides': { password: 'cpc@coro', role: 'user' },
     'developer': { password: 'de^el0per', role: 'developer' }
   };
   
@@ -1090,7 +1097,9 @@
 
   // State
   let RAW = [];
-  let FILTERS = { dateFrom:'', dateTo:'', state:'', district:'', retailer:'', product:'', unit:'', status:'', source:'', pt:'', zone:'' };
+  let REFERENCE_DATA = []; // PT/Missed Calls reference data
+  let REFERENCE_GRAND_TOTAL = null; // Grand Total row (excluded from filters)
+  let FILTERS = { dateFrom:'', dateTo:'', state:'', district:'', retailer:'', product:'', unit:'', status:'', source:'', pt:'', zone:'', hq:'' };
 
   // DOM
   const selDateFrom = document.getElementById('dateFrom');
@@ -1105,6 +1114,7 @@
   const selSource = document.getElementById('source');
   const selPT = document.getElementById('pt');
   const selZone = document.getElementById('zone');
+  const selHQ = document.getElementById('hq');
   
   flatpickr("#dateRange",{
     mode:"range",
@@ -1115,18 +1125,19 @@
         FILTERS.dateTo   = dates[1].toISOString().slice(0,10);
         selDateFrom.value = FILTERS.dateFrom;
         selDateTo.value   = FILTERS.dateTo;
+        populateFilters(RAW, REFERENCE_DATA, true);
         render();
       }
     }
   });
 
   document.getElementById('resetBtn').addEventListener('click', ()=>{
-    FILTERS = { dateFrom:'', dateTo:'', state:'', district:'', retailer:'', product:'', unit:'', status:'', source:'', pt:'', zone:'' };
+    FILTERS = { dateFrom:'', dateTo:'', state:'', district:'', retailer:'', product:'', unit:'', status:'', source:'', pt:'', zone:'', hq:'' };
     selDateFrom.value = selDateTo.value = '';
     selDateRange._flatpickr && selDateRange._flatpickr.clear();
     selState.value = selDistrict.value = selRetailer.value = selProduct.value = selUnit.value = selStatus.value = '';
-    selSource.value = selPT.value = selZone.value = '';
-    populateFilters(RAW);
+    selSource.value = selPT.value = selZone.value = selHQ.value = '';
+    populateFilters(RAW, REFERENCE_DATA, false); // Reset to full dataset
     render();
   });
 
@@ -1230,31 +1241,49 @@
       }
     }
     
-    // Hardcoded Missed Calls Data (affected by state filter)
-    const MISSED_CALLS_DATA = {
-      'Andhra Pradesh': { total: 12962, unique: 10059 },
-      'Karnataka': { total: 5609, unique: 4313 },
-      'Maharashtra': { total: 8690, unique: 6577 },
-      'Telangana': { total: 8113, unique: 6297 },
-      'West Bengal': { total: 6, unique: 6 }
-    };
+    // Calculate Missed Calls from reference.csv (dynamic based on filters)
+    // Check if any reference-related filters are applied
+    const hasReferenceFilters = FILTERS.state || FILTERS.zone || FILTERS.pt || FILTERS.hq;
     
-    let missedCallsTotal = 35380;
-    let missedCallsUnique = 27240;
     let missedCallsDisplay = 0;
     let missedCallsUniqueDisplay = 0;
+    let missedCallsTotal = 0;
+    let missedCallsUnique = 0;
     
-    if(FILTERS.state && MISSED_CALLS_DATA[FILTERS.state]){
-      missedCallsTotal = MISSED_CALLS_DATA[FILTERS.state].total;
-      missedCallsUnique = MISSED_CALLS_DATA[FILTERS.state].unique;
-      // For display, show the filtered value (could be from data if available)
-      // For now, display the hardcoded value when state is selected
-      missedCallsDisplay = missedCallsTotal;
-      missedCallsUniqueDisplay = missedCallsUnique;
+    if(!hasReferenceFilters && REFERENCE_GRAND_TOTAL){
+      // No filters applied - use Grand Total row values
+      missedCallsDisplay = REFERENCE_GRAND_TOTAL.total;
+      missedCallsUniqueDisplay = REFERENCE_GRAND_TOTAL.unique;
+      missedCallsTotal = REFERENCE_GRAND_TOTAL.total;
+      missedCallsUnique = REFERENCE_GRAND_TOTAL.unique;
     } else {
-      // Show grand total when no state filter
-      missedCallsDisplay = missedCallsTotal;
-      missedCallsUniqueDisplay = missedCallsUnique;
+      // Filters applied - calculate from filtered PT data
+      const filteredReferenceData = REFERENCE_DATA.filter(r => {
+        // Apply common filters: State, Zone, PT
+        if(FILTERS.state && trim(r.State) !== FILTERS.state) return false;
+        if(FILTERS.zone && trim(r.ZONE) !== FILTERS.zone) return false;
+        // PT filter (maps to Name column in reference.csv)
+        if(FILTERS.pt && trim(r.Name) !== FILTERS.pt) return false;
+        // HQ filter (unique to reference data)
+        if(FILTERS.hq && trim(r.HQ) !== FILTERS.hq) return false;
+        return true;
+      });
+      
+      for(const r of filteredReferenceData){
+        missedCallsDisplay += Number(r['Total Missed Calls']) || 0;
+        missedCallsUniqueDisplay += Number(r['Total Unique Missed Calls']) || 0;
+      }
+      
+      // Grand totals for context (use Grand Total row if available, otherwise calculate)
+      if(REFERENCE_GRAND_TOTAL){
+        missedCallsTotal = REFERENCE_GRAND_TOTAL.total;
+        missedCallsUnique = REFERENCE_GRAND_TOTAL.unique;
+      } else {
+        for(const r of REFERENCE_DATA){
+          missedCallsTotal += Number(r['Total Missed Calls']) || 0;
+          missedCallsUnique += Number(r['Total Unique Missed Calls']) || 0;
+        }
+      }
     }
     
     document.getElementById('kpiTotalBig').textContent = total.toLocaleString();
@@ -1594,7 +1623,7 @@
       const ptCanvas = document.getElementById('ptStatusChart');
       if(ptCanvas){
         const parent = ptCanvas.parentElement;
-        parent.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:240px;color:#6b7280;font-size:14px;"><div style="text-align:center;"><div style="font-size:3rem;margin-bottom:1rem;">📊</div><div style="font-weight:600;">No PT data available</div><div style="font-size:12px;margin-top:0.5rem;">PT Data is not available for Direct Landing Page Data</div></div></div>';
+        parent.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:240px;color:#6b7280;font-size:14px;"><div style="text-align:center;"><div style="font-size:3rem;margin-bottom:1rem;">📊</div><div style="font-weight:600;">No PT data available</div><div style="font-size:12px;margin-top:0.5rem;">Please ensure your CSV has a "PT" column with data</div></div></div>';
       }
     } else {
       makeChart('ptStatusChart','bar',{
@@ -1849,100 +1878,170 @@
     setTimeout(() => { indiaMap.fitBounds([[8, 68],[37, 97]]); }, 100);
   }
 
-  function populateFilters(rows){
-    const states = uniqSorted(rows.map(r=>trim(r.State)));
-    const dists  = uniqSorted(rows.map(r=>trim(r.District)));
-    const rets   = uniqSorted(rows.map(r=>trim(r['Retailer Name'])));
-    const products = uniqSorted(rows.flatMap(r=>[...parseProducts(r['Cart Items']).keys()]));
-    const unitsAll = uniqSorted(rows.flatMap(r=>parseCartItems(r['Cart Items']).map(it=>it.unit).filter(Boolean)));
+  // Smart cascading filter population - updates all filters based on current selections
+  function populateFilters(rows, refData = [], preserveFilters = false){
+    // Apply current filters to get filtered dataset
+    const filteredRows = preserveFilters ? applyFilters(rows) : rows;
+    
+    // For reference data, apply relevant filters
+    let filteredRefData = refData;
+    if(preserveFilters && refData.length > 0){
+      filteredRefData = refData.filter(r => {
+        if(FILTERS.state && trim(r.State) !== FILTERS.state) return false;
+        if(FILTERS.zone && trim(r.ZONE) !== FILTERS.zone) return false;
+        if(FILTERS.pt && trim(r.Name) !== FILTERS.pt) return false;
+        if(FILTERS.hq && trim(r.HQ) !== FILTERS.hq) return false;
+        return true;
+      });
+    }
+    
+    // Extract unique values from filtered data
+    const states = uniqSorted(filteredRows.map(r=>trim(r.State)));
+    const dists  = uniqSorted(filteredRows.map(r=>trim(r.District)));
+    const rets   = uniqSorted(filteredRows.map(r=>trim(r['Retailer Name'])));
+    const products = uniqSorted(filteredRows.flatMap(r=>[...parseProducts(r['Cart Items']).keys()]));
+    const unitsAll = uniqSorted(filteredRows.flatMap(r=>parseCartItems(r['Cart Items']).map(it=>it.unit).filter(Boolean)));
     const statuses = ['','Yes','No','Pending'];
-    const sources = uniqSorted(rows.map(r=>trim(r.Source||'')).filter(Boolean));
-    const pts = uniqSorted(rows.map(r=>trim(r.PT||'')).filter(Boolean));
-    const zones = uniqSorted(rows.map(r=>trim(r.Zone||'')).filter(Boolean));
+    const sources = uniqSorted(filteredRows.map(r=>trim(r.Source||'')).filter(Boolean));
+    
+    // Combine PT names from both filtered datasets
+    const ptsFromData = filteredRows.map(r=>trim(r.PT||'')).filter(Boolean);
+    const ptsFromRef = filteredRefData.map(r=>trim(r.Name||'')).filter(Boolean);
+    const pts = uniqSorted([...ptsFromData, ...ptsFromRef]);
+    
+    const zones = uniqSorted(filteredRows.map(r=>trim(r.Zone||'')).filter(Boolean));
+    
+    // HQ filter is unique to reference.csv
+    const hqs = uniqSorted(filteredRefData.map(r=>trim(r.HQ||'')).filter(Boolean));
 
-    function fill(sel, items){ 
+    function fill(sel, items, currentValue){ 
+      const prevValue = currentValue !== undefined ? currentValue : sel.value;
       sel.innerHTML = ''; 
       const opt0 = document.createElement('option'); 
-      opt0.value=''; opt0.textContent='All'; sel.appendChild(opt0); 
-      for(const v of items){ const o=document.createElement('option'); o.value=v; o.textContent=v; sel.appendChild(o); }
+      opt0.value=''; 
+      // Show count of available options
+      opt0.textContent = items.length > 0 ? `All (${items.length})` : 'All'; 
+      sel.appendChild(opt0); 
+      
+      let valueStillExists = false;
+      for(const v of items){ 
+        const o=document.createElement('option'); 
+        o.value=v; 
+        o.textContent=v; 
+        sel.appendChild(o);
+        if(v === prevValue) valueStillExists = true;
+      }
+      
+      // Restore previous value if it still exists in filtered options
+      if(preserveFilters && valueStillExists){
+        sel.value = prevValue;
+      } else if(preserveFilters && !valueStillExists && prevValue){
+        // Value no longer valid, clear it from FILTERS
+        return null; // Indicates filter should be cleared
+      }
+      
+      return valueStillExists ? prevValue : '';
     }
 
-    fill(selState, states); 
-    fill(selDistrict, dists); 
-    fill(selRetailer, rets); 
-    fill(selProduct, products);
-    fill(selUnit, unitsAll);
-    fill(selStatus, statuses);
-    fill(selSource, sources);
-    fill(selPT, pts);
-    fill(selZone, zones);
+    // Fill all dropdowns and track if any filters need to be cleared
+    const stateValid = fill(selState, states, FILTERS.state);
+    const distValid = fill(selDistrict, dists, FILTERS.district);
+    const retValid = fill(selRetailer, rets, FILTERS.retailer);
+    const prodValid = fill(selProduct, products, FILTERS.product);
+    const unitValid = fill(selUnit, unitsAll, FILTERS.unit);
+    fill(selStatus, statuses, FILTERS.status);
+    const sourceValid = fill(selSource, sources, FILTERS.source);
+    const ptValid = fill(selPT, pts, FILTERS.pt);
+    const zoneValid = fill(selZone, zones, FILTERS.zone);
+    const hqValid = fill(selHQ, hqs, FILTERS.hq);
+    
+    // Clear filters that are no longer valid
+    if(preserveFilters){
+      if(stateValid === null) FILTERS.state = '';
+      if(distValid === null) FILTERS.district = '';
+      if(retValid === null) FILTERS.retailer = '';
+      if(prodValid === null) FILTERS.product = '';
+      if(unitValid === null) FILTERS.unit = '';
+      if(sourceValid === null) FILTERS.source = '';
+      if(ptValid === null) FILTERS.pt = '';
+      if(zoneValid === null) FILTERS.zone = '';
+      if(hqValid === null) FILTERS.hq = '';
+    }
   }
 
   function attachFilterHandlers(){
-    selDateFrom.onchange = ()=>{ FILTERS.dateFrom = selDateFrom.value; render(); };
-    selDateTo.onchange   = ()=>{ FILTERS.dateTo   = selDateTo.value; render(); };
+    // Date filters
+    selDateFrom.onchange = ()=>{ 
+      FILTERS.dateFrom = selDateFrom.value; 
+      populateFilters(RAW, REFERENCE_DATA, true);
+      render(); 
+    };
+    selDateTo.onchange = ()=>{ 
+      FILTERS.dateTo = selDateTo.value; 
+      populateFilters(RAW, REFERENCE_DATA, true);
+      render(); 
+    };
 
+    // All other filters trigger cascading updates
     selState.onchange = ()=>{
       FILTERS.state = selState.value;
-
-      const dists = uniqSorted(RAW.filter(r=>!FILTERS.state || trim(r.State)===FILTERS.state).map(r=>trim(r.District)));
-      selDistrict.innerHTML = ''; 
-      const opt0=document.createElement('option'); opt0.value=''; opt0.textContent='All'; selDistrict.appendChild(opt0);
-      for(const v of dists){ const o=document.createElement('option'); o.value=v; o.textContent=v; selDistrict.appendChild(o); }
-      FILTERS.district = ''; selDistrict.value='';
-
-      const rets = uniqSorted(RAW.filter(r=>!FILTERS.state || trim(r.State)===FILTERS.state).map(r=>trim(r['Retailer Name'])));
-      selRetailer.innerHTML = ''; 
-      const optR=document.createElement('option'); optR.value=''; optR.textContent='All'; selRetailer.appendChild(optR);
-      for(const v of rets){ const o=document.createElement('option'); o.value=v; o.textContent=v; selRetailer.appendChild(o); }
-      FILTERS.retailer = ''; selRetailer.value='';
-
+      populateFilters(RAW, REFERENCE_DATA, true);
       render();
     };
 
     selDistrict.onchange = ()=>{
       FILTERS.district = selDistrict.value;
-
-      const rets = uniqSorted(RAW.filter(r=>{
-        if(FILTERS.state && trim(r.State)!==FILTERS.state) return false;
-        if(FILTERS.district && trim(r.District)!==FILTERS.district) return false;
-        return true;
-      }).map(r=>trim(r['Retailer Name'])));
-      selRetailer.innerHTML = ''; 
-      const optR=document.createElement('option'); optR.value=''; optR.textContent='All'; selRetailer.appendChild(optR);
-      for(const v of rets){ const o=document.createElement('option'); o.value=v; o.textContent=v; selRetailer.appendChild(o); }
-      FILTERS.retailer = ''; selRetailer.value='';
-
+      populateFilters(RAW, REFERENCE_DATA, true);
       render();
     };
 
-    selRetailer.onchange = ()=>{ FILTERS.retailer = selRetailer.value; render(); };
+    selRetailer.onchange = ()=>{ 
+      FILTERS.retailer = selRetailer.value; 
+      populateFilters(RAW, REFERENCE_DATA, true);
+      render(); 
+    };
 
     selProduct.onchange = ()=>{
       FILTERS.product = selProduct.value;
-
-      const unitsSet = new Set();
-      RAW.forEach(r=>{
-        parseCartItems(r['Cart Items']).forEach(it=>{
-          if(!FILTERS.product || it.name===FILTERS.product){
-            if(it.unit) unitsSet.add(it.unit);
-          }
-        });
-      });
-      const units = [...unitsSet].sort((a,b)=>a.localeCompare(b));
-      selUnit.innerHTML = '';
-      const optU=document.createElement('option'); optU.value=''; optU.textContent='All'; selUnit.appendChild(optU);
-      for(const v of units){ const o=document.createElement('option'); o.value=v; o.textContent=v; selUnit.appendChild(o); }
-      FILTERS.unit = ''; selUnit.value='';
-
+      populateFilters(RAW, REFERENCE_DATA, true);
       render();
     };
 
-    selUnit.onchange = ()=>{ FILTERS.unit = selUnit.value; render(); };
-    selStatus.onchange = ()=>{ FILTERS.status = selStatus.value; render(); };
-    selSource.onchange = ()=>{ FILTERS.source = selSource.value; render(); };
-    selPT.onchange = ()=>{ FILTERS.pt = selPT.value; render(); };
-    selZone.onchange = ()=>{ FILTERS.zone = selZone.value; render(); };
+    selUnit.onchange = ()=>{ 
+      FILTERS.unit = selUnit.value; 
+      populateFilters(RAW, REFERENCE_DATA, true);
+      render(); 
+    };
+    
+    selStatus.onchange = ()=>{ 
+      FILTERS.status = selStatus.value; 
+      populateFilters(RAW, REFERENCE_DATA, true);
+      render(); 
+    };
+    
+    selSource.onchange = ()=>{ 
+      FILTERS.source = selSource.value; 
+      populateFilters(RAW, REFERENCE_DATA, true);
+      render(); 
+    };
+    
+    selPT.onchange = ()=>{ 
+      FILTERS.pt = selPT.value; 
+      populateFilters(RAW, REFERENCE_DATA, true);
+      render(); 
+    };
+    
+    selZone.onchange = ()=>{ 
+      FILTERS.zone = selZone.value; 
+      populateFilters(RAW, REFERENCE_DATA, true);
+      render(); 
+    };
+    
+    selHQ.onchange = ()=>{ 
+      FILTERS.hq = selHQ.value; 
+      populateFilters(RAW, REFERENCE_DATA, true);
+      render(); 
+    };
   }
 
   function render(){
@@ -1978,6 +2077,20 @@
     };
   }
 
+  // Load both CSV files in parallel
+  let csvLoaded = false;
+  let referenceLoaded = false;
+
+  function checkBothLoaded(){
+    if(csvLoaded && referenceLoaded){
+      populateFilters(RAW, REFERENCE_DATA);
+      attachFilterHandlers();
+      render();
+      console.log('✅ Both CSV files loaded successfully!');
+    }
+  }
+
+  // Load main data.csv
   Papa.parse(CSV_URL, {
     download: true,
     header: true,
@@ -1989,35 +2102,82 @@
       // Debug: Check if new columns exist
       if(RAW.length > 0){
         const firstRow = RAW[0];
-        console.log('✅ CSV Columns Found:', Object.keys(firstRow));
-        console.log('📊 New Columns Check:', {
+        console.log('✅ data.csv Columns Found:', Object.keys(firstRow));
+        console.log('📊 Data Check:', {
+          totalRows: RAW.length,
           hasSource: 'Source' in firstRow,
           hasPT: 'PT' in firstRow,
-          hasZone: 'Zone' in firstRow,
-          sampleSource: firstRow.Source || '(empty)',
-          samplePT: firstRow.PT || '(empty)',
-          sampleZone: firstRow.Zone || '(empty)'
-        });
-        
-        // Count rows with data
-        const withSource = RAW.filter(r => r.Source && trim(r.Source)).length;
-        const withPT = RAW.filter(r => r.PT && trim(r.PT)).length;
-        const withZone = RAW.filter(r => r.Zone && trim(r.Zone)).length;
-        console.log('📈 Data availability:', {
-          totalRows: RAW.length,
-          rowsWithSource: withSource + ' (' + ((withSource/RAW.length)*100).toFixed(1) + '%)',
-          rowsWithPT: withPT + ' (' + ((withPT/RAW.length)*100).toFixed(1) + '%)',
-          rowsWithZone: withZone + ' (' + ((withZone/RAW.length)*100).toFixed(1) + '%)'
+          hasZone: 'Zone' in firstRow
         });
       }
       
-      populateFilters(RAW);
-      attachFilterHandlers();
-      render();
+      csvLoaded = true;
+      checkBothLoaded();
     },
     error: (err)=>{
       console.error('CSV load error', err);
       alert('Failed to load data.csv. Ensure the file exists at '+CSV_URL);
+    }
+  });
+
+  // Load reference.csv for PT/Missed Calls data
+  Papa.parse(REFERENCE_CSV_URL, {
+    download: true,
+    header: true,
+    skipEmptyLines: true,
+    dynamicTyping: false,
+    complete: (res)=>{
+      // Separate Grand Total row from actual PT data
+      const allData = res.data;
+      REFERENCE_DATA = allData.filter(r => {
+        const name = trim(r.Name || '');
+        // Exclude Grand Total row from PT data
+        return name && !name.toLowerCase().includes('grand total');
+      });
+      
+      // Find and store Grand Total row separately
+      const grandTotalRow = allData.find(r => {
+        const name = trim(r.Name || '');
+        return name && name.toLowerCase().includes('grand total');
+      });
+      
+      if(grandTotalRow){
+        REFERENCE_GRAND_TOTAL = {
+          total: Number(grandTotalRow['Total Missed Calls']) || 0,
+          unique: Number(grandTotalRow['Total Unique Missed Calls']) || 0
+        };
+      }
+      
+      if(REFERENCE_DATA.length > 0){
+        console.log('✅ reference.csv loaded:', {
+          totalPTs: REFERENCE_DATA.length,
+          columns: Object.keys(REFERENCE_DATA[0]),
+          sample: REFERENCE_DATA[0],
+          hasGrandTotal: !!REFERENCE_GRAND_TOTAL
+        });
+        
+        // Calculate totals from PT data (excluding Grand Total)
+        let totalMissed = 0, totalUnique = 0;
+        for(const r of REFERENCE_DATA){
+          totalMissed += Number(r['Total Missed Calls']) || 0;
+          totalUnique += Number(r['Total Unique Missed Calls']) || 0;
+        }
+        
+        console.log('📞 Missed Calls Data:', {
+          ptCount: REFERENCE_DATA.length,
+          calculatedTotal: totalMissed.toLocaleString(),
+          calculatedUnique: totalUnique.toLocaleString(),
+          grandTotalRow: REFERENCE_GRAND_TOTAL ? `${REFERENCE_GRAND_TOTAL.total.toLocaleString()} total, ${REFERENCE_GRAND_TOTAL.unique.toLocaleString()} unique` : 'Not found',
+          states: [...new Set(REFERENCE_DATA.map(r=>r.State))].length
+        });
+      }
+      
+      referenceLoaded = true;
+      checkBothLoaded();
+    },
+    error: (err)=>{
+      console.error('Reference CSV load error', err);
+      alert('Failed to load reference.csv. Ensure the file exists at '+REFERENCE_CSV_URL);
     }
   });
 </script>
@@ -2078,12 +2238,3 @@
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
