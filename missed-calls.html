@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Missed Call Data Download — Coromandel CPC</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+  <style>
+    :root{
+      --bg:#f8fafc;
+      --panel:#ffffff;
+      --card:#ffffff;
+      --card-hover:#f8f9ff;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --acc1:#6366f1;
+      --acc2:#f59e0b;
+      --acc3:#10b981;
+      --acc4:#ec4899;
+      --acc5:#8b5cf6;
+      --ring:#e5e7eb;
+      --border:#d1d5db;
+      --shadow:rgba(99,102,241,.08);
+      --shadow-lg:rgba(99,102,241,.15);
+      --danger:#ef4444;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;overflow-x:hidden}
+    body{
+      font-family:'Outfit',sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+    }
+    
+    /* Header */
+    header{
+      background:rgba(255,255,255,.98);
+      border-bottom:2px solid var(--ring);
+      box-shadow:0 4px 16px var(--shadow);
+      position:sticky;
+      top:0;
+      z-index:100;
+      backdrop-filter:blur(20px);
+    }
+    .bar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:20px 40px;
+      flex-wrap:wrap;
+      gap:20px;
+    }
+    .logo{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .dot{
+      width:16px;
+      height:16px;
+      border-radius:50%;
+      background:linear-gradient(135deg,var(--acc1),var(--acc3));
+      box-shadow:0 4px 12px rgba(99,102,241,0.4);
+      animation:pulse 2s infinite;
+    }
+    @keyframes pulse{
+      0%, 100%{transform:scale(1)}
+      50%{transform:scale(1.1)}
+    }
+    .title{
+      font-size:1.5rem;
+      font-weight:900;
+      font-family:'Space Grotesk',sans-serif;
+      background:linear-gradient(135deg,var(--acc1),var(--acc3));
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+    .nav-links{
+      display:flex;
+      gap:12px;
+    }
+    .nav-link{
+      padding:10px 20px;
+      border-radius:10px;
+      text-decoration:none;
+      color:var(--text);
+      font-weight:600;
+      font-size:14px;
+      transition:all .2s;
+      background:transparent;
+      border:2px solid transparent;
+    }
+    .nav-link:hover{
+      background:rgba(99,102,241,.1);
+      border-color:var(--acc1);
+      transform:translateY(-2px);
+    }
+    .nav-link.active{
+      background:linear-gradient(135deg,var(--acc1),var(--acc5));
+      color:white;
+      box-shadow:0 4px 16px rgba(99,102,241,0.3);
+    }
+    
+    /* Main */
+    .main{
+      max-width:1600px;
+      margin:0 auto;
+      padding:40px;
+    }
+    
+    /* KPIs */
+    .kpis{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+      gap:24px;
+      margin-bottom:40px;
+    }
+    .kpi{
+      background:linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(249,250,251,0.95) 100%);
+      backdrop-filter:blur(20px);
+      border-radius:20px;
+      padding:28px 32px;
+      box-shadow:0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
+      border:2px solid rgba(255,255,255,0.8);
+      position:relative;
+      overflow:hidden;
+      transition:all .3s cubic-bezier(0.4,0,0.2,1);
+    }
+    .kpi::before{
+      content:'';
+      position:absolute;
+      top:0;left:0;right:0;
+      height:4px;
+      background:linear-gradient(90deg, var(--acc1), var(--acc3));
+      opacity:0;
+      transition:opacity .3s ease;
+    }
+    .kpi:hover{
+      transform:translateY(-4px);
+      box-shadow:0 12px 48px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.06);
+      border-color:var(--acc1);
+    }
+    .kpi:hover::before{
+      opacity:1;
+    }
+    .kpi-label{
+      font-size:13px;
+      color:var(--muted);
+      font-weight:700;
+      margin-bottom:12px;
+      text-transform:uppercase;
+      letter-spacing:0.5px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .kpi-label::before{
+      content:'●';
+      color:var(--acc1);
+      font-size:16px;
+    }
+    .kpi-value{
+      font-size:2.5rem;
+      font-weight:900;
+      background:linear-gradient(135deg,var(--acc1),var(--acc3));
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      font-family:'Space Grotesk',sans-serif;
+    }
+    
+    /* Filters */
+    .filters-section{
+      background:linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(249,250,251,0.95) 100%);
+      backdrop-filter:blur(20px);
+      border-radius:24px;
+      padding:36px 40px;
+      box-shadow:0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.9);
+      border:2px solid rgba(255,255,255,0.8);
+      margin-bottom:40px;
+      position:relative;
+      overflow:hidden;
+      transition:all .4s cubic-bezier(0.4,0,0.2,1);
+    }
+    .filters-section::before{
+      content:'';
+      position:absolute;
+      top:0;left:0;right:0;
+      height:3px;
+      background:linear-gradient(90deg, #6366f1, #ec4899, #10b981, #f59e0b, #6366f1);
+      background-size:200% 100%;
+      animation:shimmer 3s linear infinite;
+    }
+    @keyframes shimmer{
+      0%{background-position:200% 0}
+      100%{background-position:-200% 0}
+    }
+    .filters-section:hover{
+      box-shadow:0 12px 48px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,1);
+      transform:translateY(-2px);
+    }
+    .filters-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:32px;
+      flex-wrap:wrap;
+      gap:16px;
+    }
+    .filters-title{
+      font-size:1.5rem;
+      font-weight:800;
+      font-family:'Space Grotesk',sans-serif;
+      background:linear-gradient(135deg,var(--acc1),var(--acc3));
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+    .filters-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+      gap:24px;
+      margin-bottom:32px;
+    }
+    .filter-group{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      position:relative;
+    }
+    .filter-group label{
+      font-size:12px;
+      color:#64748b;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .filter-count{
+      font-size:10px;
+      background:linear-gradient(135deg, var(--acc1), var(--acc3));
+      color:white;
+      padding:2px 8px;
+      border-radius:10px;
+      font-weight:700;
+      margin-left:8px;
+    }
+    .filter-group input,
+    .filter-group select{
+      padding:14px 18px;
+      border:2px solid #e2e8f0;
+      border-radius:12px;
+      font-family:'Outfit',sans-serif;
+      font-size:14px;
+      font-weight:500;
+      background:white;
+      transition:all .3s cubic-bezier(0.4,0,0.2,1);
+      box-shadow:0 2px 8px rgba(0,0,0,0.04);
+    }
+    .filter-group input:hover,
+    .filter-group select:hover{
+      border-color:#cbd5e1;
+      box-shadow:0 4px 12px rgba(0,0,0,0.08);
+    }
+    .filter-group input:focus,
+    .filter-group select:focus{
+      outline:none;
+      border-color:var(--acc1);
+      box-shadow:0 0 0 4px rgba(99,102,241,0.12), 0 4px 16px rgba(99,102,241,0.2);
+      transform:translateY(-2px);
+    }
+    .filter-actions{
+      display:flex;
+      gap:16px;
+      justify-content:flex-end;
+      flex-wrap:wrap;
+    }
+    .btn{
+      padding:14px 32px;
+      border:none;
+      border-radius:12px;
+      font-family:'Outfit',sans-serif;
+      font-size:14px;
+      font-weight:700;
+      cursor:pointer;
+      transition:all .3s cubic-bezier(0.4,0,0.2,1);
+      box-shadow:0 4px 12px rgba(0,0,0,0.1);
+      position:relative;
+      overflow:hidden;
+    }
+    .btn::before{
+      content:'';
+      position:absolute;
+      top:50%;left:50%;
+      width:0;height:0;
+      border-radius:50%;
+      background:rgba(255,255,255,0.3);
+      transform:translate(-50%,-50%);
+      transition:width .5s, height .5s;
+    }
+    .btn:hover::before{
+      width:300px;
+      height:300px;
+    }
+    .btn:hover{
+      transform:translateY(-3px);
+      box-shadow:0 8px 24px rgba(0,0,0,0.2);
+    }
+    .btn:active{
+      transform:translateY(-1px);
+    }
+    .btn-primary{
+      background:linear-gradient(135deg, var(--acc1), var(--acc5));
+      color:white;
+    }
+    .btn-secondary{
+      background:linear-gradient(135deg, #64748b, #475569);
+      color:white;
+    }
+    .btn-success{
+      background:linear-gradient(135deg, var(--acc3), #059669);
+      color:white;
+    }
+    
+    /* Search */
+    .search-section{
+      background:linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(249,250,251,0.95) 100%);
+      backdrop-filter:blur(20px);
+      border-radius:20px;
+      padding:28px 32px;
+      box-shadow:0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
+      border:2px solid rgba(255,255,255,0.8);
+      margin-bottom:40px;
+      transition:all .3s cubic-bezier(0.4,0,0.2,1);
+    }
+    .search-section:hover{
+      transform:translateY(-2px);
+      box-shadow:0 12px 48px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.06);
+      border-color:var(--acc1);
+    }
+    .search-box{
+      display:flex;
+      gap:16px;
+      align-items:center;
+    }
+    .search-input{
+      flex:1;
+      padding:14px 20px;
+      border:2px solid #e2e8f0;
+      border-radius:12px;
+      font-family:'Outfit',sans-serif;
+      font-size:14px;
+      font-weight:500;
+      background:white;
+      box-shadow:0 2px 8px rgba(0,0,0,0.04);
+      transition:all .3s cubic-bezier(0.4,0,0.2,1);
+    }
+    .search-input:focus{
+      outline:none;
+      border-color:var(--acc1);
+      box-shadow:0 0 0 4px rgba(99,102,241,0.12), 0 4px 16px rgba(99,102,241,0.2);
+      transform:translateY(-2px);
+    }
+    
+    /* Charts */
+    .charts-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(520px,1fr));
+      gap:32px;
+      margin-bottom:40px;
+    }
+    .chart-card{
+      background:linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(249,250,251,0.95) 100%);
+      backdrop-filter:blur(20px);
+      border-radius:20px;
+      padding:32px;
+      box-shadow:0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
+      border:2px solid rgba(255,255,255,0.8);
+      position:relative;
+      overflow:hidden;
+      transition:all .3s cubic-bezier(0.4,0,0.2,1);
+    }
+    .chart-card::before{
+      content:'';
+      position:absolute;
+      top:0;left:0;right:0;
+      height:3px;
+      background:linear-gradient(90deg, var(--acc1), var(--acc3));
+      opacity:0;
+      transition:opacity .3s ease;
+    }
+    .chart-card:hover{
+      transform:translateY(-4px);
+      box-shadow:0 12px 48px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.06);
+      border-color:var(--acc1);
+    }
+    .chart-card:hover::before{
+      opacity:1;
+    }
+    .chart-title{
+      font-size:1.125rem;
+      font-weight:800;
+      font-family:'Space Grotesk',sans-serif;
+      background:linear-gradient(135deg,var(--acc1),var(--acc3));
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      margin-bottom:24px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .chart-title::before{
+      content:'📊';
+      font-size:1.25rem;
+    }
+    .chart-container{
+      position:relative;
+      height:300px;
+    }
+    
+    /* Table */
+    .table-section{
+      background:linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(249,250,251,0.95) 100%);
+      backdrop-filter:blur(20px);
+      border-radius:20px;
+      padding:32px;
+      box-shadow:0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
+      border:2px solid rgba(255,255,255,0.8);
+      margin-bottom:40px;
+      overflow-x:auto;
+      transition:all .3s cubic-bezier(0.4,0,0.2,1);
+    }
+    .table-section:hover{
+      box-shadow:0 12px 48px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.06);
+    }
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+    }
+    th,td{
+      padding:16px 20px;
+      text-align:left;
+      border-bottom:1px solid #e5e7eb;
+    }
+    th{
+      font-weight:800;
+      font-size:12px;
+      color:#475569;
+      background:linear-gradient(135deg, #f8fafc, #f1f5f9);
+      text-transform:uppercase;
+      letter-spacing:0.5px;
+      position:sticky;
+      top:0;
+      z-index:10;
+      border-bottom:2px solid var(--acc1);
+    }
+    th:first-child{
+      border-top-left-radius:12px;
+    }
+    th:last-child{
+      border-top-right-radius:12px;
+    }
+    td{
+      color:var(--text);
+      font-weight:500;
+      font-size:14px;
+    }
+    tr:hover td{
+      background:var(--card-hover);
+    }
+    tr:last-child td:first-child{
+      border-bottom-left-radius:12px;
+    }
+    tr:last-child td:last-child{
+      border-bottom-right-radius:12px;
+    }
+    
+    /* Pagination */
+    .pagination{
+      display:flex;
+      justify-content:center;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:32px;
+    }
+    .page-btn{
+      padding:12px 20px;
+      border:2px solid #e2e8f0;
+      background:white;
+      border-radius:10px;
+      cursor:pointer;
+      font-family:'Outfit',sans-serif;
+      font-weight:700;
+      font-size:14px;
+      transition:all .3s cubic-bezier(0.4,0,0.2,1);
+      box-shadow:0 2px 8px rgba(0,0,0,0.04);
+      min-width:48px;
+      text-align:center;
+    }
+    .page-btn:hover:not(:disabled){
+      background:linear-gradient(135deg, var(--acc1), var(--acc5));
+      color:white;
+      border-color:var(--acc1);
+      transform:translateY(-2px);
+      box-shadow:0 4px 16px rgba(99,102,241,0.3);
+    }
+    .page-btn.active{
+      background:linear-gradient(135deg, var(--acc1), var(--acc5));
+      color:white;
+      border-color:var(--acc1);
+      box-shadow:0 4px 16px rgba(99,102,241,0.3);
+    }
+    .page-btn:disabled{
+      opacity:0.4;
+      cursor:not-allowed;
+    }
+    
+    @media (max-width: 1024px){
+      .charts-grid{grid-template-columns:1fr}
+    }
+    @media (max-width: 768px){
+      .bar{padding:16px 20px}
+      .main{padding:20px 16px}
+      .kpis{grid-template-columns:repeat(2,1fr);gap:16px}
+      .filters-section{padding:24px 20px}
+      .filters-grid{grid-template-columns:1fr}
+      .charts-grid{grid-template-columns:1fr}
+      .table-section{padding:20px 16px}
+      .page-btn{padding:10px 16px;font-size:13px}
+    }
+
+  </style>
+</head>
+<body>
+  <header>
+    <div class="bar">
+      <div class="logo">
+        <span class="dot"></span>
+        <h1 class="title">Missed Call Data</h1>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link">📊 Dashboard</a>
+        <a href="missed-calls.html" class="nav-link active">📞 Missed Call Data</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <!-- KPIs -->
+    <div class="kpis">
+      <div class="kpi">
+        <div class="kpi-label">Total Growers</div>
+        <div class="kpi-value" id="totalGrowers">0</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Unique Growers</div>
+        <div class="kpi-value" id="uniqueGrowers">0</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Active PTs</div>
+        <div class="kpi-value" id="activePTs">0 / 253</div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-section">
+      <div class="filters-header">
+        <h2 class="filters-title">📋 Filters</h2>
+        <button class="btn btn-success" id="downloadBtn">📥 Download Excel</button>
+      </div>
+      
+      <div class="filters-grid">
+        <div class="filter-group">
+          <label>
+            <span>📱 Digitrack No</span>
+            <span class="filter-count" id="digitrackCount">0</span>
+          </label>
+          <select id="filterDigitrack">
+            <option value="">All Digitrack Numbers</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>
+            <span>🗺️ State</span>
+            <span class="filter-count" id="stateCount">0</span>
+          </label>
+          <select id="filterState">
+            <option value="">All States</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>
+            <span>🏢 HQ</span>
+            <span class="filter-count" id="hqCount">0</span>
+          </label>
+          <select id="filterHQ">
+            <option value="">All HQs</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>
+            <span>📍 District</span>
+            <span class="filter-count" id="districtCount">0</span>
+          </label>
+          <select id="filterDistrict">
+            <option value="">All Districts</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>
+            <span>🌐 Zone</span>
+            <span class="filter-count" id="zoneCount">0</span>
+          </label>
+          <select id="filterZone">
+            <option value="">All Zones</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>
+            <span>👤 Name (PT)</span>
+            <span class="filter-count" id="nameCount">0</span>
+          </label>
+          <select id="filterName">
+            <option value="">All PTs</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>📅 Date Range</label>
+          <input type="text" id="filterDateRange" placeholder="Click to select date range" readonly style="cursor:pointer;">
+        </div>
+      </div>
+      
+      <div class="filter-actions">
+        <button class="btn btn-secondary" id="resetFiltersBtn">🔄 Reset All Filters</button>
+      </div>
+    </div>
+
+    <!-- Universal Search -->
+    <div class="search-section">
+      <div class="search-box">
+        <input type="text" class="search-input" id="universalSearch" placeholder="🔍 Universal Search - Search across all columns (auto-search as you type)...">
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <h3 class="chart-title">📍 State-wise Missed Calls</h3>
+        <div class="chart-container">
+          <canvas id="stateChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3 class="chart-title">👤 PT-wise Missed Calls</h3>
+        <div class="chart-container">
+          <canvas id="ptChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="table-section">
+      <div class="table-header">
+        <h2 class="table-title">📞 Missed Call Records</h2>
+        <span class="table-info" id="tableInfo">Showing 0 of 0 records</span>
+      </div>
+      
+      <div class="table-container">
+        <table id="dataTable">
+          <thead>
+            <tr>
+              <th>Digitrack No</th>
+              <th>Grower</th>
+              <th>Date</th>
+              <th>Action</th>
+              <th>Date Processed</th>
+              <th>Name (PT)</th>
+              <th>HQ</th>
+              <th>Division/PT District</th>
+              <th>Zone</th>
+              <th>State</th>
+              <th>Mobile</th>
+              <th>Language</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="pagination" id="pagination">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // State
+    let MC_DATA = [];
+    let FILTERED_DATA = [];
+    let CURRENT_PAGE = 1;
+    const ROWS_PER_PAGE = 50;
+
+    // Load CSV
+    Papa.parse('./mc_data.csv', {
+      download: true,
+      header: true,
+      skipEmptyLines: true,
+      complete: (result) => {
+        MC_DATA = result.data;
+        FILTERED_DATA = [...MC_DATA];
+        console.log('✅ Loaded', MC_DATA.length, 'records');
+        populateFilters();
+        render();
+      },
+      error: (err) => {
+        console.error('❌ Error loading CSV:', err);
+        alert('Failed to load data. Please check if mc_data.csv exists.');
+      }
+    });
+
+    // Populate filter dropdowns with cascading logic
+    function populateFilters(preserveFilters = false){
+      // Get current filter values
+      const currentFilters = {
+        digitrack: document.getElementById('filterDigitrack').value,
+        state: document.getElementById('filterState').value,
+        hq: document.getElementById('filterHQ').value,
+        district: document.getElementById('filterDistrict').value,
+        zone: document.getElementById('filterZone').value
+      };
+
+      // Start with all data or filtered data
+      let baseData = [...MC_DATA];
+      
+      // Apply date range filter to base data first
+      if(window.dateRangePicker && window.dateRangePicker.selectedDates.length === 2){
+        const dates = window.dateRangePicker.selectedDates;
+        const dateFrom = formatDateYYYYMMDD(dates[0]);
+        const dateTo = formatDateYYYYMMDD(dates[1]);
+        
+        console.log('📅 Date Filter in Cascading:', { dateFrom, dateTo, totalRows: baseData.length });
+        
+        baseData = baseData.filter(row => {
+          // Try "Date Processed" first (format: "10-Sep-2025")
+          let rowDate = parseDateProcessed(row['Date Processed']);
+          
+          // Fallback to "Date" column (format: "10-09-2025 13:25")
+          if(!rowDate) {
+            rowDate = parseDate(row['Date']);
+          }
+          
+          if(!rowDate) return false;
+          
+          // Compare YYYY-MM-DD strings
+          const isInRange = rowDate >= dateFrom && rowDate <= dateTo;
+          return isInRange;
+        });
+        
+        console.log('📅 After Date Filter:', { rowsRemaining: baseData.length });
+      }
+
+      // For each filter, get available options based on other selected filters
+      // Digitrack options based on other filters (except digitrack itself)
+      let digitrackData = baseData;
+      if(currentFilters.state) digitrackData = digitrackData.filter(r => r.State === currentFilters.state);
+      if(currentFilters.hq) digitrackData = digitrackData.filter(r => r.HQ === currentFilters.hq);
+      if(currentFilters.district) digitrackData = digitrackData.filter(r => r['Division/PT District'] === currentFilters.district);
+      if(currentFilters.zone) digitrackData = digitrackData.filter(r => r.ZONE === currentFilters.zone);
+      const digitracks = [...new Set(digitrackData.map(r => r['Digitrack No']).filter(Boolean))].sort();
+
+      // State options
+      let stateData = baseData;
+      if(currentFilters.digitrack) stateData = stateData.filter(r => r['Digitrack No'] === currentFilters.digitrack);
+      if(currentFilters.hq) stateData = stateData.filter(r => r.HQ === currentFilters.hq);
+      if(currentFilters.district) stateData = stateData.filter(r => r['Division/PT District'] === currentFilters.district);
+      if(currentFilters.zone) stateData = stateData.filter(r => r.ZONE === currentFilters.zone);
+      const states = [...new Set(stateData.map(r => r.State).filter(Boolean))].sort();
+
+      // HQ options
+      let hqData = baseData;
+      if(currentFilters.digitrack) hqData = hqData.filter(r => r['Digitrack No'] === currentFilters.digitrack);
+      if(currentFilters.state) hqData = hqData.filter(r => r.State === currentFilters.state);
+      if(currentFilters.district) hqData = hqData.filter(r => r['Division/PT District'] === currentFilters.district);
+      if(currentFilters.zone) hqData = hqData.filter(r => r.ZONE === currentFilters.zone);
+      const hqs = [...new Set(hqData.map(r => r.HQ).filter(Boolean))].sort();
+
+      // District options
+      let districtData = baseData;
+      if(currentFilters.digitrack) districtData = districtData.filter(r => r['Digitrack No'] === currentFilters.digitrack);
+      if(currentFilters.state) districtData = districtData.filter(r => r.State === currentFilters.state);
+      if(currentFilters.hq) districtData = districtData.filter(r => r.HQ === currentFilters.hq);
+      if(currentFilters.zone) districtData = districtData.filter(r => r.ZONE === currentFilters.zone);
+      const districts = [...new Set(districtData.map(r => r['Division/PT District']).filter(Boolean))].sort();
+
+      // Zone options
+      let zoneData = baseData;
+      if(currentFilters.digitrack) zoneData = zoneData.filter(r => r['Digitrack No'] === currentFilters.digitrack);
+      if(currentFilters.state) zoneData = zoneData.filter(r => r.State === currentFilters.state);
+      if(currentFilters.hq) zoneData = zoneData.filter(r => r.HQ === currentFilters.hq);
+      if(currentFilters.district) zoneData = zoneData.filter(r => r['Division/PT District'] === currentFilters.district);
+      if(currentFilters.name) zoneData = zoneData.filter(r => r.Name === currentFilters.name);
+      const zones = [...new Set(zoneData.map(r => r.ZONE).filter(Boolean))].sort();
+
+      // Name (PT) options
+      let nameData = baseData;
+      if(currentFilters.digitrack) nameData = nameData.filter(r => r['Digitrack No'] === currentFilters.digitrack);
+      if(currentFilters.state) nameData = nameData.filter(r => r.State === currentFilters.state);
+      if(currentFilters.hq) nameData = nameData.filter(r => r.HQ === currentFilters.hq);
+      if(currentFilters.district) nameData = nameData.filter(r => r['Division/PT District'] === currentFilters.district);
+      if(currentFilters.zone) nameData = nameData.filter(r => r.ZONE === currentFilters.zone);
+      const names = [...new Set(nameData.map(r => r.Name).filter(Boolean))].sort();
+      
+      populateSelect('filterDigitrack', digitracks, preserveFilters ? currentFilters.digitrack : '');
+      populateSelect('filterState', states, preserveFilters ? currentFilters.state : '');
+      populateSelect('filterHQ', hqs, preserveFilters ? currentFilters.hq : '');
+      populateSelect('filterDistrict', districts, preserveFilters ? currentFilters.district : '');
+      populateSelect('filterZone', zones, preserveFilters ? currentFilters.zone : '');
+      populateSelect('filterName', names, preserveFilters ? currentFilters.name : '');
+    }
+
+    function populateSelect(id, options, valueToSet){
+      const select = document.getElementById(id);
+      
+      if(id === 'filterDigitrack'){
+        select.innerHTML = '<option value="">All Digitrack Numbers</option>';
+      } else if(id === 'filterState'){
+        select.innerHTML = '<option value="">All States</option>';
+      } else if(id === 'filterHQ'){
+        select.innerHTML = '<option value="">All HQs</option>';
+      } else if(id === 'filterDistrict'){
+        select.innerHTML = '<option value="">All Districts</option>';
+      } else if(id === 'filterZone'){
+        select.innerHTML = '<option value="">All Zones</option>';
+      } else if(id === 'filterName'){
+        select.innerHTML = '<option value="">All PTs</option>';
+      } else {
+        select.innerHTML = '<option value="">All</option>';
+      }
+      
+      options.forEach(opt => {
+        const option = document.createElement('option');
+        option.value = opt;
+        option.textContent = opt;
+        select.appendChild(option);
+      });
+      
+      // Update count badge
+      const countMap = {
+        'filterDigitrack': 'digitrackCount',
+        'filterState': 'stateCount',
+        'filterHQ': 'hqCount',
+        'filterDistrict': 'districtCount',
+        'filterZone': 'zoneCount',
+        'filterName': 'nameCount'
+      };
+      
+      if(countMap[id]){
+        const countEl = document.getElementById(countMap[id]);
+        if(countEl) countEl.textContent = options.length;
+      }
+      
+      // Set value if provided and exists in options
+      if(valueToSet && options.includes(valueToSet)){
+        select.value = valueToSet;
+      } else if(valueToSet && !options.includes(valueToSet)){
+        // Value was set but no longer valid, clear it
+        select.value = '';
+      }
+    }
+
+    // Apply filters (called automatically on any filter change)
+    function applyFilters(){
+      const digitrack = document.getElementById('filterDigitrack').value;
+      const state = document.getElementById('filterState').value;
+      const hq = document.getElementById('filterHQ').value;
+      const district = document.getElementById('filterDistrict').value;
+      const zone = document.getElementById('filterZone').value;
+      const name = document.getElementById('filterName').value;
+      
+      // Get date range from flatpickr
+      let dateFrom = null;
+      let dateTo = null;
+      if(window.dateRangePicker && window.dateRangePicker.selectedDates.length === 2){
+        const dates = window.dateRangePicker.selectedDates;
+        dateFrom = formatDateYYYYMMDD(dates[0]);
+        dateTo = formatDateYYYYMMDD(dates[1]);
+      }
+
+      console.log('🔍 Auto-applying filters:', { 
+        digitrack, state, hq, district, zone, name, dateFrom, dateTo,
+        totalData: MC_DATA.length 
+      });
+
+      // Debug: Check date values in data
+      if(dateFrom && dateTo && MC_DATA.length > 0){
+        const sampleDates = MC_DATA.slice(0, 5).map(r => r['Date']);
+        console.log('📅 Sample dates from data:', sampleDates);
+      }
+
+      FILTERED_DATA = MC_DATA.filter(row => {
+        // Digitrack filter
+        if(digitrack && row['Digitrack No'] !== digitrack) return false;
+        
+        // State filter
+        if(state && row.State !== state) return false;
+        
+        // HQ filter
+        if(hq && row.HQ !== hq) return false;
+        
+        // District filter
+        if(district && row['Division/PT District'] !== district) return false;
+        
+        // Zone filter
+        if(zone && row.ZONE !== zone) return false;
+        
+        // Name (PT) filter
+        if(name && row.Name !== name) return false;
+        
+        // Date range filter (using "Date Processed" column)
+        if(dateFrom && dateTo){
+          // Try "Date Processed" first (format: "10-Sep-2025")
+          let rowDate = parseDateProcessed(row['Date Processed']);
+          
+          // Fallback to "Date" column (format: "10-09-2025 13:25")
+          if(!rowDate) {
+            rowDate = parseDate(row['Date']);
+          }
+          
+          if(!rowDate) return false;
+          
+          // Compare YYYY-MM-DD strings directly
+          if(rowDate < dateFrom || rowDate > dateTo) return false;
+        }
+        
+        return true;
+      });
+
+      console.log('✅ Filtered results:', FILTERED_DATA.length, 'records');
+
+      CURRENT_PAGE = 1;
+      
+      // Update cascading filters
+      populateFilters(true);
+      
+      // Update display
+      render();
+    }
+
+    // Format date helper
+    function formatDateYYYYMMDD(date){
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    // Parse date from "Date Processed" column (format: "10-Sep-2025")
+    function parseDateProcessed(dateStr){
+      if(!dateStr) return null;
+      
+      // Format: "10-Sep-2025" or "10-Sep-25"
+      const parts = dateStr.trim().split('-');
+      if(parts.length !== 3) return null;
+      
+      const day = parts[0].padStart(2, '0');
+      const monthStr = parts[1];
+      const year = parts[2].length === 2 ? '20' + parts[2] : parts[2];
+      
+      const monthMap = {
+        'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04',
+        'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08',
+        'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'
+      };
+      
+      const month = monthMap[monthStr];
+      if(!month) return null;
+      
+      return `${year}-${month}-${day}`;
+    }
+
+    // Parse date from "Date" column (format: "10-09-2025 13:25")
+    function parseDate(dateStr){
+      if(!dateStr) return null;
+      
+      // Format: "10-09-2025 13:25" or "10-09-2025"
+      const datePart = dateStr.trim().split(' ')[0];
+      const parts = datePart.split('-');
+      
+      if(parts.length !== 3) return null;
+      
+      const day = parts[0].padStart(2, '0');
+      const month = parts[1].padStart(2, '0');
+      const year = parts[2];
+      
+      return `${year}-${month}-${day}`;
+    }
+
+    // Universal search (auto-search with debounce)
+    let searchTimeout;
+    function universalSearch(){
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        const query = document.getElementById('universalSearch').value.toLowerCase().trim();
+        
+        // First apply all other filters
+        const digitrack = document.getElementById('filterDigitrack').value;
+        const state = document.getElementById('filterState').value;
+        const hq = document.getElementById('filterHQ').value;
+        const district = document.getElementById('filterDistrict').value;
+        const zone = document.getElementById('filterZone').value;
+        const name = document.getElementById('filterName').value;
+        
+        let dateFrom = null;
+        let dateTo = null;
+        if(window.dateRangePicker && window.dateRangePicker.selectedDates.length === 2){
+          const dates = window.dateRangePicker.selectedDates;
+          dateFrom = formatDateYYYYMMDD(dates[0]);
+          dateTo = formatDateYYYYMMDD(dates[1]);
+        }
+
+        FILTERED_DATA = MC_DATA.filter(row => {
+          if(digitrack && row['Digitrack No'] !== digitrack) return false;
+          if(state && row.State !== state) return false;
+          if(hq && row.HQ !== hq) return false;
+          if(district && row['Division/PT District'] !== district) return false;
+          if(zone && row.ZONE !== zone) return false;
+          if(name && row.Name !== name) return false;
+          if(dateFrom && dateTo){
+            // Try "Date Processed" first (format: "10-Sep-2025")
+            let rowDate = parseDateProcessed(row['Date Processed']);
+            
+            // Fallback to "Date" column (format: "10-09-2025 13:25")
+            if(!rowDate) {
+              rowDate = parseDate(row['Date']);
+            }
+            
+            if(!rowDate || rowDate < dateFrom || rowDate > dateTo) return false;
+          }
+          
+          // Then filter by search query
+          if(query){
+            return Object.values(row).some(val => String(val).toLowerCase().includes(query));
+          }
+          
+          return true;
+        });
+        
+        CURRENT_PAGE = 1;
+        render();
+      }, 300); // 300ms debounce
+    }
+
+    // Reset filters
+    function resetFilters(){
+      document.getElementById('filterDigitrack').value = '';
+      document.getElementById('filterState').value = '';
+      document.getElementById('filterHQ').value = '';
+      document.getElementById('filterDistrict').value = '';
+      document.getElementById('filterZone').value = '';
+      document.getElementById('filterName').value = '';
+      document.getElementById('filterDateRange').value = '';
+      document.getElementById('universalSearch').value = '';
+      
+      // Reset flatpickr
+      if(window.dateRangePicker) {
+        window.dateRangePicker.clear();
+      }
+      
+      FILTERED_DATA = [...MC_DATA];
+      CURRENT_PAGE = 1;
+      
+      // Repopulate filters with all options
+      populateFilters(false);
+      
+      render();
+    }
+
+    // Render everything
+    function render(){
+      updateKPIs();
+      renderCharts();
+      renderTable();
+      renderPagination();
+    }
+
+    // Update KPIs
+    function updateKPIs(){
+      const totalGrowers = FILTERED_DATA.length;
+      
+      // Unique growers by Grower name
+      const uniqueGrowers = new Set(FILTERED_DATA.map(r => r.Grower).filter(Boolean)).size;
+      
+      // Active PTs - unique count of Name (PT) field
+      const activePTs = new Set(FILTERED_DATA.map(r => r.Name).filter(Boolean)).size;
+      const totalPTs = 253;
+      
+      document.getElementById('totalGrowers').textContent = totalGrowers.toLocaleString();
+      document.getElementById('uniqueGrowers').textContent = uniqueGrowers.toLocaleString();
+      document.getElementById('activePTs').textContent = `${activePTs} / ${totalPTs}`;
+    }
+
+    // Render charts
+    let stateChart = null;
+    let ptChart = null;
+
+    function renderCharts(){
+      // State-wise data
+      const stateData = {};
+      FILTERED_DATA.forEach(row => {
+        const state = row.State || 'Unknown';
+        stateData[state] = (stateData[state] || 0) + 1;
+      });
+      
+      const states = Object.keys(stateData).sort((a,b) => stateData[b] - stateData[a]).slice(0,10);
+      const stateCounts = states.map(s => stateData[s]);
+
+      // PT-wise data
+      const ptData = {};
+      FILTERED_DATA.forEach(row => {
+        const pt = row.Name || 'Unknown';
+        ptData[pt] = (ptData[pt] || 0) + 1;
+      });
+      
+      const pts = Object.keys(ptData).sort((a,b) => ptData[b] - ptData[a]).slice(0,10);
+      const ptCounts = pts.map(p => ptData[p]);
+
+      // Render State Chart
+      const stateCtx = document.getElementById('stateChart').getContext('2d');
+      if(stateChart) stateChart.destroy();
+      stateChart = new Chart(stateCtx, {
+        type: 'bar',
+        data: {
+          labels: states,
+          datasets: [{
+            label: 'Missed Calls',
+            data: stateCounts,
+            backgroundColor: '#6366f1',
+            borderRadius: 8
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {display: false}
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {font: {weight: '600'}}
+            },
+            x: {
+              ticks: {font: {weight: '600'}}
+            }
+          }
+        }
+      });
+
+      // Render PT Chart
+      const ptCtx = document.getElementById('ptChart').getContext('2d');
+      if(ptChart) ptChart.destroy();
+      ptChart = new Chart(ptCtx, {
+        type: 'bar',
+        data: {
+          labels: pts,
+          datasets: [{
+            label: 'Missed Calls',
+            data: ptCounts,
+            backgroundColor: '#10b981',
+            borderRadius: 8
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {display: false}
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {font: {weight: '600'}}
+            },
+            x: {
+              ticks: {
+                font: {weight: '600'},
+                maxRotation: 45,
+                minRotation: 45
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Render table
+    function renderTable(){
+      const start = (CURRENT_PAGE - 1) * ROWS_PER_PAGE;
+      const end = start + ROWS_PER_PAGE;
+      const pageData = FILTERED_DATA.slice(start, end);
+
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = '';
+
+      if(pageData.length === 0){
+        tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;padding:40px;color:#9ca3af">No data found</td></tr>';
+      } else {
+        pageData.forEach(row => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${row['Digitrack No'] || '-'}</td>
+            <td>${row.Grower || '-'}</td>
+            <td>${row.Date || '-'}</td>
+            <td>${row.Action || '-'}</td>
+            <td>${row['Date Processed'] || '-'}</td>
+            <td>${row.Name || '-'}</td>
+            <td>${row.HQ || '-'}</td>
+            <td>${row['Division/PT District'] || '-'}</td>
+            <td>${row.ZONE || '-'}</td>
+            <td>${row.State || '-'}</td>
+            <td>${row['Mobile number'] || '-'}</td>
+            <td>${row.Language || '-'}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      document.getElementById('tableInfo').textContent = 
+        `Showing ${start + 1}-${Math.min(end, FILTERED_DATA.length)} of ${FILTERED_DATA.length} records`;
+    }
+
+    // Render pagination
+    function renderPagination(){
+      const totalPages = Math.ceil(FILTERED_DATA.length / ROWS_PER_PAGE);
+      const pagination = document.getElementById('pagination');
+      pagination.innerHTML = '';
+
+      // Previous
+      const prev = document.createElement('button');
+      prev.textContent = '← Previous';
+      prev.className = 'page-btn';
+      prev.disabled = CURRENT_PAGE === 1;
+      prev.onclick = () => {
+        if(CURRENT_PAGE > 1){
+          CURRENT_PAGE--;
+          renderTable();
+          renderPagination();
+        }
+      };
+      pagination.appendChild(prev);
+
+      // Page numbers
+      const maxPages = 5;
+      let startPage = Math.max(1, CURRENT_PAGE - Math.floor(maxPages / 2));
+      let endPage = Math.min(totalPages, startPage + maxPages - 1);
+
+      if(endPage - startPage < maxPages - 1){
+        startPage = Math.max(1, endPage - maxPages + 1);
+      }
+
+      if(startPage > 1){
+        const first = document.createElement('button');
+        first.textContent = '1';
+        first.className = 'page-btn';
+        first.onclick = () => {
+          CURRENT_PAGE = 1;
+          renderTable();
+          renderPagination();
+        };
+        pagination.appendChild(first);
+
+        if(startPage > 2){
+          const dots = document.createElement('span');
+          dots.textContent = '...';
+          dots.style.padding = '0 8px';
+          pagination.appendChild(dots);
+        }
+      }
+
+      for(let i = startPage; i <= endPage; i++){
+        const btn = document.createElement('button');
+        btn.textContent = i;
+        btn.className = 'page-btn' + (i === CURRENT_PAGE ? ' active' : '');
+        btn.onclick = () => {
+          CURRENT_PAGE = i;
+          renderTable();
+          renderPagination();
+        };
+        pagination.appendChild(btn);
+      }
+
+      if(endPage < totalPages){
+        if(endPage < totalPages - 1){
+          const dots = document.createElement('span');
+          dots.textContent = '...';
+          dots.style.padding = '0 8px';
+          pagination.appendChild(dots);
+        }
+
+        const last = document.createElement('button');
+        last.textContent = totalPages;
+        last.className = 'page-btn';
+        last.onclick = () => {
+          CURRENT_PAGE = totalPages;
+          renderTable();
+          renderPagination();
+        };
+        pagination.appendChild(last);
+      }
+
+      // Next
+      const next = document.createElement('button');
+      next.textContent = 'Next →';
+      next.className = 'page-btn';
+      next.disabled = CURRENT_PAGE === totalPages;
+      next.onclick = () => {
+        if(CURRENT_PAGE < totalPages){
+          CURRENT_PAGE++;
+          renderTable();
+          renderPagination();
+        }
+      };
+      pagination.appendChild(next);
+    }
+
+    // Download Excel
+    function downloadExcel(){
+      const dataToExport = FILTERED_DATA.length > 0 ? FILTERED_DATA : MC_DATA;
+      
+      const ws = XLSX.utils.json_to_sheet(dataToExport);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Missed Calls');
+      
+      const filename = `missed_calls_${new Date().toISOString().slice(0,10)}.xlsx`;
+      XLSX.writeFile(wb, filename);
+      
+      alert(`✅ Downloaded ${dataToExport.length} records to ${filename}`);
+    }
+
+    // Initialize flatpickr for date range (auto-apply on change)
+    window.dateRangePicker = flatpickr("#filterDateRange", {
+      mode: "range",
+      dateFormat: "Y-m-d",
+      maxDate: "today",
+      onChange: function(selectedDates, dateStr, instance) {
+        console.log('📅 Flatpickr onChange:', { 
+          selectedDates: selectedDates.length, 
+          dateStr,
+          formatted: selectedDates.map(d => formatDateYYYYMMDD(d))
+        });
+        
+        // Auto-apply when both dates are selected
+        if(selectedDates.length === 2){
+          console.log('📅 Auto-applying date filter...');
+          applyFilters();
+        }
+      },
+      onClose: function(selectedDates, dateStr, instance) {
+        console.log('📅 Flatpickr onClose:', { selectedDates: selectedDates.length });
+        
+        // Also apply when calendar is closed (in case user selected range and clicked away)
+        if(selectedDates.length === 2){
+          console.log('📅 Auto-applying on close...');
+          applyFilters();
+        }
+      },
+      onReady: function(selectedDates, dateStr, instance) {
+        console.log('📅 Flatpickr ready!');
+      }
+    });
+
+    // Attach change handlers to all filters (auto-apply)
+    function attachFilterHandlers(){
+      document.getElementById('filterDigitrack').onchange = applyFilters;
+      document.getElementById('filterState').onchange = applyFilters;
+      document.getElementById('filterHQ').onchange = applyFilters;
+      document.getElementById('filterDistrict').onchange = applyFilters;
+      document.getElementById('filterZone').onchange = applyFilters;
+      document.getElementById('filterName').onchange = applyFilters;
+      
+      // Universal search with auto-search
+      document.getElementById('universalSearch').oninput = universalSearch;
+      
+      // Reset button
+      document.getElementById('resetFiltersBtn').onclick = resetFilters;
+      
+      // Download button
+      document.getElementById('downloadBtn').onclick = downloadExcel;
+    }
+
+    // Call after DOM is ready
+    attachFilterHandlers();
+  </script>
+</body>
+</html>
