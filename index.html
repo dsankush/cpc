@@ -1444,13 +1444,30 @@
   // Charts
   const charts = {};
   function makeChart(id, type, data, opts){
-    const ctx = document.getElementById(id).getContext('2d');
-    if(charts[id]){ 
-      charts[id].data = data; 
-      charts[id].options = opts; 
-      charts[id].update(); 
-      return charts[id]; 
+    const canvasElement = document.getElementById(id);
+    if(!canvasElement){
+      console.error(`Canvas element with id '${id}' not found`);
+      return null;
     }
+    
+    const ctx = canvasElement.getContext('2d');
+    
+    // Check if chart exists and canvas is still valid
+    if(charts[id]){ 
+      // Verify the chart's canvas is still the same element
+      if(charts[id].canvas === canvasElement){
+        charts[id].data = data; 
+        charts[id].options = opts; 
+        charts[id].update(); 
+        return charts[id];
+      } else {
+        // Canvas was replaced, destroy old chart
+        console.log(`🔄 Canvas replaced for ${id}, destroying old chart`);
+        charts[id].destroy();
+        delete charts[id];
+      }
+    }
+    
     charts[id] = new Chart(ctx, { type, data, options: opts });
     return charts[id];
   }
@@ -2064,6 +2081,11 @@
         if(parent){
           parent.innerHTML = '<h3>📊 Submission Status by PT (Top 10)</h3><canvas id="ptStatusChart" height="280"></canvas>';
         }
+        // Clear the old chart instance since we recreated the canvas
+        if(charts['ptStatusChart']){
+          charts['ptStatusChart'].destroy();
+          delete charts['ptStatusChart'];
+        }
       }
       
       makeChart('ptStatusChart','bar',{
@@ -2193,6 +2215,11 @@
         const parent = document.querySelector('[data-chart="sourceChart"]');
         if(parent){
           parent.innerHTML = '<h3>📱 Participation Share by Source</h3><canvas id="sourceChart" height="280"></canvas>';
+        }
+        // Clear the old chart instance since we recreated the canvas
+        if(charts['sourceChart']){
+          charts['sourceChart'].destroy();
+          delete charts['sourceChart'];
         }
       }
       makeChart('sourceChart','doughnut',{
