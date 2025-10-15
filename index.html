@@ -78,6 +78,28 @@
       box-shadow:0 4px 16px rgba(99,102,241,0.2);
       border:2px solid rgba(99,102,241,0.1);
     }
+    .nav-links{
+      display:flex;
+      gap:12px;
+      margin-left:auto;
+    }
+    .nav-link{
+      padding:10px 20px;
+      border-radius:10px;
+      text-decoration:none;
+      color:var(--text);
+      font-weight:600;
+      font-size:14px;
+      transition:all .2s;
+      background:rgba(99,102,241,.1);
+      border:2px solid rgba(99,102,241,.2);
+    }
+    .nav-link:hover{
+      background:var(--acc1);
+      color:white;
+      transform:translateY(-2px);
+      box-shadow:0 4px 12px rgba(99,102,241,.3);
+    }
     .dot{
       width:20px;height:20px;border-radius:50%;
       background:linear-gradient(135deg,var(--acc1),var(--acc4));
@@ -895,6 +917,10 @@
         <span class="dot"></span>
         <h1 class="title">Coromandel CPC Campaign Dashboard</h1>
       </div>
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link" style="background:var(--acc1);color:white">📊 Dashboard</a>
+        <a href="missed-calls.html" class="nav-link">📞 Missed Call Data</a>
+      </nav>
       <div class="header-actions">
         <button class="btn" id="downloadBtn">📥 Download Data</button>
         <button class="btn btn-logout" id="logoutBtn">🔒 Logout</button>
@@ -1342,6 +1368,7 @@
   let RAW = [];
   let REFERENCE_DATA = []; // PT/Missed Calls reference data
   let REFERENCE_GRAND_TOTAL = null; // Grand Total row (excluded from filters)
+  let MC_DATA_GLOBAL = []; // Missed call data from mc_data.csv (for unfiltered totals)
   let FILTERS = { dateFrom:'', dateTo:'', state:'', district:'', retailer:'', product:'', unit:'', status:'', source:'', pt:'', zone:'', hq:'' };
 
   // DOM
@@ -1509,12 +1536,28 @@
     let missedCallsTotal = 0;
     let missedCallsUnique = 0;
     
-    if(!hasReferenceFilters && REFERENCE_GRAND_TOTAL){
-      // No filters applied - use Grand Total row values
-      missedCallsDisplay = REFERENCE_GRAND_TOTAL.total;
-      missedCallsUniqueDisplay = REFERENCE_GRAND_TOTAL.unique;
-      missedCallsTotal = REFERENCE_GRAND_TOTAL.total;
-      missedCallsUnique = REFERENCE_GRAND_TOTAL.unique;
+    if(!hasReferenceFilters){
+      // No filters applied - use mc_data.csv totals if available, otherwise Grand Total
+      if(MC_DATA_GLOBAL && MC_DATA_GLOBAL.length > 0){
+        // Calculate from actual missed call data
+        missedCallsDisplay = MC_DATA_GLOBAL.length;
+        missedCallsUniqueDisplay = new Set(MC_DATA_GLOBAL.map(r => r.Grower).filter(Boolean)).size;
+        missedCallsTotal = MC_DATA_GLOBAL.length;
+        missedCallsUnique = new Set(MC_DATA_GLOBAL.map(r => r.Grower).filter(Boolean)).size;
+        
+        console.log('📞 Using mc_data.csv for missed calls:', {
+          total: missedCallsTotal,
+          unique: missedCallsUnique
+        });
+      } else if(REFERENCE_GRAND_TOTAL){
+        // Fallback to Grand Total row values
+        missedCallsDisplay = REFERENCE_GRAND_TOTAL.total;
+        missedCallsUniqueDisplay = REFERENCE_GRAND_TOTAL.unique;
+        missedCallsTotal = REFERENCE_GRAND_TOTAL.total;
+        missedCallsUnique = REFERENCE_GRAND_TOTAL.unique;
+        
+        console.log('📞 Using reference.csv Grand Total for missed calls');
+      }
     } else {
       // Filters applied - calculate from filtered PT data
       const filteredReferenceData = REFERENCE_DATA.filter(r => {
@@ -1596,8 +1639,11 @@
         });
       }
       
-      // Grand totals for context (use Grand Total row if available, otherwise calculate)
-      if(REFERENCE_GRAND_TOTAL){
+      // Grand totals for context - use mc_data.csv if available
+      if(MC_DATA_GLOBAL && MC_DATA_GLOBAL.length > 0){
+        missedCallsTotal = MC_DATA_GLOBAL.length;
+        missedCallsUnique = new Set(MC_DATA_GLOBAL.map(r => r.Grower).filter(Boolean)).size;
+      } else if(REFERENCE_GRAND_TOTAL){
         missedCallsTotal = REFERENCE_GRAND_TOTAL.total;
         missedCallsUnique = REFERENCE_GRAND_TOTAL.unique;
       } else {
@@ -1606,6 +1652,12 @@
           missedCallsUnique += Number(r['Total Unique Missed Calls']) || 0;
         }
       }
+      
+      console.log('📞 Using reference.csv for filtered missed calls:', {
+        display: missedCallsDisplay,
+        unique: missedCallsUniqueDisplay,
+        total: missedCallsTotal
+      });
     }
     
     document.getElementById('kpiTotalBig').textContent = total.toLocaleString();
@@ -2724,13 +2776,40 @@
       }
       
       referenceLoaded = true;
-      checkBothLoaded();
+      loadMCData();
     },
     error: (err)=>{
       console.error('Reference CSV load error', err);
       alert('Failed to load reference.csv. Ensure the file exists at '+REFERENCE_CSV_URL);
     }
   });
+
+  // Load mc_data.csv for actual missed call records
+  function loadMCData(){
+    Papa.parse('mc_data.csv', {
+      download: true,
+      header: true,
+      skipEmptyLines: true,
+      dynamicTyping: false,
+      complete: (res) => {
+        MC_DATA_GLOBAL = res.data;
+        console.log('✅ mc_data.csv loaded:', {
+          totalRecords: MC_DATA_GLOBAL.length,
+          uniqueGrowers: new Set(MC_DATA_GLOBAL.map(r => r.Grower).filter(Boolean)).size,
+          sampleRecord: MC_DATA_GLOBAL[0]
+        });
+        
+        mcDataLoaded = true;
+        checkBothLoaded();
+      },
+      error: (err) => {
+        console.warn('⚠️ mc_data.csv not found, using reference.csv for missed calls');
+        MC_DATA_GLOBAL = [];
+        mcDataLoaded = true; // Still mark as loaded to proceed
+        checkBothLoaded();
+      }
+    });
+  }
 </script>
 
 <!-- Theme Auto-Sync Script -->
