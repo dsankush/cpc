@@ -1483,6 +1483,10 @@
     return rows.filter(r=>{
       if(f.dateFrom || f.dateTo){
         const scanDate = toDateKey(trim(r['Scan Date']));
+        
+        // Exclude rows with invalid/missing dates when date filter is active
+        if(!scanDate) return false;
+        
         if(f.dateFrom && scanDate < f.dateFrom) return false;
         if(f.dateTo && scanDate > f.dateTo) return false;
       }
