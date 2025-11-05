@@ -1428,18 +1428,57 @@
   });
 
   // Download CSV
-  document.getElementById('downloadBtn').addEventListener('click', ()=>{
-    const filtered = applyFilters(RAW);
-    if(filtered.length === 0){ alert('No data to download!'); return; }
-    const csv = Papa.unparse(filtered);
-    const blob = new Blob([csv], {type:'text/csv'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'cpc_data_export_' + new Date().toISOString().slice(0,10) + '.csv';
-    a.click();
-    URL.revokeObjectURL(url);
+  // Download CSV - WITH DATE COLUMN
+document.getElementById('downloadBtn').addEventListener('click', ()=>{
+  const filtered = applyFilters(RAW);
+  if(filtered.length === 0){ alert('No data to download!'); return; }
+  
+  // Add "Date" column (date only, no time) - extract from "Scan Date"
+  const enhancedData = filtered.map(row => {
+    const scanDate = trim(row['Scan Date']);
+    let dateOnly = '';
+    
+    if(scanDate){
+      // Extract date part from "DD-MM-YYYY HH:MM" format
+      const datePart = scanDate.split(' ')[0]; // Gets "DD-MM-YYYY"
+      dateOnly = datePart || scanDate;
+    }
+    
+    // Create new object with Date column added after Scan Date
+    return {
+      'User ID': row['User ID'],
+      'Phone Number': row['Phone Number'],
+      'First Name': row['First Name'],
+      'Last Name': row['Last Name'],
+      'District': row['District'],
+      'State': row['State'],
+      'Language': row['Language'],
+      'Pin Code': row['Pin Code'],
+      'QR Code': row['QR Code'],
+      'Land Acreage': row['Land Acreage'],
+      'Crop Name': row['Crop Name'],
+      'Scan Date': row['Scan Date'],
+      'Date': dateOnly,  // NEW COLUMN: Date without time
+      'RIN': row['RIN'],
+      'Retailer Name': row['Retailer Name'],
+      'Cart Items': row['Cart Items'],
+      'Coupon Code': row['Coupon Code'],
+      'Submission Status': row['Submission Status'],
+      'Source': row['Source'],
+      'PT': row['PT'],
+      'Zone': row['Zone']
+    };
   });
+  
+  const csv = Papa.unparse(enhancedData);
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'cpc_data_export_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+});
 
   // Charts
   const charts = {};
