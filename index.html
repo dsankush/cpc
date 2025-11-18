@@ -1187,7 +1187,6 @@
 <script>
   const CSV_URL = './data.csv';
   const REFERENCE_CSV_URL = './reference.csv';
-  const MC_DATA_CSV_URL = './mc_data.csv';
 
   // Login
   const USERS = {
@@ -1369,7 +1368,7 @@
   let RAW = [];
   let REFERENCE_DATA = []; // PT/Missed Calls reference data
   let REFERENCE_GRAND_TOTAL = null; // Grand Total row (excluded from filters)
-  let MC_DATA_GLOBAL = []; // Missed call data from mc_data.csv (raw records with State column)
+  let MC_DATA_GLOBAL = []; // Missed call data from mc_data.csv (for unfiltered totals)
   let FILTERS = { dateFrom:'', dateTo:'', state:'', district:'', retailer:'', product:'', unit:'', status:'', source:'', pt:'', zone:'', hq:'' };
 
   // DOM
@@ -1428,57 +1427,58 @@
     render();
   });
 
+  // Download CSV
   // Download CSV - WITH DATE COLUMN
-  document.getElementById('downloadBtn').addEventListener('click', ()=>{
-    const filtered = applyFilters(RAW);
-    if(filtered.length === 0){ alert('No data to download!'); return; }
+document.getElementById('downloadBtn').addEventListener('click', ()=>{
+  const filtered = applyFilters(RAW);
+  if(filtered.length === 0){ alert('No data to download!'); return; }
+  
+  // Add "Date" column (date only, no time) - extract from "Scan Date"
+  const enhancedData = filtered.map(row => {
+    const scanDate = trim(row['Scan Date']);
+    let dateOnly = '';
     
-    // Add "Date" column (date only, no time) - extract from "Scan Date"
-    const enhancedData = filtered.map(row => {
-      const scanDate = trim(row['Scan Date']);
-      let dateOnly = '';
-      
-      if(scanDate){
-        // Extract date part from "DD-MM-YYYY HH:MM" format
-        const datePart = scanDate.split(' ')[0]; // Gets "DD-MM-YYYY"
-        dateOnly = datePart || scanDate;
-      }
-      
-      // Create new object with Date column added after Scan Date
-      return {
-        'User ID': row['User ID'],
-        'Phone Number': row['Phone Number'],
-        'First Name': row['First Name'],
-        'Last Name': row['Last Name'],
-        'District': row['District'],
-        'State': row['State'],
-        'Language': row['Language'],
-        'Pin Code': row['Pin Code'],
-        'QR Code': row['QR Code'],
-        'Land Acreage': row['Land Acreage'],
-        'Crop Name': row['Crop Name'],
-        'Scan Date': row['Scan Date'],
-        'Date': dateOnly,  // NEW COLUMN: Date without time
-        'RIN': row['RIN'],
-        'Retailer Name': row['Retailer Name'],
-        'Cart Items': row['Cart Items'],
-        'Coupon Code': row['Coupon Code'],
-        'Submission Status': row['Submission Status'],
-        'Source': row['Source'],
-        'PT': row['PT'],
-        'Zone': row['Zone']
-      };
-    });
+    if(scanDate){
+      // Extract date part from "DD-MM-YYYY HH:MM" format
+      const datePart = scanDate.split(' ')[0]; // Gets "DD-MM-YYYY"
+      dateOnly = datePart || scanDate;
+    }
     
-    const csv = Papa.unparse(enhancedData);
-    const blob = new Blob([csv], {type:'text/csv'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'cpc_data_export_' + new Date().toISOString().slice(0,10) + '.csv';
-    a.click();
-    URL.revokeObjectURL(url);
+    // Create new object with Date column added after Scan Date
+    return {
+      'User ID': row['User ID'],
+      'Phone Number': row['Phone Number'],
+      'First Name': row['First Name'],
+      'Last Name': row['Last Name'],
+      'District': row['District'],
+      'State': row['State'],
+      'Language': row['Language'],
+      'Pin Code': row['Pin Code'],
+      'QR Code': row['QR Code'],
+      'Land Acreage': row['Land Acreage'],
+      'Crop Name': row['Crop Name'],
+      'Scan Date': row['Scan Date'],
+      'Date': dateOnly,  // NEW COLUMN: Date without time
+      'RIN': row['RIN'],
+      'Retailer Name': row['Retailer Name'],
+      'Cart Items': row['Cart Items'],
+      'Coupon Code': row['Coupon Code'],
+      'Submission Status': row['Submission Status'],
+      'Source': row['Source'],
+      'PT': row['PT'],
+      'Zone': row['Zone']
+    };
   });
+  
+  const csv = Papa.unparse(enhancedData);
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'cpc_data_export_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+});
 
   // Charts
   const charts = {};
@@ -1583,181 +1583,139 @@
       }
     }
     
-    // ============================================
-    // MISSED CALLS LOGIC - STATE-BASED SWITCHING
-    // ============================================
-    // ============================================
-// MISSED CALLS LOGIC (CORRECTED)
-// Always use mc_data.csv total rows
-// ============================================
-
-    let missedCallsTotal = 0;
-    let missedCallsUnique = 0;
-    let missedCallsDisplay = 0;
-    let missedCallsUniqueDisplay = 0;
-    
-    // Always compute true totals from mc_data.csv
-    if (MC_DATA_GLOBAL && MC_DATA_GLOBAL.length > 0) {
-        
-        // TRUE TOTAL MISSED CALLS (NO FILTER)
-        missedCallsTotal = MC_DATA_GLOBAL.length;
-    
-        // TRUE UNIQUE
-        missedCallsUnique = new Set(
-            MC_DATA_GLOBAL.map(r => trim(r.Grower || r.grower || ''))
-        ).size;
-    
-        // DISPLAY MISSED CALLS (FILTERED BY STATE IF SELECTED)
-        if (FILTERS.state) {
-            const filteredState = MC_DATA_GLOBAL.filter(r => trim(r.State || r.state || '') === FILTERS.state);
-    
-            missedCallsDisplay = filteredState.length;
-            missedCallsUniqueDisplay = new Set(
-                filteredState.map(r => trim(r.Grower || r.grower || ''))
-            ).size;
-    
-        } else {
-            // No filter → show complete totals
-            missedCallsDisplay = missedCallsTotal;
-            missedCallsUniqueDisplay = missedCallsUnique;
-        }
-    
-    } else {
-        // Fallback if mc_data.csv missing
-        if (REFERENCE_GRAND_TOTAL) {
-            missedCallsTotal = REFERENCE_GRAND_TOTAL.total;
-            missedCallsUnique = REFERENCE_GRAND_TOTAL.unique;
-            missedCallsDisplay = missedCallsTotal;
-            missedCallsUniqueDisplay = missedCallsUnique;
-        }
-    }
-
-
-
-
-
-
-
+    // Calculate Missed Calls from reference.csv (dynamic based on filters)
+    // Check if any reference-related filters are applied
+    const hasReferenceFilters = FILTERS.state || FILTERS.zone || FILTERS.pt || FILTERS.hq || FILTERS.dateFrom || FILTERS.dateTo;
     
     let missedCallsDisplay = 0;
     let missedCallsUniqueDisplay = 0;
     let missedCallsTotal = 0;
     let missedCallsUnique = 0;
-    let dataSource = '';
     
-    if(!FILTERS.state){
-      // NO STATE FILTER → Use mc_data.csv
-      dataSource = 'mc_data.csv';
-      
+    if(!hasReferenceFilters){
+      // No filters applied - use mc_data.csv totals if available, otherwise Grand Total
       if(MC_DATA_GLOBAL && MC_DATA_GLOBAL.length > 0){
-        // Filter mc_data.csv by date range if present
-        let filteredMCData = MC_DATA_GLOBAL;
-        
-        if(FILTERS.dateFrom || FILTERS.dateTo){
-          filteredMCData = filteredMCData.filter(r => {
-            const mcDate = toDateKey(trim(r.Date || r.date || ''));
-            if(!mcDate) return false;
-            if(FILTERS.dateFrom && mcDate < FILTERS.dateFrom) return false;
-            if(FILTERS.dateTo && mcDate > FILTERS.dateTo) return false;
-            return true;
-          });
-        }
-        
-        missedCallsDisplay = filteredMCData.length;
-        missedCallsUniqueDisplay = new Set(filteredMCData.map(r => trim(r.Grower || r.grower || '')).filter(Boolean)).size;
-        
-        // Unfiltered totals for progress bar
+        // Calculate from actual missed call data
+        missedCallsDisplay = MC_DATA_GLOBAL.length;
+        missedCallsUniqueDisplay = new Set(MC_DATA_GLOBAL.map(r => r.Grower).filter(Boolean)).size;
         missedCallsTotal = MC_DATA_GLOBAL.length;
-        missedCallsUnique = new Set(MC_DATA_GLOBAL.map(r => trim(r.Grower || r.grower || '')).filter(Boolean)).size;
+        missedCallsUnique = new Set(MC_DATA_GLOBAL.map(r => r.Grower).filter(Boolean)).size;
         
-        console.log('📞 Using mc_data.csv (No State Filter):', {
-          source: dataSource,
-          displayTotal: missedCallsDisplay,
-          displayUnique: missedCallsUniqueDisplay,
-          grandTotal: missedCallsTotal,
-          grandUnique: missedCallsUnique,
-          dateFiltered: !!(FILTERS.dateFrom || FILTERS.dateTo)
+        console.log('📞 Using mc_data.csv for missed calls:', {
+          total: missedCallsTotal,
+          unique: missedCallsUnique
         });
-      } else {
-        // Fallback to reference Grand Total if mc_data.csv unavailable
-        if(REFERENCE_GRAND_TOTAL){
-          missedCallsDisplay = REFERENCE_GRAND_TOTAL.total;
-          missedCallsUniqueDisplay = REFERENCE_GRAND_TOTAL.unique;
-          missedCallsTotal = REFERENCE_GRAND_TOTAL.total;
-          missedCallsUnique = REFERENCE_GRAND_TOTAL.unique;
-          dataSource = 'reference.csv (Grand Total)';
-          
-          console.log('⚠️ mc_data.csv unavailable, using Grand Total from reference.csv');
-        }
-      }
-      
-    } else {
-      // STATE FILTER APPLIED → Use reference.csv
-      dataSource = 'reference.csv (Filtered by State)';
-      
-      const filteredReferenceData = REFERENCE_DATA.filter(r => {
-        // Must match state
-        if(trim(r.State) !== FILTERS.state) return false;
+      } else if(REFERENCE_GRAND_TOTAL){
+        // Fallback to Grand Total row values
+        missedCallsDisplay = REFERENCE_GRAND_TOTAL.total;
+        missedCallsUniqueDisplay = REFERENCE_GRAND_TOTAL.unique;
+        missedCallsTotal = REFERENCE_GRAND_TOTAL.total;
+        missedCallsUnique = REFERENCE_GRAND_TOTAL.unique;
         
+        console.log('📞 Using reference.csv Grand Total for missed calls');
+      }
+    } else {
+      // Filters applied - calculate from filtered PT data
+      const filteredReferenceData = REFERENCE_DATA.filter(r => {
         // Apply date range filter if present
         if(FILTERS.dateFrom || FILTERS.dateTo){
           const refDate = parseReferenceDate(trim(r['Date Processed'] || ''));
+          
+          // Exclude rows with invalid/missing dates when date filter is active
           if(!refDate) return false;
+          
           if(FILTERS.dateFrom && refDate < FILTERS.dateFrom) return false;
           if(FILTERS.dateTo && refDate > FILTERS.dateTo) return false;
         }
         
-        // Apply zone filter if present
+        // Apply common filters: State, Zone, PT
+        if(FILTERS.state && trim(r.State) !== FILTERS.state) return false;
         if(FILTERS.zone && trim(r.ZONE) !== FILTERS.zone) return false;
-        
-        // Apply PT filter if present
+        // PT filter (maps to Name column in reference.csv)
         if(FILTERS.pt && trim(r.Name) !== FILTERS.pt) return false;
-        
-        // Apply HQ filter if present
+        // HQ filter (unique to reference data)
         if(FILTERS.hq && trim(r.HQ) !== FILTERS.hq) return false;
-        
         return true;
       });
       
-      // Calculate from filtered reference data
+      // Debug: Log filtered data when date filter is active
+      if(FILTERS.dateFrom || FILTERS.dateTo){
+        // Analyze all rows to see date parsing success/failure
+        const dateAnalysis = REFERENCE_DATA.map(r => {
+          const rawDate = trim(r['Date Processed'] || '');
+          const parsedDate = parseReferenceDate(rawDate);
+          const inRange = parsedDate && parsedDate >= FILTERS.dateFrom && parsedDate <= FILTERS.dateTo;
+          return { rawDate, parsedDate, inRange, total: Number(r['Total Missed Calls']||0), unique: Number(r['Total Unique Missed Calls']||0) };
+        });
+        
+        const totalParsed = dateAnalysis.filter(d => d.parsedDate).length;
+        const totalFailed = dateAnalysis.filter(d => !d.parsedDate && d.rawDate).length;
+        const inRangeRows = dateAnalysis.filter(d => d.inRange);
+        const inRangeTotal = inRangeRows.reduce((sum, r) => sum + r.total, 0);
+        const inRangeUnique = inRangeRows.reduce((sum, r) => sum + r.unique, 0);
+        
+        console.log('📅 Date Range Filter Applied to Missed Calls:', {
+          dateFrom: FILTERS.dateFrom,
+          dateTo: FILTERS.dateTo,
+          totalReferenceRows: REFERENCE_DATA.length,
+          datesParsedSuccessfully: totalParsed,
+          datesFailedToParse: totalFailed,
+          rowsInDateRange: inRangeRows.length,
+          calculatedTotalInRange: inRangeTotal,
+          calculatedUniqueInRange: inRangeUnique,
+          filteredRows: filteredReferenceData.length,
+          sampleParsedDates: dateAnalysis.slice(0, 10).map(d => ({
+            raw: d.rawDate,
+            parsed: d.parsedDate || 'FAILED',
+            inRange: d.inRange ? 'YES' : 'NO',
+            total: d.total,
+            unique: d.unique
+          })),
+          sampleFilteredRows: filteredReferenceData.slice(0, 5).map(r => ({
+            date: r['Date Processed'],
+            parsedDate: parseReferenceDate(r['Date Processed']),
+            name: r.Name,
+            total: r['Total Missed Calls'],
+            unique: r['Total Unique Missed Calls']
+          }))
+        });
+      }
+      
       for(const r of filteredReferenceData){
         missedCallsDisplay += Number(r['Total Missed Calls']) || 0;
         missedCallsUniqueDisplay += Number(r['Total Unique Missed Calls']) || 0;
       }
       
-      // Grand totals for progress bar - use mc_data.csv if available
+      // Debug: Log calculated totals
+      if(FILTERS.dateFrom || FILTERS.dateTo){
+        console.log('📊 Missed Calls Calculation:', {
+          filteredRowCount: filteredReferenceData.length,
+          calculatedTotal: missedCallsDisplay,
+          calculatedUnique: missedCallsUniqueDisplay
+        });
+      }
+      
+      // Grand totals for context - use mc_data.csv if available
       if(MC_DATA_GLOBAL && MC_DATA_GLOBAL.length > 0){
         missedCallsTotal = MC_DATA_GLOBAL.length;
-        missedCallsUnique = new Set(MC_DATA_GLOBAL.map(r => trim(r.Grower || r.grower || '')).filter(Boolean)).size;
+        missedCallsUnique = new Set(MC_DATA_GLOBAL.map(r => r.Grower).filter(Boolean)).size;
       } else if(REFERENCE_GRAND_TOTAL){
         missedCallsTotal = REFERENCE_GRAND_TOTAL.total;
         missedCallsUnique = REFERENCE_GRAND_TOTAL.unique;
       } else {
-        // Fallback to sum of all PT data
         for(const r of REFERENCE_DATA){
           missedCallsTotal += Number(r['Total Missed Calls']) || 0;
           missedCallsUnique += Number(r['Total Unique Missed Calls']) || 0;
         }
       }
       
-      console.log('📞 Using reference.csv (State Filter Applied):', {
-        source: dataSource,
-        state: FILTERS.state,
-        ptRecordsFound: filteredReferenceData.length,
-        displayTotal: missedCallsDisplay,
-        displayUnique: missedCallsUniqueDisplay,
-        grandTotal: missedCallsTotal,
-        grandUnique: missedCallsUnique,
-        otherFilters: {
-          dateRange: !!(FILTERS.dateFrom || FILTERS.dateTo),
-          zone: !!FILTERS.zone,
-          pt: !!FILTERS.pt,
-          hq: !!FILTERS.hq
-        }
+      console.log('📞 Using reference.csv for filtered missed calls:', {
+        display: missedCallsDisplay,
+        unique: missedCallsUniqueDisplay,
+        total: missedCallsTotal
       });
     }
     
-    // Update KPI display
     document.getElementById('kpiTotalBig').textContent = total.toLocaleString();
     document.getElementById('kpiYes').textContent = yes.toLocaleString();
     document.getElementById('kpiNo').textContent = no.toLocaleString();
@@ -1766,14 +1724,19 @@
     document.getElementById('kpiUniqueFarmers').textContent = `Unique: ${uniqueFarmers.toLocaleString()}`;
     document.getElementById('kpiActiveRetailers').textContent = activeRetailers.toLocaleString();
     document.getElementById('kpiTotalRetailers').textContent = `of ${totalRetailers.toLocaleString()} total`;
+    // Debug: Log the actual values being displayed
+    console.log('💡 Setting Missed Calls Display:', {
+      missedCallsDisplay: missedCallsDisplay,
+      formattedDisplay: missedCallsDisplay.toLocaleString(),
+      missedCallsUniqueDisplay: missedCallsUniqueDisplay,
+      formattedUnique: missedCallsUniqueDisplay.toLocaleString()
+    });
     
-    // Missed Calls KPI
     document.getElementById('kpiMissedCalls').textContent = missedCallsDisplay.toLocaleString();
     document.getElementById('kpiMissedCallsTotal').textContent = FILTERS.state ? FILTERS.state : 'All States';
     document.getElementById('kpiUniqueMissedCalls').textContent = missedCallsUniqueDisplay.toLocaleString();
     document.getElementById('kpiUniqueMissedCallsTotal').textContent = FILTERS.state ? FILTERS.state : 'All States';
     
-    // Calculate percentages
     const yesPct = total > 0 ? ((yes / total) * 100).toFixed(1) : '0.0';
     const noPct = total > 0 ? ((no / total) * 100).toFixed(1) : '0.0';
     const pendingPct = total > 0 ? ((pending / total) * 100).toFixed(1) : '0.0';
@@ -2059,15 +2022,15 @@
             maxRotation:45, 
             minRotation:20, 
             font:{size:10,weight:'700',family:'Outfit'} 
-          }, 
-          grid:{display:false} 
-        }, 
-        y:{ 
-          ticks:{ color:'#6b7280', font:{weight:'700',family:'Space Grotesk'} }, 
-          grid:{color:'#e5e7eb'} 
-        } 
-      } 
-    });
+      }, 
+      grid:{display:false} 
+    }, 
+    y:{ 
+      ticks:{ color:'#6b7280', font:{weight:'700',family:'Space Grotesk'} }, 
+      grid:{color:'#e5e7eb'} 
+    } 
+  } 
+});
 
     // NEW: Submission Status by PT (Top 10)
     const ptStats = {};
@@ -2165,60 +2128,60 @@
       }
       
       makeChart('ptStatusChart','bar',{
-        labels: topPTs.map(p => p.pt),
-        datasets:[
-          { 
-            label: 'Approved', 
-            data: topPTs.map(p => p.yes), 
-            backgroundColor:'#10b981',
-            borderRadius: 10,
-            barThickness: 22
-          },
-          { 
-            label: 'Pending', 
-            data: topPTs.map(p => p.pending), 
-            backgroundColor:'#8b5cf6',
-            borderRadius: 10,
-            barThickness: 22
-          },
-          { 
-            label: 'Rejected', 
-            data: topPTs.map(p => p.no), 
-            backgroundColor:'#f59e0b',
-            borderRadius: 10,
-            barThickness: 22
-          }
-        ]
-      },{ 
-        plugins: { 
-          legend: { 
-            display: true, 
-            position: 'top', 
-            labels: { 
-              color: '#1f2937', 
-              padding: 14, 
-              font: { size: 12, weight: '700', family: 'Outfit' }, 
-              usePointStyle: true, 
-              pointStyle: 'circle' 
-            } 
-          } 
-        }, 
-        scales: { 
-          x: { 
-            ticks: { 
-              color: '#1f2937', 
-              maxRotation: 45, 
-              minRotation: 25, 
-              font: { size: 11, weight: '700', family: 'Outfit' } 
-            }, 
-            grid: { display: false } 
-          }, 
-          y: { 
-            ticks: { color: '#6b7280', font: { weight: '700', family: 'Space Grotesk' } }, 
-            grid: { color: '#e5e7eb' } 
-          } 
+      labels: topPTs.map(p => p.pt),
+      datasets:[
+        { 
+          label: 'Approved', 
+          data: topPTs.map(p => p.yes), 
+          backgroundColor:'#10b981',
+          borderRadius: 10,
+          barThickness: 22
+        },
+        { 
+          label: 'Pending', 
+          data: topPTs.map(p => p.pending), 
+          backgroundColor:'#8b5cf6',
+          borderRadius: 10,
+          barThickness: 22
+        },
+        { 
+          label: 'Rejected', 
+          data: topPTs.map(p => p.no), 
+          backgroundColor:'#f59e0b',
+          borderRadius: 10,
+          barThickness: 22
         }
-      });
+      ]
+    },{ 
+      plugins: { 
+        legend: { 
+          display: true, 
+          position: 'top', 
+          labels: { 
+            color: '#1f2937', 
+            padding: 14, 
+            font: { size: 12, weight: '700', family: 'Outfit' }, 
+            usePointStyle: true, 
+            pointStyle: 'circle' 
+          } 
+        } 
+      }, 
+      scales: { 
+        x: { 
+          ticks: { 
+            color: '#1f2937', 
+            maxRotation: 45, 
+            minRotation: 25, 
+            font: { size: 11, weight: '700', family: 'Outfit' } 
+          }, 
+          grid: { display: false } 
+        }, 
+        y: { 
+          ticks: { color: '#6b7280', font: { weight: '700', family: 'Space Grotesk' } }, 
+          grid: { color: '#e5e7eb' } 
+        } 
+      }
+    });
     }
 
     // NEW: Participation Share by Source
@@ -2299,58 +2262,58 @@
         }
       }
       makeChart('sourceChart','doughnut',{
-        labels: sourceData.map(s => s[0]),
-        datasets:[{ 
-          data: sourceData.map(s => s[1]), 
-          backgroundColor:['#6366f1','#ec4899','#10b981','#f59e0b','#8b5cf6'],
-          borderWidth: 4,
-          borderColor: '#fff',
-          hoverOffset: 10
-        }]
-      },{
-        plugins:{
-          legend:{ 
-            display:true,
-            position:'bottom',
-            labels:{ 
-              color:'#1f2937', 
-              padding:15, 
-              font:{size:13,weight:'800',family:'Outfit'},
-              usePointStyle:true,
-              pointStyle:'circle',
-              generateLabels: function(chart) {
-                const data = chart.data;
-                if (data.labels.length && data.datasets.length) {
-                  return data.labels.map((label, i) => {
-                    const value = data.datasets[0].data[i];
-                    const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
-                    const percent = ((value / total) * 100).toFixed(1);
-                    return {
-                      text: `${label}: ${value.toLocaleString()} (${percent}%)`,
-                      fillStyle: data.datasets[0].backgroundColor[i],
-                      hidden: false,
-                      index: i
-                    };
-                  });
-                }
-                return [];
+      labels: sourceData.map(s => s[0]),
+      datasets:[{ 
+        data: sourceData.map(s => s[1]), 
+        backgroundColor:['#6366f1','#ec4899','#10b981','#f59e0b','#8b5cf6'],
+        borderWidth: 4,
+        borderColor: '#fff',
+        hoverOffset: 10
+      }]
+    },{
+      plugins:{
+        legend:{ 
+          display:true,
+          position:'bottom',
+          labels:{ 
+            color:'#1f2937', 
+            padding:15, 
+            font:{size:13,weight:'800',family:'Outfit'},
+            usePointStyle:true,
+            pointStyle:'circle',
+            generateLabels: function(chart) {
+              const data = chart.data;
+              if (data.labels.length && data.datasets.length) {
+                return data.labels.map((label, i) => {
+                  const value = data.datasets[0].data[i];
+                  const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                  const percent = ((value / total) * 100).toFixed(1);
+                  return {
+                    text: `${label}: ${value.toLocaleString()} (${percent}%)`,
+                    fillStyle: data.datasets[0].backgroundColor[i],
+                    hidden: false,
+                    index: i
+                  };
+                });
               }
-            }
-          },
-          tooltip: {
-            callbacks: {
-              label: function(context) {
-                const label = context.label || '';
-                const value = context.parsed || 0;
-                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                const percent = ((value / total) * 100).toFixed(1);
-                return `${label}: ${value.toLocaleString()} (${percent}%)`;
-              }
+              return [];
             }
           }
         },
-        cutout:'65%'
-      });
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const label = context.label || '';
+              const value = context.parsed || 0;
+              const total = context.dataset.data.reduce((a, b) => a + b, 0);
+              const percent = ((value / total) * 100).toFixed(1);
+              return `${label}: ${value.toLocaleString()} (${percent}%)`;
+            }
+          }
+        }
+      },
+      cutout:'65%'
+    });
     }
   }
 
@@ -2770,14 +2733,13 @@
   // Load both CSV files in parallel
   let csvLoaded = false;
   let referenceLoaded = false;
-  let mcDataLoaded = false;
 
-  function checkAllLoaded(){
-    if(csvLoaded && referenceLoaded && mcDataLoaded){
+  function checkBothLoaded(){
+    if(csvLoaded && referenceLoaded){
       populateFilters(RAW, REFERENCE_DATA);
       attachFilterHandlers();
       render();
-      console.log('✅ All CSV files loaded successfully!');
+      console.log('✅ Both CSV files loaded successfully!');
     }
   }
 
@@ -2803,7 +2765,7 @@
       }
       
       csvLoaded = true;
-      checkAllLoaded();
+      checkBothLoaded();
     },
     error: (err)=>{
       console.error('CSV load error', err);
@@ -2869,7 +2831,7 @@
           totalUnique += Number(r['Total Unique Missed Calls']) || 0;
         }
         
-        console.log('📞 Missed Calls Data from reference.csv:', {
+        console.log('📞 Missed Calls Data:', {
           ptCount: REFERENCE_DATA.length,
           calculatedTotal: totalMissed.toLocaleString(),
           calculatedUnique: totalUnique.toLocaleString(),
@@ -2880,7 +2842,7 @@
       }
       
       referenceLoaded = true;
-      checkAllLoaded();
+      loadMCData();
     },
     error: (err)=>{
       console.error('Reference CSV load error', err);
@@ -2889,32 +2851,31 @@
   });
 
   // Load mc_data.csv for actual missed call records
-  Papa.parse(MC_DATA_CSV_URL, {
-    download: true,
-    header: true,
-    skipEmptyLines: true,
-    dynamicTyping: false,
-    complete: (res) => {
-      MC_DATA_GLOBAL = res.data;
-      console.log('✅ mc_data.csv loaded:', {
-        totalRecords: MC_DATA_GLOBAL.length,
-        uniqueGrowers: new Set(MC_DATA_GLOBAL.map(r => trim(r.Grower || r.grower || '')).filter(Boolean)).size,
-        columns: MC_DATA_GLOBAL.length > 0 ? Object.keys(MC_DATA_GLOBAL[0]) : [],
-        sampleRecord: MC_DATA_GLOBAL[0],
-        hasState: MC_DATA_GLOBAL.length > 0 && ('State' in MC_DATA_GLOBAL[0] || 'state' in MC_DATA_GLOBAL[0]),
-        hasDate: MC_DATA_GLOBAL.length > 0 && ('Date' in MC_DATA_GLOBAL[0] || 'date' in MC_DATA_GLOBAL[0])
-      });
-      
-      mcDataLoaded = true;
-      checkAllLoaded();
-    },
-    error: (err) => {
-      console.warn('⚠️ mc_data.csv not found or failed to load, using reference.csv for missed calls');
-      MC_DATA_GLOBAL = [];
-      mcDataLoaded = true; // Still mark as loaded to proceed
-      checkAllLoaded();
-    }
-  });
+  function loadMCData(){
+    Papa.parse('mc_data.csv', {
+      download: true,
+      header: true,
+      skipEmptyLines: true,
+      dynamicTyping: false,
+      complete: (res) => {
+        MC_DATA_GLOBAL = res.data;
+        console.log('✅ mc_data.csv loaded:', {
+          totalRecords: MC_DATA_GLOBAL.length,
+          uniqueGrowers: new Set(MC_DATA_GLOBAL.map(r => r.Grower).filter(Boolean)).size,
+          sampleRecord: MC_DATA_GLOBAL[0]
+        });
+        
+        mcDataLoaded = true;
+        checkBothLoaded();
+      },
+      error: (err) => {
+        console.warn('⚠️ mc_data.csv not found, using reference.csv for missed calls');
+        MC_DATA_GLOBAL = [];
+        mcDataLoaded = true; // Still mark as loaded to proceed
+        checkBothLoaded();
+      }
+    });
+  }
 </script>
 
 <!-- Theme Auto-Sync Script -->
@@ -2973,4 +2934,3 @@
 
 </body>
 </html>
-
