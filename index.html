@@ -1586,6 +1586,59 @@
     // ============================================
     // MISSED CALLS LOGIC - STATE-BASED SWITCHING
     // ============================================
+    // ============================================
+// MISSED CALLS LOGIC (CORRECTED)
+// Always use mc_data.csv total rows
+// ============================================
+
+    let missedCallsTotal = 0;
+    let missedCallsUnique = 0;
+    let missedCallsDisplay = 0;
+    let missedCallsUniqueDisplay = 0;
+    
+    // Always compute true totals from mc_data.csv
+    if (MC_DATA_GLOBAL && MC_DATA_GLOBAL.length > 0) {
+        
+        // TRUE TOTAL MISSED CALLS (NO FILTER)
+        missedCallsTotal = MC_DATA_GLOBAL.length;
+    
+        // TRUE UNIQUE
+        missedCallsUnique = new Set(
+            MC_DATA_GLOBAL.map(r => trim(r.Grower || r.grower || ''))
+        ).size;
+    
+        // DISPLAY MISSED CALLS (FILTERED BY STATE IF SELECTED)
+        if (FILTERS.state) {
+            const filteredState = MC_DATA_GLOBAL.filter(r => trim(r.State || r.state || '') === FILTERS.state);
+    
+            missedCallsDisplay = filteredState.length;
+            missedCallsUniqueDisplay = new Set(
+                filteredState.map(r => trim(r.Grower || r.grower || ''))
+            ).size;
+    
+        } else {
+            // No filter → show complete totals
+            missedCallsDisplay = missedCallsTotal;
+            missedCallsUniqueDisplay = missedCallsUnique;
+        }
+    
+    } else {
+        // Fallback if mc_data.csv missing
+        if (REFERENCE_GRAND_TOTAL) {
+            missedCallsTotal = REFERENCE_GRAND_TOTAL.total;
+            missedCallsUnique = REFERENCE_GRAND_TOTAL.unique;
+            missedCallsDisplay = missedCallsTotal;
+            missedCallsUniqueDisplay = missedCallsUnique;
+        }
+    }
+
+
+
+
+
+
+
+    
     let missedCallsDisplay = 0;
     let missedCallsUniqueDisplay = 0;
     let missedCallsTotal = 0;
@@ -2920,3 +2973,4 @@
 
 </body>
 </html>
+
